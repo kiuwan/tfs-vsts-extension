@@ -1,0 +1,66 @@
+{
+  "_from": "vsts-task-sdk",
+  "_id": "vsts-task-sdk@0.6.4",
+  "_inBundle": false,
+  "_integrity": "sha1-/AKbdLBrNo5gvoa1BiBI0Blb454=",
+  "_location": "/vsts-task-sdk",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "vsts-task-sdk",
+    "name": "vsts-task-sdk",
+    "escapedName": "vsts-task-sdk",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/vsts-task-sdk/-/vsts-task-sdk-0.6.4.tgz",
+  "_shasum": "fc029b74b06b368e60be86b5062048d0195be39e",
+  "_spec": "vsts-task-sdk",
+  "_where": "C:\\Data\\Optimyth\\Marketing\\Kiuwan\\Integration\\VSTS-TFS\\Kiuwan-Analysis-Extension",
+  "author": {
+    "name": "Microsoft"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vsts-task-lib/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "q": "^1.2.0"
+  },
+  "deprecated": false,
+  "description": "VSTS Task SDK",
+  "devDependencies": {
+    "del": "^2.2.0",
+    "gulp": "^3.9.0",
+    "gulp-mocha": "^2.1.3",
+    "gulp-tsc": "^1.1.0",
+    "minimist": "^1.2.0",
+    "mocha": "^2.3.3",
+    "run-sequence": "^1.0.2",
+    "semver": "^5.1.0",
+    "shelljs": "^0.5.3"
+  },
+  "homepage": "https://github.com/Microsoft/vsts-task-lib#readme",
+  "keywords": [
+    "vsts",
+    "xplat",
+    "agent",
+    "build"
+  ],
+  "license": "MIT",
+  "name": "vsts-task-sdk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Microsoft/vsts-task-lib.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.6.4"
+}

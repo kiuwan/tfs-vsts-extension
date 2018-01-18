@@ -1,0 +1,60 @@
+{
+    "manifestVersion": 1,
+    "id": "kiuwan-analysis-extension",
+    "name": "Kiuwan analysis",
+    "version": "1.0.1",
+    "publisher": "Kiuwan",
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],    
+    "description": "Provides tasks to analyze source code with Kiuwan. Support for application baseline analyses and delivery analyses. Use the appropriate task for TFS agents and VSTS private or for VSTS hosted agents.",
+    "categories": [
+        "Build and release"
+    ],
+    "icons": {
+        "default": "images/kiuwan-extension.png"
+    },
+    "tags": [
+        "SAST",
+        "Code Analysis"
+    ],
+    "scopes": [
+        "vso.work",
+        "vso.code",
+        "vso.project",
+        "vso.symbols",
+        "vso.work"
+    ],
+    "files": [
+        {
+            "path": "baseline-analysis-task"
+        },
+        {
+            "path": "delivery-analysis-task"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "kiuwan-bl-analysis-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "baseline-analysis-task"
+            }
+        },
+        {
+            "id": "kiuwan-cr-analysis-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "delivery-analysis-task"
+            }
+        }
+    ]
+}
