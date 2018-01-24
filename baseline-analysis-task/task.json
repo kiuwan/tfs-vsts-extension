@@ -9,7 +9,7 @@
     "version": {
         "Major": 1,
         "Minor": 1,
-        "Patch": 0
+        "Patch": 1
     },
     "visibility": [
         "Build",
@@ -22,7 +22,7 @@
     "groups": [
         {
             "name": "advanced",
-            "displayName": "Advanced",
+            "displayName": "Advanced analysis settings",
             "isExpanded": false
         }
     ],
@@ -33,7 +33,7 @@
             "label": "Analysis label",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "A label to identify this analysis. Typically it should be the application version or the build number"
+            "helpMarkDown": "A label to identify this analysis in Kiuwan. The build number is always appended to the specified label. if empty, the label will be the build number."
         },
         {
             "name": "encoding",
@@ -57,7 +57,7 @@
             "name": "excludepatterns",
             "type": "string",
             "label": "Exclude patterns",
-            "defaultValue": "**/KiuwanLocalAnalyzer/**,**/*.min.js,**/*.Designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.Designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h include.patterns=**/**",
+            "defaultValue": "**/*.min.js,**/*.Designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.Designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h include.patterns=**/**",
             "required": false,
             "groupName": "advanced",
             "helpMarkDown": "Comma separatedlist of ant like patterns to exclude specific files from the analysis"
