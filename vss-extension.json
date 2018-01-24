@@ -2,14 +2,43 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "1.0.1",
-    "publisher": "Kiuwan",
+    "version": "1.1.0",
+    "publisher": "kiuwan-publisher",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
         }
     ],    
-    "description": "Provides tasks to analyze source code with Kiuwan. Support for application baseline analyses and delivery analyses. Use the appropriate task for TFS agents and VSTS private or for VSTS hosted agents.",
+    "description": "Analyze your applications with Kiuwan in your build pipelines. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
+    "content": {
+        "details": {
+            "path": "overview.md"
+        }
+    },
+    "links": {
+        "getstarted": {
+            "uri": "https://www.kiuwan.com"
+        },
+        "repository": {
+            "uri": "https://github.com/jsalado/kiuwan-vsts-extension"
+        },
+        "issues": {
+            "uri": "https://github.com/jsalado/kiuwan-vsts-extension/issues"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "uri": "https://github.com/jsalado/kiuwan-vsts-extension"
+    },
+    "branding": {
+        "color": "#01a4a6",
+        "theme": "dark"
+    },
+    "screenshots": [
+        {
+            "path": "screenshots/tfs-build-progress.png"
+        }
+    ],
     "categories": [
         "Build and release"
     ],
@@ -18,7 +47,14 @@
     },
     "tags": [
         "SAST",
-        "Code Analysis"
+        "Code Analysis",
+        "DevOps",
+        "DevSecOps",
+        "Applcation security",
+        "Security vulnerabilities",
+        "OWASP Top 10",
+        "Build Task",
+        "SCA"
     ],
     "scopes": [
         "vso.work",
@@ -33,6 +69,9 @@
         },
         {
             "path": "delivery-analysis-task"
+        },
+        {
+            "path": "screenshots"
         }
     ],
     "contributions": [

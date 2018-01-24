@@ -8,7 +8,7 @@
     "author": "Javier Salado",
     "version": {
         "Major": 1,
-        "Minor": 0,
+        "Minor": 1,
         "Patch": 0
     },
     "visibility": [
@@ -16,10 +16,7 @@
         "Release"
     ],
     "runsOn": [
-        "Agent",
-    ],
-    "demands": [
-        "KIUWAN_HOME"
+        "Agent"
     ],
     "instanceNameFormat": "Kiuwan baseline analysis",
     "groups": [
