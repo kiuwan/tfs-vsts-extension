@@ -5,3 +5,4 @@
 node_modules
 ps_modules
 settings.json
+.eslint*
