@@ -4,9 +4,11 @@ The Kiuwan extension for FTS and VSTS includes 2 new build tasks to run Kiuwan a
 
 This extension works with the Kiuwan Application Security platform in the cloud. So you need a Kiuwan account to use it.
 
-For the moment, the included build tasks will work on TFS windows agents and VSTS private windows agents, since the tasks are based on PowerShell for the moment.
+The included build tasks will work on TFS Windows, Linux or MacOS agents and VSTS private or hosted Windows, Linux and MacOS agents.
 
-Another requirement is that you download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME evironment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer) and add it to the Path as well.
+For private agents, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME evironment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer). If you don't pre-install the KLA, the first time you run a Kiuwan task the KLA will be downloaded and intalled in the agent home directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation.
+
+For hosted agents (that are spawned dynamicaly), the KLA is downloaded and installed every time a Kiuwan task runs.
 
 <img src="https://www.kiuwan.com/wp-content/uploads/2018/01/kiuwan-kla-download.png">
 
@@ -24,5 +26,6 @@ Another requirement is that you download the Kiuwan Local Analyzer (KLA) from yo
 
 <img src="https://www.kiuwan.com/wp-content/uploads/2018/01/kiuwan-audit-results.png">
 
-
+### **NOTE**: Kiuwan credentials configuration settings
+Running Kiuwan analysis requires authentication with your Kiuwan account. You will need to define the KiuwanUser and KiuwanPasswd variables in your build definitions running the build tasks from this plugin.
 

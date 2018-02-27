@@ -17,12 +17,21 @@ async function run() {
 
         // Get the values from the task's inputs bythe user
         let analysisLabel = tl.getInput('analysislabel');
+        
         let skipclones = tl.getBoolInput('skipclones');
-        let encoding = tl.getInput('encoding');
+        let skiparch = tl.getBoolInput('skiparch');
         let ignoreclause: string = "";
         if (skipclones) {
             ignoreclause = "ignore=clones";
+            if (skiparch) {
+                ignoreclause += ",architecture";
+            }
         }
+        else if (skiparch) {
+            ignoreclause = "ignore=architecture";
+        }
+
+        let encoding = tl.getInput('encoding');
         let includePatterns = tl.getInput('includepatterns');
         if (includePatterns === null) {
             includePatterns = "**/*";
@@ -52,12 +61,13 @@ async function run() {
 
         if (agentName === 'Hosted Agent') {
             // Download and install the agent in the Working directory
+            console.log(`Hosted Agent: ${osPlat}`)
             let installPath: string = await downloadInstallKla(false, osPlat);
 
             console.log('KLA Installed in: ' + installPath);
 
             // build the KLA command for the corresponding OS
-            kla = buildKlaCommand(installPath, osPlat, true);
+            kla = await buildKlaCommand(installPath, osPlat, true);
 
             // Add the kla directory to the exclude patters so it is not analyzed
             excludePatterns += ',KiuwanLocalAnalyzer/**';
@@ -74,12 +84,12 @@ async function run() {
             if ( kiuwanHome !== undefined && kiuwanHome !== "") {
                 console.log(`Kiuwan_HOME env variable defined: ${kiuwanHome}`);
                 kiuwanHome = hasDefaultPath ? kiuwanHome.substring(0,kiuwanHome.lastIndexOf(klaDefaultPath)) : kiuwanHome;
-                kla = buildKlaCommand(kiuwanHome, osPlat);
+                kla = await buildKlaCommand(kiuwanHome, osPlat);
             }
             else {
                 // Check if it is installed in the Agent home from a previosu task run
                 console.log(`Checking for KLA previously installed in the agent home: ${agentHomeDir}`);
-                kla = buildKlaCommand(agentHomeDir, osPlat);
+                kla = await buildKlaCommand(agentHomeDir, osPlat);
             }
 
             if ( kla.length === 0) {
@@ -88,7 +98,7 @@ async function run() {
                 console.log(`Downloading and installing KLA in the agent home: ${agentHomeDir}`);
                 let klaInstallPath = await downloadInstallKla(true, osPlat);
 
-                kla = buildKlaCommand(klaInstallPath, osPlat, true);
+                kla = await buildKlaCommand(klaInstallPath, osPlat, true);
             }
         }
 
@@ -201,7 +211,7 @@ async function run() {
     }
 }
 
-function buildKlaCommand(klaPath: string, platform: string, chmod?: boolean) {
+async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolean) {
     let command: string;
     let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
     let dirExist: boolean;
@@ -209,14 +219,16 @@ function buildKlaCommand(klaPath: string, platform: string, chmod?: boolean) {
     if (platform === 'linux' || platform === 'darwin') {
         // Define the KLA command if install directory exisits
         dirExist = _exist(`${klaPath}/${defaultKiuwanDir}`);
-        command = dirExist ? `${klaPath}/KiuwanLocalAnalyzer/bin/agent.sh` : "";
+        console.log(`${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
+        command = dirExist ? `${klaPath}/${defaultKiuwanDir}/bin/agent.sh` : "";
         if (chmod) {
-            tl.exec('chmod', `+x ${klaPath}/KiuwanLocalAnalyzer/bin/*.sh`);
+            let ret = await tl.exec('chmod', `+x ${klaPath}/${defaultKiuwanDir}/bin/agent.sh`);
+            console.log(`chmod retuned: ${ret}`);
         }
     }
     else {
         dirExist = _exist(`${klaPath}\\${defaultKiuwanDir}`);
-        command = dirExist ? `${klaPath}\\KiuwanLocalAnalyzer\\bin\\agent.cmd` : "";
+        command = dirExist ? `${klaPath}\\${defaultKiuwanDir}\\bin\\agent.cmd` : "";
     }
 
     return command;

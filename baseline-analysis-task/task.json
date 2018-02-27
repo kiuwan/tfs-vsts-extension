@@ -8,8 +8,8 @@
     "author": "Javier Salado",
     "version": {
         "Major": 2,
-        "Minor": 0,
-        "Patch": 5
+        "Minor": 1,
+        "Patch": 1
     },
     "visibility": [
         "Build",
@@ -22,7 +22,7 @@
     "groups": [
         {
             "name": "security",
-            "displayName": "Security analysis",
+            "displayName": "Security analysis performance",
             "isExpanded": true
         },
         {
@@ -52,7 +52,16 @@
             "defaultValue": false,
             "required": true,
             "groupName": "security",
-            "helpMarkDown": "Skipping the duplicated code analysis is recommended if code security analysis only."
+            "helpMarkDown": "Skipping the duplicated code analysis is recommended for code security analysis only."
+        },
+        {
+            "name": "skiparch",
+            "type": "boolean",
+            "label": "Skip architecture analysis?",
+            "defaultValue": true,
+            "required": true,
+            "groupName": "security",
+            "helpMarkDown": "Skipping the architecture code analysis is recommended for code security analysis only."
         },
         {
             "name": "encoding",
@@ -97,7 +106,7 @@
             "defaultValue": "60",
             "required": false,
             "groupName": "advanced",
-            "helpMarkDown": "Maximum time to run the analysis. IF reached the analysis will end and fail. Usually the default is enough, change it only in the case of very big applications (more than 1 MLoC)."
+            "helpMarkDown": "Maximum time to run the analysis. If reached, the analysis will end and fail. Usually the default is enough, change it only in the case of very big applications (more than 1 MLoC)."
         },
         {
             "name": "dbanalysis",

@@ -2,13 +2,14 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.0.5",
+    "version": "2.1.1",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
         }
-    ],    
+    ],
+    "public": true,
     "description": "Analyze your applications with Kiuwan in your build pipelines. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
     "content": {
         "details": {
