@@ -5,6 +5,11 @@ $technologies ="abap,actionscript,aspnet,c,cobol,cpp,csharp,html,java,javascript
 
 # Get the values from the task's inputs bythe user
 $analysisLabel = Get-VstsInput -Name 'analysislabel'
+$skipclones = Get-VstsInput -Name 'skipclones'
+$ignoreclause = ""
+if ($skipclones) {
+    $ignoreclause = "ignore=clones"
+}
 $encoding = Get-VstsInput -Name 'encoding'
 $includePatterns = Get-VstsInput -Name 'includepatterns'
 $excludePatterns = Get-VstsInput -Name 'excludepatterns'
@@ -79,8 +84,8 @@ else {
 
 Write-Host "Running KLA..."
 Write-Host "With user $kiuwanUser for project $projectName $analysisLabel on this sources $sourceDirectory"
-Write-Host "$kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -c -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout"
-& $kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -c -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout
+Write-Host "$kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -c -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout $ignoreclause"
+& $kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -c -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout $ignoreclause
 
 switch ( $lastexitcode ) {
     1 {

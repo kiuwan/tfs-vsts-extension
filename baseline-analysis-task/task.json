@@ -7,9 +7,9 @@
     "category": "Build",
     "author": "Javier Salado",
     "version": {
-        "Major": 1,
-        "Minor": 2,
-        "Patch": 0
+        "Major": 2,
+        "Minor": 0,
+        "Patch": 5
     },
     "visibility": [
         "Build",
@@ -21,8 +21,13 @@
     "instanceNameFormat": "Kiuwan baseline analysis",
     "groups": [
         {
+            "name": "security",
+            "displayName": "Security analysis",
+            "isExpanded": true
+        },
+        {
             "name": "database",
-            "displayName": "Database code analysis ",
+            "displayName": "Database code analysis",
             "isExpanded": false
         },
         {
@@ -39,6 +44,15 @@
             "defaultValue": "",
             "required": false,
             "helpMarkDown": "A label to identify this analysis in Kiuwan. The build number is always appended to the specified label. if empty, the label will be the build number."
+        },
+        {
+            "name": "skipclones",
+            "type": "boolean",
+            "label": "Skip duplication of code analysis?",
+            "defaultValue": false,
+            "required": true,
+            "groupName": "security",
+            "helpMarkDown": "Skipping the duplicated code analysis is recommended if code security analysis only."
         },
         {
             "name": "encoding",
@@ -62,7 +76,7 @@
             "name": "excludepatterns",
             "type": "string",
             "label": "Exclude patterns",
-            "defaultValue": "**/*.min.js,**/*.Designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.Designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h include.patterns=**/**",
+            "defaultValue": "**/*.min.js,**/*.Designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.designer.vb,**/*reference.vb,**/*service.vb,**/*silverlight.vb,**/*.Designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/*.designer.cs,**/*reference.cs,**/*service.cs,**/*silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h include.patterns=**/**",
             "required": false,
             "groupName": "advanced",
             "helpMarkDown": "Comma separatedlist of ant like patterns to exclude specific files from the analysis"
@@ -113,6 +127,10 @@
     ],
     "execution": {
         "PowerShell3": {
-            "target": "run-kla-baseline.ps1"}
+            "target": "run-kla-baseline.ps1"
+        },
+        "Node": {
+            "target": "index.js"
+        }
     }
 }

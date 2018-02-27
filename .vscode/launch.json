@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Kiuwan task",
+            "program": "${workspaceFolder}\\baseline-analysis-task\\index.js",
+            "env": {
+                // "KIUWAN_HOME": "",
+                "INPUT_ANALYSISLABEL": "My label",
+                "INPUT_SKIPCLONES": "true",
+                "INPUT_ANALYSISSCOPE": "completeDelivery",
+                "INPUT_CRSTATUS": "resolved",
+                "INPUT_ENCODING": "UTF-8",
+                "INPUT_INCLUDEPATTERNS": "",
+                "INPUT_EXCLUDEPATTERNS": "**/*designer.cs",
+                "INPUT_MEMORY": "2048",
+                "INPUT_TIMEOUT": "60",
+                "INPUT_BDANALYSIS": "false",
+                "INPUT_DBTECHNOLOGY": "None",
+                "BUILD_BUILDNUMBER": "25",
+                "KIUWANUSER": "jellyfish@kiuwan.com",
+                "KIUWANPASSWD": "J4v13rS4l4d0",
+                "SYSTEM_TEAMPROJECT": "My project",
+                "BUILD_SOURCESDIRECTORY": "${workspaceFolder}\\temp\\MyProjectCode",
+                "BUILD_SOURCEBRANCHNAME": "Development Branch",
+                "AGENT_NAME": "Private Agent",
+                "AGENT_HOMEDIRECTORY": "${workspaceFolder}",
+                "AGENT_TEMPDIRECTORY": "${workspaceFolder}\\temp"
+            },
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/**/*"
+            ],
+            "outputCapture": "std"
+        }
+    ]
+}

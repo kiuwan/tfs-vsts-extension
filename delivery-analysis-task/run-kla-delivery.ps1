@@ -5,11 +5,19 @@ $technologies ="abap,actionscript,aspnet,c,cobol,cpp,csharp,html,java,javascript
 
 # Get the values from the task's inputs bythe user
 $analysisLabel = Get-VstsInput -Name 'analysislabel'
+$analysisscope = Get-VstsInput -Name 'analysisscope'
+$skipclones = Get-VstsInput -Name 'skipclones'
+$ignoreclause = ""
+if ($skipclones) {
+    $ignoreclause = "ignore=clones"
+}
 $encoding = Get-VstsInput -Name 'encoding'
 $includePatterns = Get-VstsInput -Name 'includepatterns'
 $excludePatterns = Get-VstsInput -Name 'excludepatterns'
 $memory = Get-VstsInput -Name 'memory'
+$memory += "m"
 $timeout = Get-VstsInput -Name 'timeout'
+$timeout = [int]$timeout * 60000
 $dbanalysis = Get-VstsInput -Name 'dbanalysis'
 if ($dbanalysis) {
     $dbtechnology = Get-VstsInput -Name 'dbtchenology'
@@ -80,8 +88,8 @@ else {
 
 Write-Host "Running KLA..."
 Write-Host "With user $kiuwanUser for project $projectName $analysisLabel on this branch $branchName and these sources $sourceDirectory"
-Write-Host "$kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -c -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout"
-& $kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -as completeDelivery -cr $branchName -crs $crstatus -bn $branchName -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout
+Write-Host "$kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -c -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout $ignoreclause"
+& $kla -n $projectName -s $sourceDirectory -l "$analysislabel $buildNumber" -as $analysisscope -cr $branchName -crs $crstatus -bn $branchName -wr --user $kiuwanUser --pass $kiuwanPasswd exclude.patterns=$excludePatterns include.patterns=$includePatterns encoding=$encoding supported.technologies=$technologies memory.max=$memory timeout=$timeout $ignoreclause
 
 switch ( $lastexitcode ) {
     1 {
