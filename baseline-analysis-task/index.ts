@@ -17,7 +17,7 @@ async function run() {
 
         // Get the values from the task's inputs bythe user
         let analysisLabel = tl.getInput('analysislabel');
-        
+
         let skipclones = tl.getBoolInput('skipclones');
         let skiparch = tl.getBoolInput('skiparch');
         let ignoreclause: string = "";
@@ -54,12 +54,13 @@ async function run() {
         let projectName = tl.getVariable('System.TeamProject');
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
         let agentName = tl.getVariable('Agent.Name');
+        let isHostedAgent = agentName.startsWith('Hosted');
 
         let agentHomeDir = tl.getVariable('Agent.HomeDirectory');
 
         let kla = 'Not installed yet';
 
-        if (agentName === 'Hosted Agent') {
+        if (isHostedAgent) {
             // Download and install the agent in the Working directory
             console.log(`Hosted Agent: ${osPlat}`)
             let installPath: string = await downloadInstallKla(false, osPlat);
@@ -78,11 +79,10 @@ async function run() {
             // is set or because it was installed by a previous task execution.
             var kiuwanHome: string;
             kiuwanHome = tl.getVariable('KIUWAN_HOME');
-            let klaDefaultPath = 'KiuwanLocalAnalyzer';
-            let hasDefaultPath = kiuwanHome.endsWith(klaDefaultPath);
         
             if ( kiuwanHome !== undefined && kiuwanHome !== "") {
-                console.log(`Kiuwan_HOME env variable defined: ${kiuwanHome}`);
+                let klaDefaultPath = 'KiuwanLocalAnalyzer';
+                let hasDefaultPath = kiuwanHome.endsWith(klaDefaultPath);                console.log(`KIUWAN_HOME env variable defined: ${kiuwanHome}`);
                 kiuwanHome = hasDefaultPath ? kiuwanHome.substring(0,kiuwanHome.lastIndexOf(klaDefaultPath)) : kiuwanHome;
                 kla = await buildKlaCommand(kiuwanHome, osPlat);
             }
@@ -223,7 +223,7 @@ async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolea
         command = dirExist ? `${klaPath}/${defaultKiuwanDir}/bin/agent.sh` : "";
         if (chmod) {
             let ret = await tl.exec('chmod', `+x ${klaPath}/${defaultKiuwanDir}/bin/agent.sh`);
-            console.log(`chmod retuned: ${ret}`);
+            console.error(`chmod retuned: ${ret}`);
         }
     }
     else {
@@ -236,8 +236,8 @@ async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolea
 
 async function downloadInstallKla(isPrivate: boolean, platform: string) {
     // The downloadTool ALWAYS downloads to the AgentTempDirectory.
-    // For private agents,We set the AgentTemDirectory variable to AgentHome directory 
-    // to install it there (insubsiquent task runs we check for it there)
+    // For private agents, we set the AgentTemDirectory variable to AgentHome directory 
+    // to install it there (in subsequent task runs we check for it there)
     if ( isPrivate ) {
         tl.setVariable('Agent.TempDirectory', agentHomeDir);
     }
@@ -254,12 +254,14 @@ async function downloadInstallKla(isPrivate: boolean, platform: string) {
         if (platform === 'linux' || platform === 'darwin') {
             origPath = `${extPath}/KiuwanLocalAnalyzer`
             destPath = path.normalize(`${extPath}/..`);
-            tl.exec('mv',`${origPath} ${destPath}`);
+            let ret = await tl.exec('mv',`${origPath} ${destPath}`);
+            console.error(`Error moving KLA installation. mv returned: ${ret}`);
         } 
         else {
             origPath = `${extPath}\\KiuwanLocalAnalyzer`
             destPath = path.normalize(`${extPath}\\..`);            
-            tl.exec('powershell',`-command "Move-Item -Path '${origPath}' -Destination '${destPath}'"`);
+            let ret = await tl.exec('powershell',`-command "Move-Item -Path '${origPath}' -Destination '${destPath}'"`);
+            console.error(`Error moving KLA installation. Move-Item returned: ${ret}`);
         }
 
         extPath = destPath;
@@ -277,7 +279,6 @@ async function runKiuwanLocalAnalyzer(command: string, args: string, mode: strin
     }
 
     let kiuwan = tl.tool(command).line(args);
-//    let kiuwan = tl.tool('C:\\Program Files\\Java\\jdk1.8.0_66\\bin\\java.exe').arg('-version');
 
     let options = <trm.IExecOptions>{
         cwd: '.',
