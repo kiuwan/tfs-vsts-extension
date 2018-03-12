@@ -13,6 +13,7 @@
                 // "KIUWAN_HOME": "",
                 "INPUT_ANALYSISLABEL": "My label",
                 "INPUT_SKIPCLONES": "true",
+                "INPUT_SKIPARCH": "true",
                 "INPUT_ANALYSISSCOPE": "completeDelivery",
                 "INPUT_CRSTATUS": "resolved",
                 "INPUT_ENCODING": "UTF-8",
@@ -28,9 +29,10 @@
                 "SYSTEM_TEAMPROJECT": "My project",
                 "BUILD_SOURCESDIRECTORY": "${workspaceFolder}\\temp\\MyProjectCode",
                 "BUILD_SOURCEBRANCHNAME": "Development Branch",
-                "AGENT_NAME": "Private Agent",
+                "AGENT_NAME": "Any Agent",
                 "AGENT_HOMEDIRECTORY": "${workspaceFolder}",
-                "AGENT_TEMPDIRECTORY": "${workspaceFolder}\\temp"
+                "AGENT_TEMPDIRECTORY": "${workspaceFolder}\\temp",
+                "KIUWAN_HOME": ""
             },
             "sourceMaps": true,
             "outFiles": [

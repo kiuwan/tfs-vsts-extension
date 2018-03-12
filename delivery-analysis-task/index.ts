@@ -25,11 +25,11 @@ async function run() {
         if (skipclones) {
             ignoreclause = "ignore=clones";
             if (skiparch) {
-                ignoreclause += ",architecture";
+                ignoreclause += ",architecture,insights";
             }
         }
         else if (skiparch) {
-            ignoreclause = "ignore=architecture";
+            ignoreclause = "ignore=architecture,insights";
         }
 
         let analysisScope = tl.getInput('analysisscope');
@@ -59,53 +59,39 @@ async function run() {
         let projectName = tl.getVariable('System.TeamProject');
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
         let agentName = tl.getVariable('Agent.Name');
-        let isHostedAgent = agentName.startsWith('Hosted');
 
         let agentHomeDir = tl.getVariable('Agent.HomeDirectory');
 
         let kla = 'Not installed yet';
 
-        if (isHostedAgent) {
-            // Download and install the agent in the Working directory
-            console.log(`Hosted Agent: ${osPlat}`)
-            let installPath: string = await downloadInstallKla(false, osPlat);
+        // We treat al agents equal now:
+        // Check if the KLA is already installed, either because the KIUWAN_HOME variable
+        // is set or because it was installed by a previous task execution.
+        var kiuwanHome: string;
+        kiuwanHome = tl.getVariable('KIUWAN_HOME');
 
-            console.log('KLA Installed in: ' + installPath);
-
-            // build the KLA command for the corresponding OS
-            kla = await buildKlaCommand(installPath, osPlat, true);
-
-            // Add the kla directory to the exclude patters so it is not analyzed
-            excludePatterns += ',KiuwanLocalAnalyzer/**';
+        if (kiuwanHome !== undefined && kiuwanHome !== "") {
+            let klaDefaultPath = 'KiuwanLocalAnalyzer';
+            let hasDefaultPath = kiuwanHome.endsWith(klaDefaultPath);
+            console.log(`Kiuwan_HOME env variable defined: ${kiuwanHome}`);
+            kiuwanHome = hasDefaultPath ? kiuwanHome.substring(0, kiuwanHome.lastIndexOf(klaDefaultPath)) : kiuwanHome;
+            kla = await buildKlaCommand(kiuwanHome, osPlat);
         }
         else {
-            // For private agents:
-            // Check if the KLA is already installed, either because the KIUWAN_HOME variable
-            // is set or because it was installed by a previous task execution.
-            var kiuwanHome: string;
-            kiuwanHome = tl.getVariable('KIUWAN_HOME');
+            // Check if it is installed in the Agent home from a previosu task run
+            console.log(`Checking for KLA previously installed in the agent home: ${agentHomeDir}`);
+            kla = await buildKlaCommand(agentHomeDir, osPlat);
+        }
 
-            if (kiuwanHome !== undefined && kiuwanHome !== "") {
-                let klaDefaultPath = 'KiuwanLocalAnalyzer';
-                let hasDefaultPath = kiuwanHome.endsWith(klaDefaultPath);
-                console.log(`Kiuwan_HOME env variable defined: ${kiuwanHome}`);
-                kiuwanHome = hasDefaultPath ? kiuwanHome.substring(0, kiuwanHome.lastIndexOf(klaDefaultPath)) : kiuwanHome;
-                kla = await buildKlaCommand(kiuwanHome, osPlat);
-            }
-            else {
-                // Check if it is installed in the Agent home from a previosu task run
-                console.log(`Checking for KLA previously installed in the agent home: ${agentHomeDir}`);
-                kla = await buildKlaCommand(agentHomeDir, osPlat);
-            }
+        if (kla.length === 0) {
+            // KLA not installed. So we install it in the Agent.HomeDirectory
+            console.log("No KLA installation found...");
+            console.log(`Downloading and installing KLA in the agent home: ${agentHomeDir}`);
+            let klaInstallPath = await downloadInstallKla(osPlat);
 
-            if (kla.length === 0) {
-                // KLA not installed. So we install it in the Agent.HomeDirectory
-                console.log("No KLA installation found...");
-                console.log(`Downloading and installing KLA in the agent home: ${agentHomeDir}`);
-                let klaInstallPath = await downloadInstallKla(true, osPlat);
+            console.log(`Kiuwan Local Analyzer installed at: ${klaInstallPath}!`);
 
-                kla = await buildKlaCommand(klaInstallPath, osPlat, true);
-            }
+            kla = await buildKlaCommand(klaInstallPath, osPlat, true);
         }
 
         let klaArgs: string =
@@ -127,10 +113,9 @@ async function run() {
             `timeout=${timeout} ` +
             `${ignoreclause}`;
 
-        console.log('Kiuwan Local Analyzer installed! ');
         console.log('Running Kiuwan analysis');
 
-        let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs, 'baseline');
+        let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
 
         switch (kiuwanRetCode) {
             case 1: {
@@ -243,13 +228,11 @@ async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolea
     return command;
 }
 
-async function downloadInstallKla(isPrivate: boolean, platform: string) {
+async function downloadInstallKla(platform: string) {
     // The downloadTool ALWAYS downloads to the AgentTempDirectory.
     // For private agents,We set the AgentTemDirectory variable to AgentHome directory 
     // to install it there (insubsiquent task runs we check for it there)
-    if (isPrivate) {
-        tl.setVariable('Agent.TempDirectory', agentHomeDir);
-    }
+    tl.setVariable('Agent.TempDirectory', agentHomeDir);
 
     let downloadPath: string = await ttl.downloadTool('https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip', 'KiuwanLocalAnalyzer.zip');
 
@@ -259,34 +242,30 @@ async function downloadInstallKla(isPrivate: boolean, platform: string) {
     // for pricvate agents we want to move the KLA directory to the Agent.HomeDirectory
     let origPath: string;
     let destPath: string;
-    if (isPrivate) {
-        if (platform === 'linux' || platform === 'darwin') {
-            origPath = `${extPath}/KiuwanLocalAnalyzer`
-            destPath = path.normalize(`${extPath}/..`);
-            let ret = await tl.exec('mv', `${origPath} ${destPath}`);
+    if (platform === 'linux' || platform === 'darwin') {
+        origPath = `${extPath}/KiuwanLocalAnalyzer`
+        destPath = path.normalize(`${extPath}/..`);
+        let ret = await tl.exec('mv', `${origPath} ${destPath}`);
+        if (ret != 0) {
             console.error(`Error moving KLA installation. mv returned: ${ret}`);
         }
-        else {
-            origPath = `${extPath}\\KiuwanLocalAnalyzer`
-            destPath = path.normalize(`${extPath}\\..`);
-            let ret = await tl.exec('powershell', `-command "Move-Item -Path '${origPath}' -Destination '${destPath}'"`);
+    }
+    else {
+        origPath = `${extPath}\\KiuwanLocalAnalyzer`
+        destPath = path.normalize(`${extPath}\\..`);
+        let ret = await tl.exec('powershell', `-command "Move-Item -Path '${origPath}' -Destination '${destPath}'"`);
+        if (ret != 0) {
             console.error(`Error moving KLA installation. Move-Item returned: ${ret}`);
         }
-
-        extPath = destPath;
     }
 
-    return extPath;
+    return destPath;
 }
 
-async function runKiuwanLocalAnalyzer(command: string, args: string, mode: string) {
+async function runKiuwanLocalAnalyzer(command: string, args: string) {
     let exitCode: Number = 0;
 
     // Run KLA with ToolRunner
-    if (mode == 'delivery') {
-        args += " -as completeDelivery";
-    }
-
     let kiuwan = tl.tool(command).line(args);
 
     let options = <trm.IExecOptions>{
