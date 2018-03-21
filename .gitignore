@@ -17,3 +17,7 @@ delivery-analysis-task/ps_modules
 baseline-analysis-task/node_modules
 delivery-analysis-task/node_modules
 *.zip
+*.txt
+endpoin-definition.json
+sample.json
+

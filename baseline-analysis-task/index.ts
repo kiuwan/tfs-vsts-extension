@@ -47,11 +47,39 @@ async function run() {
             technologies += dbtechnology;
         }
 
+        // Get the Kiuwan connection service authorization
+        let kiuwanConnection = tl.getInput("kiuwanConnection", true);
+        let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
+        // Get user and password from variables defined in the build, otherwise get them from
+        // the Kiuwan service endpoint authorization
+        let kiuwanUser = tl.getVariable('KiuwanUser');
+        if (kiuwanUser === undefined || kiuwanUser === "") {
+            kiuwanUser = kiuwanEndpointAuth.parameters["username"];
+        }
+        let kiuwanPasswd = tl.getVariable('KiuwanPasswd');
+        if (kiuwanPasswd === undefined || kiuwanPasswd === "") {
+            kiuwanPasswd = kiuwanEndpointAuth.parameters["password"];
+        }
+
         // Get other relevant Variables from the task
         let buildNumber = tl.getVariable('Build.BuildNumber');
-        let kiuwanUser = tl.getVariable('KiuwanUser');
-        let kiuwanPasswd = tl.getVariable('KiuwanPasswd');
-        let projectName = tl.getVariable('System.TeamProject');
+        // Now the project name may come from different sources
+        // the System.TeamProject variable, an existing Kiuwan app name or a new one
+        let projectSelector = tl.getInput('projectnameselector');
+        let projectName = '';
+        if (projectSelector === 'default') {
+            projectName = tl.getVariable('System.TeamProject');
+            console.log(`Kiuwan application from System.TeamProject: ${projectName}`);
+        }
+        if (projectSelector === 'kiuwanapp') {
+            projectName = tl.getInput('kiuwanappname');
+            console.log(`Kiuwan application from Kiuwan app list: ${projectName}`);
+        }
+        if (projectSelector === 'appname') {
+            projectName = tl.getInput('customappname');
+            console.log(`Kiuwan application from user input: ${projectName}`);
+        }
+        
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
         let agentName = tl.getVariable('Agent.Name');
 

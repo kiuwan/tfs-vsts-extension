@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.1.11",
+    "version": "2.2.0",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -100,23 +100,25 @@
             "id": "kiuwan-service-endpoint",
             "description": "Kiuwan servide endpoint to connect to the Kiuwan platform",
             "type": "ms.vss-endpoint.service-endpoint-type",
-            "targets": [
-                "ms.vss-service.endpont-types"
-            ],
+            "targets": [ "ms.vss-endpoint.endpoint-types" ],
             "properties": {
                 "name": "kiuwan",
                 "displayName": "Kiuwan Platform",
-                "icon": "images/kiuwan-extension.png",
                 "url": {
                     "displayName": "Kiuwan URL",
                     "value": "https://api.kiuwan.com",
-                    "helpMarkDown": "Please unless you have an Kiuwan on-premise installation the Kiuwan Service Endpoint URL is always https://api.kiuwan.com"
+                    "helpMarkDown": "The Kiuwan Service Endpoint URL is always https://api.kiuwan.com"
                 },
                 "dataSources": [
                     {
                         "name": "TestConnection",
                         "endpointUrl": "{{endpoint.url}}/info",
-                        "resultSelector": "jsonpath:$[*].Key"
+                        "resultSelector": "jsonpath:$.username"
+                    },
+                    {
+                        "name": "ListApplications",
+                        "endpointUrl": "{{endpoint.url}}/apps/list",
+                        "resultSelector": "jsonpath:$[*].name"
                     }
                 ],
                 "authenticationSchemes": [
@@ -126,27 +128,23 @@
                             {
                                 "id": "username",
                                 "name": "Username",
-                                "description": "Kiuwan username",
+                                "description": "This is your Kiuwan username",
                                 "inputMode": "textbox",
-                                "isConfidentioal": false,
+                                "isConfidential": false,
                                 "validation": {
-                                    "isrequired": false,
+                                    "isrequired": true,
                                     "dataType": "string"
                                 }
                             },
                             {
                                 "id": "password",
                                 "name": "Password",
-                                "description": "Kiuwan password",
+                                "description": "Yup! this is your Kiuwan password",
                                 "inputMode": "passwordBox",
-                                "isConfidentioal": true,
+                                "isConfidential": true,
                                 "validation": {
-                                    "isrequired": false,
+                                    "isrequired": true,
                                     "dataType": "string"
-                                },
-                                "values": {
-                                    "inputId": "passwordInput",
-                                    "defaultValue": ""
                                 }
                             }
                         ]
