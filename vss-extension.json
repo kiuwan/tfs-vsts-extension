@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -10,7 +10,7 @@
         }
     ],
     "public": true,
-    "description": "Analyze your applications with Kiuwan in your build pipelines. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
+    "description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
     "content": {
         "details": {
             "path": "overview.md"
