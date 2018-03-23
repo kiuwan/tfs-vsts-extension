@@ -235,13 +235,6 @@ async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolea
 }
 
 async function downloadInstallKla(isPrivate: boolean, platform: string) {
-    // The downloadTool ALWAYS downloads to the AgentTempDirectory.
-    // For private agents, we set the AgentTemDirectory variable to AgentHome directory 
-    // to install it there (in subsequent task runs we check for it there)
-    if ( isPrivate ) {
-        tl.setVariable('Agent.TempDirectory', agentHomeDir);
-    }
-
     let downloadPath: string = await ttl.downloadTool('https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip', 'KiuwanLocalAnalyzer.zip');
 
     let extPath: string = await ttl.extractZip(downloadPath);
