@@ -9,6 +9,8 @@ import { isPrimitive } from 'util';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
+const toolName = 'KiuwanLocalAnalyzer';
+const toolVersion = '2.1.2';
 
 async function run() {
     try {
@@ -235,32 +237,15 @@ async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolea
 }
 
 async function downloadInstallKla(isPrivate: boolean, platform: string) {
-    let downloadPath: string = await ttl.downloadTool('https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip', 'KiuwanLocalAnalyzer.zip');
+    let toolPath = ttl.findLocalTool(toolName, toolVersion);
+    if (!toolPath) {
+        let downloadPath: string = await ttl.downloadTool('https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip', 'KiuwanLocalAnalyzer.zip');
 
-    let extPath: string = await ttl.extractZip(downloadPath);
-
-    // the extractZip tool ALWAYS extracts to a uuidv4 created directory.
-    // for pricvate agents we want to move the KLA directory to the Agent.HomeDirectory
-    let origPath: string;
-    let destPath: string;
-    if ( isPrivate ) {
-        if (platform === 'linux' || platform === 'darwin') {
-            origPath = `${extPath}/KiuwanLocalAnalyzer`
-            destPath = path.normalize(`${extPath}/..`);
-            let ret = await tl.exec('mv',`${origPath} ${destPath}`);
-            console.error(`Error moving KLA installation. mv returned: ${ret}`);
-        } 
-        else {
-            origPath = `${extPath}\\KiuwanLocalAnalyzer`
-            destPath = path.normalize(`${extPath}\\..`);            
-            let ret = await tl.exec('powershell',`-command "Move-Item -Path '${origPath}' -Destination '${destPath}'"`);
-            console.error(`Error moving KLA installation. Move-Item returned: ${ret}`);
-        }
-
-        extPath = destPath;
+        let extPath: string = await ttl.extractZip(downloadPath);
+        toolPath = await ttl.cacheDir(extPath, toolName, toolVersion);
     }
 
-    return extPath;
+    return toolPath;
 }
 
 async function runKiuwanLocalAnalyzer(command: string, args: string, mode: string) {
