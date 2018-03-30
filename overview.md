@@ -18,7 +18,7 @@ For hosted agents (that are spawned dynamicaly), the KLA is downloaded and insta
 
 A service endpoint type and 2 build tasks. One to run Kiuwan baseline analyses to analyse your realeases. And one to run Kiuwan delivery analyses for your change or pull requests.
 
-- **New Service Endpoint type.** To connect to the Kiuwan platform form TFS/VSTS. Now you can define a new service endpoint to the Kiuwan platform. You just need to select the Kiuwan Platform service connection type from the "New Service Enpoint" pulldown in the TFS/VSTS Services configuration tab.
+- **New Service Endpoint type.** To connect to the Kiuwan platform form TFS/VSTS. Now you can define a new service endpoint to the Kiuwan platform. You just need to select the Kiuwan Platform service connection type from the "New Service Endpoint" pulldown in the TFS/VSTS Services configuration tab.
 
 <img src="https://www.kiuwan.com/wp-content/uploads/2018/03/vsts-services.png">
 
@@ -29,11 +29,11 @@ Then you just configure a name for the Kiuwan connection and your Kiuwan account
 <img src="https://www.kiuwan.com/wp-content/uploads/2018/03/kiuwan-endpoint-config.png">
 
 ### **NOTE**: Kiuwan credentials for your build tasks
-You can now configure the Kiuwan connection in your exisitng tasks. The credentials configured the selected Kiuwan connection will be used to run the analysis. For backward compatibility, if you don't configure the Kiuwan connection in the task, the build definition variables: KiuwanUser and KiuwanPasswd, will be use for credentials. These variables can be used as well to override the Kiuwan connection credentials. This can be useful if you want a particular build definition to run analyses with a different user.
+You can now configure the Kiuwan connection in your existing tasks. The credentials configured the selected Kiuwan connection will be used to run the analysis. For backward compatibility, if you don't configure the Kiuwan connection in the task, the build definition variables: KiuwanUser and KiuwanPasswd, will be use for credentials. These variables can be used as well to override the Kiuwan connection credentials. This can be useful if you want a particular build definition to run analyses with a different user.
 
 <img src="https://www.kiuwan.com/wp-content/uploads/2018/01/kiuwan-tasks.png">
 
-- **Kiuwan Baseline Anlysis.** This task will run a Kiuwan baseline analysis as part of your build definition. The results are automatically uploaded to your Kiuwan account in the cloud where you can see the results and browse through the security vulnerabilities and other relevant defects  found in your applications.
+- **Kiuwan Baseline Analysis.** This task will run a Kiuwan baseline analysis as part of your build definition. The results are automatically uploaded to your Kiuwan account in the cloud where you can see the results and browse through the security vulnerabilities and other relevant defects  found in your applications.
 
 <img src="https://www.kiuwan.com/wp-content/uploads/2018/01/analysis-results.png">
 

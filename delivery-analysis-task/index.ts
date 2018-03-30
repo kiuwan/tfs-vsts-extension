@@ -190,7 +190,7 @@ async function run() {
                 console.error(`KLA Error ${kiuwanRetCode}: Error checking license. Error while getting or checking Kiuwan license	Contact Kiuwan Technical Support`);
                 break;
             }
-            case 20: {
+            case 22: {
                 console.error(`KLA Error ${kiuwanRetCode}: Access denied. Lack of permissions to access some Kiuwan entity (application analyses, deliveries, etc). Review log files to find exact cause and contact your Kiuwan administrator.`);
                 break;
             }
@@ -257,10 +257,6 @@ async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolea
 }
 
 async function downloadInstallKla(platform: string) {
-    // The downloadTool ALWAYS downloads to the AgentTempDirectory.
-    // For private agents,We set the AgentTemDirectory variable to AgentHome directory 
-    // to install it there (insubsiquent task runs we check for it there)
-    tl.setVariable('Agent.TempDirectory', agentHomeDir);
 
     let downloadPath: string = await ttl.downloadTool('https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip', 'KiuwanLocalAnalyzer.zip');
 
@@ -272,7 +268,7 @@ async function downloadInstallKla(platform: string) {
     let destPath: string;
     if (platform === 'linux' || platform === 'darwin') {
         origPath = `${extPath}/KiuwanLocalAnalyzer`
-        destPath = path.normalize(`${extPath}/..`);
+        destPath = path.normalize(`${agentHomeDir}`);
         let ret = await tl.exec('mv', `${origPath} ${destPath}`);
         if (ret != 0) {
             console.error(`Error moving KLA installation. mv returned: ${ret}`);
@@ -280,7 +276,7 @@ async function downloadInstallKla(platform: string) {
     }
     else {
         origPath = `${extPath}\\KiuwanLocalAnalyzer`
-        destPath = path.normalize(`${extPath}\\..`);
+        destPath = path.normalize(`${agentHomeDir}`);
         let ret = await tl.exec('powershell', `-command "Move-Item -Path '${origPath}' -Destination '${destPath}'"`);
         if (ret != 0) {
             console.error(`Error moving KLA installation. Move-Item returned: ${ret}`);
