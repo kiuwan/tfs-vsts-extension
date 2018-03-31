@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.2.6",
+    "version": "2.2.7",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -18,7 +18,7 @@
     },
     "links": {
         "getstarted": {
-            "uri": "https://www.kiuwan.com"
+            "uri": "https://www.kiuwan.com/docs/display/K5/Microsoft+TFS-VSTS+Extension"
         },
         "repository": {
             "uri": "https://github.com/kiuwan/tfs-vsts-extension"
