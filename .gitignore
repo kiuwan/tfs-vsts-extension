@@ -10,6 +10,7 @@ temp
 *.map
 baseline-analysis-task/index.js
 delivery-analysis-task/index.js
+common/utils.js
 .taskkey
 KiuwanLocalANalyzer/**
 baseline-analysis-task/ps_modules
@@ -20,4 +21,5 @@ delivery-analysis-task/node_modules
 *.txt
 endpoin-definition.json
 sample.json
-
+_temp
+_tools

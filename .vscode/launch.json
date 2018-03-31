@@ -23,6 +23,8 @@
                 "INPUT_TIMEOUT": "60",
                 "INPUT_BDANALYSIS": "false",
                 "INPUT_DBTECHNOLOGY": "None",
+                "INPUT_PROJECTNAMESELECTOR": "default",
+                "INPUT_KIUWANCONNECTION": "Kiuwan Connection",
                 "BUILD_BUILDNUMBER": "25",
                 "KIUWANUSER": "jellyfish@kiuwan.com",
                 "KIUWANPASSWD": "J4v13rS4l4d0",
@@ -31,7 +33,6 @@
                 "BUILD_SOURCEBRANCHNAME": "Development Branch",
                 "AGENT_NAME": "Any Agent",
                 "AGENT_HOMEDIRECTORY": "${workspaceFolder}",
-                "AGENT_TEMPDIRECTORY": "${workspaceFolder}\\temp",
                 "KIUWAN_HOME": ""
             },
             "sourceMaps": true,
