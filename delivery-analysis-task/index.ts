@@ -1,14 +1,19 @@
-import path = require('path')
 import os = require('os');
 import tl = require('vsts-task-lib/task');
-import ttl = require('vsts-task-tool-lib/tool')
-import trm = require('vsts-task-lib/toolrunner');
-import { extractZip } from 'vsts-task-tool-lib/tool';
-import { _exist } from 'vsts-task-lib/internal';
-import { isPrimitive } from 'util';
+import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, checkKuwanRetCode } from 'kiuwan-common/utils';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
+var agentTempDir = tl.getVariable('Agent.TempDirectory');
+if (!agentTempDir) {
+    agentTempDir = setAgentTempDir(agentHomeDir,osPlat);
+}
+var agentToolsDir = tl.getVariable('Agent.ToolsDirectory');
+if (!agentToolsDir) {
+    agentToolsDir = setAgentToolsDir(agentHomeDir,osPlat);
+}
+const toolName = 'KiuwanLocalAnalyzer';
+const toolVersion = '1.0.0';
 
 async function run() {
     try {
@@ -52,7 +57,7 @@ async function run() {
 
         // Get the Kiuwan connection service authorization
         let kiuwanConnection = tl.getInput("kiuwanConnection", true);
-        let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection,true);
+        let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
         // Get user and password from variables defined in the build, otherwise get them from
         // the Kiuwan service endpoint authorization
         let kiuwanUser = tl.getVariable('KiuwanUser');
@@ -84,11 +89,9 @@ async function run() {
             projectName = tl.getInput('customappname');
             console.log(`Kiuwan application from user input: ${projectName}`);
         }
-        
+
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
         let agentName = tl.getVariable('Agent.Name');
-
-        let agentHomeDir = tl.getVariable('Agent.HomeDirectory');
 
         let kla = 'Not installed yet';
 
@@ -106,20 +109,12 @@ async function run() {
             kla = await buildKlaCommand(kiuwanHome, osPlat);
         }
         else {
-            // Check if it is installed in the Agent home from a previosu task run
-            console.log(`Checking for KLA previously installed in the agent home: ${agentHomeDir}`);
-            kla = await buildKlaCommand(agentHomeDir, osPlat);
-        }
+            // Check if it is installed in the Agent tools directory from a previosu task run
+            // It will download and install it in the Agent Tools directory if not found
+            let klaInstallPath = await downloadInstallKla(toolName,toolVersion,osPlat);
 
-        if (kla.length === 0) {
-            // KLA not installed. So we install it in the Agent.HomeDirectory
-            console.log("No KLA installation found...");
-            console.log(`Downloading and installing KLA in the agent home: ${agentHomeDir}`);
-            let klaInstallPath = await downloadInstallKla(osPlat);
-
-            console.log(`Kiuwan Local Analyzer installed at: ${klaInstallPath}!`);
-
-            kla = await buildKlaCommand(klaInstallPath, osPlat, true);
+            // Get the appropriate kla command depending on the platform
+            kla = await buildKlaCommand(klaInstallPath, osPlat);
         }
 
         let klaArgs: string =
@@ -145,83 +140,8 @@ async function run() {
 
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
 
-        switch (kiuwanRetCode) {
-            case 1: {
-                console.error(`KLA Error ${kiuwanRetCode}: Analyzer execution error .Run-time execution error (out of memory, etc.). Review log files to find exact cause.`);
-                break;
-            }
-            case 10: {
-                console.error(`KLA Error ${kiuwanRetCode}: Audit overall result = FAIL. Audit associated to the analyzed application did not pass. See audit report for exact reasons of non compliance (checkpoints not passed, etc.)`);
-                break;
-            }
-            case 11: {
-                console.error(`KLA Error ${kiuwanRetCode}: Invalid analysis configuration. Some configuration parameter has a wrong value. Review log files to find exact cause`);
-                break;
-            }
-            case 12: {
-                console.error(`KLA Error ${kiuwanRetCode}: The downloaded model does not support any of the discovered languages. The model specified for the application does not contains rules for the technologies being analyzed. Select an appropriate model or modify the model to include those technologies not currently supported`);
-                break;
-            }
-            case 13: {
-                console.error(`KLA Error ${kiuwanRetCode}: Timeout waiting for analysis results. After finishing the local analysis, results were uploaded to Kiuwan site but the second phase (index calculation) timed out. A very common reason for this problem is when your account has reached the maximun number of analyzed locs per 24h. In this case, your analysis is enqueued and local analyzer times out. This does not mean that the analysis has failed. Indeed, the analysis is only enqueued and it will be processed as soon as the limit is over. In this situation you don't need to execute again the analysis, just wait, it will be run automatically.`);
-                break;
-            }
-            case 14: {
-                console.error(`KLA Error ${kiuwanRetCode}: Analysis finished with error in Kiuwan. Although local analysis finished successfully, there was some error during analysis processing in the cloud. Visit the log page associated to the analysis.`);
-                break;
-            }
-            case 15: {
-                console.error(`KLA Error ${kiuwanRetCode}: Timeout: killed the subprocess. Local analysis timed out. Increase timeout value to a higher value.`);
-                break;
-            }
-            case 16: {
-                console.error(`KLA Error ${kiuwanRetCode}: Account limits exceeded. Some limit in the Kiuwan account is reached (max number of account’s analysis is reached, etc.). Contact Kiuwan Technical Support if you have any question on your acccount’s limits.`);
-                break;
-            }
-            case 17: {
-                console.error(`KLA Error ${kiuwanRetCode}: Delivery analysis not permitted for current user. User does not have permission to run delivery analysis for the current application.	Check the user has “Execute deliveries” privilege on the application.`);
-                break;
-            }
-            case 18: {
-                console.error(`KLA Error ${kiuwanRetCode}: No analyzable extensions found. Kiuwan recognizes the technology of a source file by its extension. But source files to analyze do not match any of the recognized extensions.`);
-                break;
-            }
-            case 19: {
-                console.error(`KLA Error ${kiuwanRetCode}: Error checking license. Error while getting or checking Kiuwan license	Contact Kiuwan Technical Support`);
-                break;
-            }
-            case 22: {
-                console.error(`KLA Error ${kiuwanRetCode}: Access denied. Lack of permissions to access some Kiuwan entity (application analyses, deliveries, etc). Review log files to find exact cause and contact your Kiuwan administrator.`);
-                break;
-            }
-            case 23: {
-                console.error(`KLA Error ${kiuwanRetCode}: Bad Credentials. User-supplied credentials are not valid. Contact your Kiuwan administrator.`);
-                break;
-            }
-            case 24: {
-                console.error(`KLA Error ${kiuwanRetCode}: Application Not Found. The invoked action cannot be completed because the associated application does not exist. Review log files to find exact cause and contact your Kiuwan administrator.`);
-                break;
-            }
-            case 25: {
-                console.error(`KLA Error ${kiuwanRetCode}: Limit Exceeded for Calls to Kiuwan API. Limit of max Kiuwan API calls per hour has been exceeded.	Contact Kiuwan Technical Support if you have any question on your acccount’s limits.`);
-                break;
-            }
-            case 26: {
-                console.error(`KLA Error ${kiuwanRetCode}: Quota Limit Reached. Some limit in the Kiuwan account is reached (max number of account’s analysis is reached, etc.). Contact Kiuwan Technical Support if you have any question on your acccount’s limits.`);
-                break;
-            }
-            case 27: {
-                console.error(`KLA Error ${kiuwanRetCode}: Analysis Not Found. The invoked action cannot be completed because the associated analysis does not exist. Review log files to find exact cause. Contact Kiuwan Technical Support`);
-                break;
-            }
-            case 28: {
-                console.error(`KLA Error ${kiuwanRetCode}: Application already exists`);
-                break;
-            }
-            default: {
-                console.log(`KLA returned ${kiuwanRetCode} Analysis finished successfully!`);
-            }
-        }
+        checkKuwanRetCode(kiuwanRetCode);
+
         if (kiuwanRetCode !== 0) {
             let taskFailedMsg = failOnAudit ? 'Kiuwan Audit FAILED! Task fails as instructed.' : 'Kiuwan analysis failed! See messages above.';
             tl.setResult(tl.TaskResult.Failed, taskFailedMsg);
@@ -231,86 +151,6 @@ async function run() {
         tl.setResult(tl.TaskResult.Failed, err.message);
         console.error('Task failed: ' + err.message);
     }
-}
-
-async function buildKlaCommand(klaPath: string, platform: string, chmod?: boolean) {
-    let command: string;
-    let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
-    let dirExist: boolean;
-
-    if (platform === 'linux' || platform === 'darwin') {
-        // Define the KLA command if install directory exisits
-        dirExist = _exist(`${klaPath}/${defaultKiuwanDir}`);
-        console.log(`${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
-        command = dirExist ? `${klaPath}/KiuwanLocalAnalyzer/bin/agent.sh` : "";
-        if (chmod) {
-            let ret = await tl.exec('chmod', `+x ${klaPath}/KiuwanLocalAnalyzer/bin/agent.sh`);
-            console.error(`chmod retuned: ${ret}`);
-        }
-    }
-    else {
-        dirExist = _exist(`${klaPath}\\${defaultKiuwanDir}`);
-        command = dirExist ? `${klaPath}\\KiuwanLocalAnalyzer\\bin\\agent.cmd` : "";
-    }
-
-    return command;
-}
-
-async function downloadInstallKla(platform: string) {
-
-    let downloadPath: string = await ttl.downloadTool('https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip', 'KiuwanLocalAnalyzer.zip');
-
-    let extPath: string = await ttl.extractZip(downloadPath);
-
-    // the extractZip tool ALWAYS extracts to a uuidv4 created directory.
-    // for pricvate agents we want to move the KLA directory to the Agent.HomeDirectory
-    let origPath: string;
-    let destPath: string;
-    if (platform === 'linux' || platform === 'darwin') {
-        origPath = `${extPath}/KiuwanLocalAnalyzer`
-        destPath = path.normalize(`${agentHomeDir}`);
-        let ret = await tl.exec('mv', `${origPath} ${destPath}`);
-        if (ret != 0) {
-            console.error(`Error moving KLA installation. mv returned: ${ret}`);
-        }
-    }
-    else {
-        origPath = `${extPath}\\KiuwanLocalAnalyzer`
-        destPath = path.normalize(`${agentHomeDir}`);
-        let ret = await tl.exec('powershell', `-command "Move-Item -Path '${origPath}' -Destination '${destPath}'"`);
-        if (ret != 0) {
-            console.error(`Error moving KLA installation. Move-Item returned: ${ret}`);
-        }
-    }
-
-    return destPath;
-}
-
-async function runKiuwanLocalAnalyzer(command: string, args: string) {
-    let exitCode: Number = 0;
-
-    // Run KLA with ToolRunner
-    let kiuwan = tl.tool(command).line(args);
-
-    let options = <trm.IExecOptions>{
-        cwd: '.',
-        env: process.env,
-        silent: false,
-        windowsVerbatimArguments: false,
-        failOnStdErr: false,
-        errStream: process.stdout,
-        outStream: process.stdout,
-        ignoreReturnCode: true
-    }
-
-    kiuwan.on('stdout', (data) => {
-        let output = data.toString().trim();
-        tl.debug(output);
-    })
-
-    exitCode = await kiuwan.exec(options);
-
-    return exitCode;
 }
 
 run();
