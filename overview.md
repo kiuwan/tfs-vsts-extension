@@ -8,7 +8,9 @@ This extension works with the Kiuwan Application Security platform in the cloud.
 
 The included build tasks will work on TFS Windows, Linux or MacOS agents and VSTS private or hosted Windows, Linux and MacOS agents.
 
-For private agents, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME evironment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer). If you don't pre-install the KLA, the first time you run a Kiuwan task the KLA will be downloaded and installed in the agent home directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation.
+For private agents, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME evironment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer). If you don't pre-install the KLA, the first time you run a Kiuwan task the KLA will be downloaded and installed in the agent tools directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation.
+
+If the Agent.TempDirectory and the the Agent.ToolsDirectory variables are not set in your private agents they are set by the build tasks to ${Agent.HomeDirectory}/_temp and ${Agent.ToolsDirectpry}/_tools respectively for the tasks to work properly.
 
 For hosted agents (that are spawned dynamicaly), the KLA is downloaded and installed every time a Kiuwan task runs.
 
