@@ -10,7 +10,7 @@ temp
 *.map
 baseline-analysis-task/index.js
 delivery-analysis-task/index.js
-common/utils.js
+kiuwan-common/utils.js
 .taskkey
 KiuwanLocalANalyzer/**
 baseline-analysis-task/ps_modules
