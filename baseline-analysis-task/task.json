@@ -8,8 +8,8 @@
     "author": "Javier Salado",
     "version": {
         "Major": 2,
-        "Minor": 1,
-        "Patch": 2
+        "Minor": 2,
+        "Patch": 6
     },
     "visibility": [
         "Build",
@@ -38,6 +38,44 @@
         }
     ],
     "inputs": [
+        {
+            "name": "kiuwanConnection",
+            "type": "connectedService:Kiuwan",
+            "label": "Kiuwan Service",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Kiuwan service connection"
+        },
+        {
+            "name": "projectnameselector",
+            "type": "radio",
+            "label": "What do you want to use as Kiuwan application name?",
+            "defaultValue": "default",
+            "required": true,
+            "options": {
+                "default": "$(System.TeamProject)",
+                "kiuwanapp": "Kiuwan application from list",
+                "appname": "Define a custom name"
+            },
+            "helpMarkDown": "You can use System.TeamProject variable, pick an aexisting application from a list or set a new application name."
+        },
+        {
+            "name": "kiuwanappname",
+            "type": "pickList",
+            "label": "Available Kiuwan applications",
+            "required": false,
+            "visibleRule": "projectnameselector = kiuwanapp",
+            "helpMarkDown": "Select an existing application in Kiuwan to associate results to."
+        },
+        {
+            "name": "customappname",
+            "type": "string",
+            "label": "Kiuwan application name",
+            "defaultValue": "",
+            "required": false,
+            "visibleRule": "projectnameselector = appname",
+            "helpMarkDown": "Custom application name in Kiuwan to associate results to. It will be cautomatically created if it doesn't exist in your account."
+        },
         {
             "name": "analysislabel",
             "type": "string",
@@ -133,6 +171,13 @@
                 "informix": "Informix stored procedures"
             },
             "helpMarkDown": "Please, select the type of stored procedures you use in your application. We support Oracle PL/SQL, Microsoft SQLServer TransactSQL, Sybase Transact and Informix stored procedures."
+        }
+    ],
+    "dataSourceBindings": [
+        {
+            "target": "kiuwanappname",
+            "endpointId": "$(kiuwanConnection)",
+            "dataSourceName": "ListApplications"
         }
     ],
     "execution": {
