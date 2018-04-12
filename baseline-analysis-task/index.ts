@@ -108,7 +108,7 @@ async function run() {
         else {
             // Check if it is installed in the Agent tools directory from a previosu task run
             // It will download and install it in the Agent Tools directory if not found
-            let klaInstallPath = await downloadInstallKla(toolName,toolVersion,osPlat);
+            let klaInstallPath = await downloadInstallKla(kiuwanConnection,toolName,toolVersion,osPlat);
 
             // Get the appropriate kla command depending on the platform
             kla = await buildKlaCommand(klaInstallPath, osPlat);

@@ -24,13 +24,15 @@ export async function buildKlaCommand(klaPath: string, platform: string) {
     return command;
 }
 
-export async function downloadInstallKla(toolName: string, toolVersion: string, platform: string) {
+export async function downloadInstallKla(endpointConnectionName: string, toolName: string, toolVersion: string, platform: string) {
     let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
 
     let toolPath = ttl.findLocalTool(toolName, toolVersion);
 
     if (!toolPath) {
-        let downloadPath: string = await ttl.downloadTool('https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip', 'KiuwanLocalAnalyzer.zip');
+        let downloadUrl: string = tl.getEndpointUrl(endpointConnectionName,false) + '/pub/analyzer/KiuwanLocalAnalyzer.zip';
+        console.log(`Downloading KLA from ${downloadUrl}`);
+        let downloadPath: string = await ttl.downloadTool(downloadUrl, 'KiuwanLocalAnalyzer.zip');
 
         let extPath: string = await ttl.extractZip(downloadPath);
 

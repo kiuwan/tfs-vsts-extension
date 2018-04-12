@@ -3,13 +3,13 @@
     "name": "kiuwan-baseline-analysis-task",
     "friendlyName": "Kiuwan Baseline Analysis",
     "description": "Run a Kiuwan baseline Kiuwan analysis on the source code extracted by the build configuration.",
-    "helpMarkDown": "WARNING: Make sure you define the Kiuwan credentials variables in the build definition KiuwanUser and KiuwanPasswd. Otherwise the analysis will fail.",
+    "helpMarkDown": "WARNING: To use this build task you need to have valid credentials to a Kiuwan account.",
     "category": "Build",
     "author": "Javier Salado",
     "version": {
         "Major": 2,
         "Minor": 2,
-        "Patch": 6
+        "Patch": 9
     },
     "visibility": [
         "Build",
@@ -43,7 +43,7 @@
             "type": "connectedService:Kiuwan",
             "label": "Kiuwan Service",
             "defaultValue": "",
-            "required": false,
+            "required": true,
             "helpMarkDown": "Kiuwan service connection"
         },
         {
@@ -124,7 +124,7 @@
             "name": "excludepatterns",
             "type": "string",
             "label": "Exclude patterns",
-            "defaultValue": "**/*.min.js,**/*.Designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.designer.vb,**/*reference.vb,**/*service.vb,**/*silverlight.vb,**/*.Designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/*.designer.cs,**/*reference.cs,**/*service.cs,**/*silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h include.patterns=**/**",
+            "defaultValue": "**/*.min.js,**/*.Designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.designer.vb,**/*reference.vb,**/*service.vb,**/*silverlight.vb,**/*.Designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/*.designer.cs,**/*reference.cs,**/*service.cs,**/*silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h",
             "required": false,
             "groupName": "advanced",
             "helpMarkDown": "Comma separatedlist of ant like patterns to exclude specific files from the analysis"

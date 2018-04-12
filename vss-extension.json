@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.2.7",
+    "version": "2.2.13",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -106,18 +106,19 @@
                 "displayName": "Kiuwan Platform",
                 "url": {
                     "displayName": "Kiuwan URL",
-                    "value": "https://api.kiuwan.com",
-                    "helpMarkDown": "The Kiuwan Service Endpoint URL is always https://api.kiuwan.com"
+                    "value": "https://www.kiuwan.com",
+                    "isVisible": true,
+                    "helpText": "For the cloud Kiuwan Service use: https://www.kiuwan.com This is the default.</br>For Kiuwan Enterprise on-premises use your Kiuwan server URL (i.e. http://kiuwan.mycompany.com)."
                 },
                 "dataSources": [
                     {
                         "name": "TestConnection",
-                        "endpointUrl": "{{endpoint.url}}/info",
+                        "endpointUrl": "{{endpoint.url}}saas/rest/v1/info",
                         "resultSelector": "jsonpath:$.username"
                     },
                     {
                         "name": "ListApplications",
-                        "endpointUrl": "{{endpoint.url}}/apps/list",
+                        "endpointUrl": "{{endpoint.url}}saas/rest/v1/apps/list",
                         "resultSelector": "jsonpath:$[*].name"
                     }
                 ],
