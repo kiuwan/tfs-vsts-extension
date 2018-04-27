@@ -22,3 +22,5 @@ endpoin-definition.json
 sample.json
 _temp
 _tools
+**/*.js
+tsconfig.json.ok
