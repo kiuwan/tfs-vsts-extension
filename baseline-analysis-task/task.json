@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 2,
-        "Patch": 9
+        "Patch": 10
     },
     "visibility": [
         "Build",
@@ -18,7 +18,6 @@
     "runsOn": [
         "Agent"
     ],
-    "minimumAgentVersion": "2.0.0",
     "instanceNameFormat": "Kiuwan baseline analysis",
     "groups": [
         {
@@ -91,7 +90,7 @@
             "defaultValue": false,
             "required": true,
             "groupName": "security",
-            "helpMarkDown": "Skipping the duplicated code analysis is recommended for code security analysis only."
+            "helpMarkDown": "Skipping the duplicated code analysis is recommended for code security analysis only.<br />Applies only to Kiuwan accounts with the Code Analysis module."
         },
         {
             "name": "skiparch",
@@ -100,7 +99,7 @@
             "defaultValue": true,
             "required": true,
             "groupName": "security",
-            "helpMarkDown": "Skipping the architecture code analysis is recommended for code security analysis only."
+            "helpMarkDown": "Skipping the architecture code analysis is recommended for code security analysis only.<br />Applies only to Kiuwan accounts with the Architecture module."
         },
         {
             "name": "encoding",

@@ -8,9 +8,8 @@ settings.json
 .eslint*
 temp
 *.map
-baseline-analysis-task/index.js
-delivery-analysis-task/index.js
-kiuwan-common/utils.js
+*.js
+*.ok
 .taskkey
 KiuwanLocalANalyzer/**
 baseline-analysis-task/ps_modules
