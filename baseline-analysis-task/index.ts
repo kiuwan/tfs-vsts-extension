@@ -1,6 +1,6 @@
 import os = require('os');
 import tl = require('vsts-task-lib/task');
-import { buildKlaCommand,setAgentTempDir,setAgentToolsDir,downloadInstallKla,runKiuwanLocalAnalyzer,checkKuwanRetCode } from 'kiuwan-common/utils';
+import { buildKlaCommand,setAgentTempDir,setAgentToolsDir,downloadInstallKla,runKiuwanLocalAnalyzer,getKuwanRetMsg } from 'kiuwan-common/utils';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -108,7 +108,7 @@ async function run() {
         else {
             // Check if it is installed in the Agent tools directory from a previosu task run
             // It will download and install it in the Agent Tools directory if not found
-            let klaInstallPath = await downloadInstallKla(toolName,toolVersion,osPlat);
+            let klaInstallPath = await downloadInstallKla(kiuwanConnection,toolName,toolVersion,osPlat);
 
             // Get the appropriate kla command depending on the platform
             kla = await buildKlaCommand(klaInstallPath, osPlat);
@@ -134,10 +134,13 @@ async function run() {
 
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
 
-        checkKuwanRetCode(kiuwanRetCode);
+        let kiuwanMsg: string = getKuwanRetMsg(kiuwanRetCode);
 
-        if (kiuwanRetCode !== 0) {
-            tl.setResult(tl.TaskResult.Failed, 'Kiuwan analysis failed! See messages above.');
+        if ( kiuwanRetCode === 0 ) {
+            tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);
+        }
+        else {
+            tl.setResult(tl.TaskResult.Failed, kiuwanMsg);
         }
     }
     catch (err) {
