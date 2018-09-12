@@ -108,7 +108,7 @@ export function setAgentToolsDir(agentHomeDir: string, platform: string) {
     return toolsDir;
 }
 
-export function getKuwanRetMsg(kiuwanRetCode: Number): string {
+export function getKiuwanRetMsg(kiuwanRetCode: Number): string {
     var kiuwanErrorMsg = '';
     switch (kiuwanRetCode) {
         case 1: {
@@ -192,6 +192,6 @@ export function getKuwanRetMsg(kiuwanRetCode: Number): string {
 
 }
 
-export function auditFailed(retCode): boolean {
+export function auditFailed(retCode: Number): boolean {
     return (retCode === 10);
 }
