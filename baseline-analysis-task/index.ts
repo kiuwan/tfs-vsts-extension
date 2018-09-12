@@ -1,6 +1,6 @@
 import os = require('os');
 import tl = require('vsts-task-lib/task');
-import { buildKlaCommand,setAgentTempDir,setAgentToolsDir,downloadInstallKla,runKiuwanLocalAnalyzer,getKuwanRetMsg } from 'kiuwan-common/utils';
+import { buildKlaCommand,setAgentTempDir,setAgentToolsDir,downloadInstallKla,runKiuwanLocalAnalyzer,getKiuwanRetMsg } from 'kiuwan-common/utils';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -130,11 +130,11 @@ async function run() {
             `timeout=${timeout} ` +
             `${ignoreclause}`;
 
-        console.log('Running Kiuwan analysis');
+        console.log(`Running Kiuwan analysis: ${kla} ${klaArgs}`);
 
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
 
-        let kiuwanMsg: string = getKuwanRetMsg(kiuwanRetCode);
+        let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
 
         if ( kiuwanRetCode === 0 ) {
             tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);

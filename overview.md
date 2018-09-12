@@ -1,16 +1,16 @@
 The Kiuwan extension for FTS and VSTS includes 2 new build tasks to run Kiuwan analyses as part of your application builds.
 
-With the latest version, you can now define a Kiuwan service endpoint. This will allow you store you Kiuwan credential at the project level. At the same time this service endpoint allows the extension to get information from your Kiuwan account to provide new exciting features and more to come.
+With the latest version, you can now define a Kiuwan service endpoint. This will allow you to store you Kiuwan credentials at the project level. At the same time this service endpoint allows the extension to get information from your Kiuwan account to provide new exciting features and more to come.
 
 ## What you need to know before installing it ##
 
-**NOTE: For TFS 2015 (update 2 and up) you need version 2.2015.* of the extension. You can [download a zip file with the vsix file](https://www.kiuwan.com/pub/tfs2015/kiuwan-publisher.kiuwan-analysis-extension-2.2015.1.vsix.zip) from kiuwan.com**
+**NOTE: For TFS 2015 (update 2 and up) you need version 2.2015.1 of the extension. You can [download a zip file with the VSIX file](https://www.kiuwan.com/pub/tfs2015/kiuwan-publisher.kiuwan-analysis-extension-2.2015.1.vsix.zip) from Kiuwan**
 
-This extension works with the Kiuwan Application Security platform. So you need a Kiuwan account in our cloud service, or an on-premises installation of the platform, to use it.
+This extension works with the Kiuwan Application Security platform. So you need a Kiuwan account in our cloud service, or an on-premises installation of the Kiuwan platform, to use it.
 
-The included build tasks will work on TFS Windows, Linux or MacOS agents and VSTS private or hosted Windows, Linux and MacOS agents.
+The included build tasks will work on Windows, Linux or MacOS TFS agents and VSTS private or hosted Windows, Linux and MacOS agents.
 
-For private agents, you don't need to pre-install the Kiuwan Local Analyzer (KLA). The first time you run a Kiuwan task the KLA will be downloaded and installed in the agent home directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation. However, if you want, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME environment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer).
+For TFS and VSTS private agents, you don't need to pre-install the Kiuwan Local Analyzer (KLA). The first time you run a Kiuwan task the KLA will be downloaded and installed in the agent tools directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation. However, if you tighter control, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME environment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer).
 
 If the Agent.TempDirectory and the the Agent.ToolsDirectory variables are not set in your private agents they are set by the build tasks to ${Agent.HomeDirectory}/_temp and ${Agent.ToolsDirectory}/_tools respectively for the tasks to work properly.
 
