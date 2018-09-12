@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.2.19",
+    "version": "2.2.20",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -70,23 +70,6 @@
     ],
     "files": [
         {
-            "path": "enhancer",
-            "addressable": true,
-            "packagePath": "scripts"
-        },
-        {
-            "path": "buildDumpSection.html",
-            "addressable": true
-        },
-        {
-            "path": "infoTab.html",
-            "addressable": true
-        },
-        {
-            "path": "statusSection.html",
-            "addressable": true
-        },
-        {
             "path": "baseline-analysis-task"
         },
         {
@@ -98,49 +81,9 @@
         {
             "path": "images",
             "addressable": true
-        },
-        {
-            "path": "node_modules/vss-web-extension-sdk/lib",
-            "addressable": true,
-            "packagePath": "lib"
         }
     ],
     "contributions": [
-        {
-            "id": "kiuwan-analysis-overview-section",
-            "type": "ms.vss-build-web.build-results-section",
-            "description": "Kiiuwan results overview section in build summary tab",
-            "targets": [
-                ".kiuwan-analysis-results-tab",
-                "ms.vss-build-web.build-results-summary-tab"
-            ],
-            "properties": {
-                "name": "Kiuwan Results Overview",
-                "uri": "statusSection.html",
-                "order": 20,
-                "height": 30,
-                "supportsTasks": [
-                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
-                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
-                ]
-            }
-        },
-        {
-            "id": "kiuwan-analysis-results-tab",
-            "type": "ms.vss-build-web.build-results-tab",
-            "description": "Kiuwan tab for extended analysis results",
-            "targets": [
-                "ms.vss-build-web.build-results-view"
-            ],
-            "properties": {
-                "name": "Kiuwan",
-                "uri": "builtInTaskContribution.html",
-                "supportsTasks": [
-                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
-                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
-                ]
-            }
-        },
         {
             "id": "kiuwan-bl-analysis-task",
             "type": "ms.vss-distributed-task.task",
