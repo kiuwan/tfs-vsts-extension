@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.2015.1",
+    "version": "2.2015.2",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
