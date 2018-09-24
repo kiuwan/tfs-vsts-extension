@@ -25,15 +25,11 @@ async function run() {
         let failOnAudit = tl.getBoolInput('failonaudit');
 
         let skipclones = tl.getBoolInput('skipclones');
-        let skiparch = tl.getBoolInput('skiparch');
         let ignoreclause: string = "";
         if (skipclones) {
-            ignoreclause = "ignore=clones";
-            if (skiparch) {
-                ignoreclause += ",architecture,insights";
-            }
+            ignoreclause = "ignore=clones,architecture,insights";
         }
-        else if (skiparch) {
+        else {
             ignoreclause = "ignore=architecture,insights";
         }
 

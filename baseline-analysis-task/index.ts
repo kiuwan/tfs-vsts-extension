@@ -23,17 +23,21 @@ async function run() {
         // Get the values from the task's inputs bythe user
         let analysisLabel = tl.getInput('analysislabel');
 
+        let includeinsight = tl.getBoolInput('includeinsight');
         let skipclones = tl.getBoolInput('skipclones');
         let skiparch = tl.getBoolInput('skiparch');
         let ignoreclause: string = "";
         if (skipclones) {
             ignoreclause = "ignore=clones";
             if (skiparch) {
-                ignoreclause += ",architecture,insights";
+                ignoreclause += ",architecture";
             }
         }
         else if (skiparch) {
-            ignoreclause = "ignore=architecture,insights";
+            ignoreclause = "ignore=architecture";
+        }
+        if ( !includeinsight ) {
+            ignoreclause += ",insights";
         }
 
         let encoding = tl.getInput('encoding');
