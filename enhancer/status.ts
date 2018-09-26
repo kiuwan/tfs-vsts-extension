@@ -3,7 +3,7 @@ import VSS_Service = require("VSS/Service");
 import TFS_Build_Contracts = require("TFS/Build/Contracts");
 import TFS_Build_Extension_Contracts = require("TFS/Build/ExtensionContracts");
 
-export class StatusSection extends Controls.BaseControl {	
+export class KiuwanStatusSection extends Controls.BaseControl {	
 	constructor() {
 		super();
 	}
@@ -41,7 +41,7 @@ export class StatusSection extends Controls.BaseControl {
 	}
 }
 
-StatusSection.enhance(StatusSection, $(".build-status"), {});
+KiuwanStatusSection.enhance(KiuwanStatusSection, $(".kiuwan-status"), {});
 
 // Notify the parent frame that the host has been loaded
 VSS.notifyLoadSucceeded();

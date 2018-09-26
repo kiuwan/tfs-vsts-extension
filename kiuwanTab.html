@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<head>
+    <script src="lib/VSS.SDK.min.js"></script>
+    
+    <script type="text/javascript">
+        VSS.init( { 
+            usePlatformScripts: true, 
+            moduleLoaderConfig: { 
+                paths: { "enhancer": "scripts" } 
+            } 
+        });
+        
+        VSS.ready(function() {
+            require(["enhancer/tab"], function () { });
+        });   
+    </script>
+    
+    <style>
+    .kiuwan-info {
+        padding: 10px;
+    }     
+    </style>
+</head>
+
+<body>
+    <div class="kiuwan-info">
+        We are going to display lots of Kiuwan info here. Stay tuned...
+    </div>
+</body>
+</html>

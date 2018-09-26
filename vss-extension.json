@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.2.22",
+    "version": "2.3.14",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -66,20 +66,81 @@
     ],
     "files": [
         {
+            "path": "images",
+            "addressable": true
+        },
+        {
+            "path": "screenshots"
+        },
+        {
+            "path": "kiuwanTab.html",
+            "addressable": true
+        },
+        {
+            "path": "kiuwanStatusSection.html",
+            "addressable": true
+        },
+        {
+            "path": "builtInTaskContribution.html",
+            "addressable": true
+        },
+        {
             "path": "baseline-analysis-task"
         },
         {
             "path": "delivery-analysis-task"
         },
         {
-            "path": "screenshots"
+            "path": "enhancer",
+            "addressable": true,
+            "packagePath": "scripts"
         },
         {
-            "path": "images",
-            "addressable": true
-        }
+            "path": "node_modules/vss-web-extension-sdk/lib",
+            "addressable": true,
+            "packagePath": "lib"
+        }        
     ],
     "contributions": [
+        {
+            "id": "kiuwan-info-tab",
+            "type": "ms.vss-build-web.build-results-tab",
+            "description": "A tab contributing to build results view with Kiuwan results info",
+            "targets": [
+                "ms.vss-build-web.build-results-view"
+            ],
+            "properties": {
+                "name": "Kiuwan",
+                 "uri": "kiuwanTab.html"
+            }
+        },
+        {
+            "id": "build-kiuwan-status-section",
+            "type": "ms.vss-build-web.build-results-section",
+            "description": "A section contributing to our own new tab and also to existing build 'summary' tab",
+            "targets": [
+                ".kiuwan-info-tab",
+                "ms.vss-build-web.build-results-summary-tab"
+            ],
+            "properties": {
+                 "name": "Kiuwan Status Section",
+                 "uri": "kiuwanStatusSection.html",
+                 "order": 20
+            }
+        },
+        {
+            "id": "build-kiuwan-audit-results-tab",
+            "type": "ms.vss-build-web.build-results-tab",
+            "description": "A tab contributing to build results view and depends on Kiuwan delivery analysis task",
+            "targets": [
+                "ms.vss-build-web.build-results-view"
+            ],
+            "properties": {
+                "name": "Kiuwan Audit",
+                 "uri": "builtInTaskContribution.html",
+                 "supportsTasks": ["4e6e25e3-c0b5-4986-8714-5c751945c15f"]
+            }
+        },
         {
             "id": "kiuwan-bl-analysis-task",
             "type": "ms.vss-distributed-task.task",

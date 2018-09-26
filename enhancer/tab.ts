@@ -4,7 +4,7 @@ import TFS_Build_Contracts = require("TFS/Build/Contracts");
 import TFS_Build_Extension_Contracts = require("TFS/Build/ExtensionContracts");
 import DT_Client = require("TFS/DistributedTask/TaskRestClient");
 
-export class InfoTab extends Controls.BaseControl {	
+export class KiuwanTab extends Controls.BaseControl {	
 	constructor() {
 		super();
 	}
@@ -41,11 +41,13 @@ export class InfoTab extends Controls.BaseControl {
 	}
 	
 	private _initBuildInfo(build: TFS_Build_Contracts.Build) {
-		
+		var element = $("<pre />");
+		element.text(JSON.stringify(build, null, 2));
+		this._element.append(element);
 	}
 }
 
-InfoTab.enhance(InfoTab, $(".build-info"), {});
+KiuwanTab.enhance(KiuwanTab, $(".kiuwan-info"), {});
 
 // Notify the parent frame that the host has been loaded
 VSS.notifyLoadSucceeded();
