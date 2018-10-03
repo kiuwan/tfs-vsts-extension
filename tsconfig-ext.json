@@ -60,8 +60,8 @@
     ],
   },
   "include": [
-    "enhancer/dump.ts",
-    "enhancer/status.ts",
-    "enhancer/tab.ts"
+    "enhancer/kiuwanAuditTab.ts",
+    "enhancer/kiuwanStatus.ts",
+    "enhancer/kiuwanTab.ts"
   ]
 }

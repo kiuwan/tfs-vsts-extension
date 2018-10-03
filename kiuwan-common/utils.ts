@@ -1,9 +1,80 @@
 import tl = require('vsts-task-lib/task');
 import ttl = require('vsts-task-tool-lib/tool')
 import trm = require('vsts-task-lib/toolrunner');
+import path = require('path');
 import fs = require('fs');
-import { extractZip } from 'vsts-task-tool-lib/tool';
+import https = require('https');
 import { _exist } from 'vsts-task-lib/internal';
+
+export async function getLastAnalysisResults(kiuwanUrl: string, kiuwanUser: string, kiuwanPassword: string, appName: string) {
+    const method = 'GET';
+    const auth = `${kiuwanUser}:${kiuwanPassword}`;
+
+    const options: https.RequestOptions = {
+        host: kiuwanUrl,
+        path: `/saas/rest/v1/apps/${appName}`,
+        method: method,
+        auth: auth
+    }
+
+    tl.debug("[KW] Calling Kiuwan API");
+
+    let responseString = '';
+
+    return new Promise((resolve, reject) => {
+        let req = https.request(options, function (res) {
+            res.setEncoding('utf-8');
+
+            res.on('data', function (data) {
+                responseString += data;
+            });
+
+            res.on('end', function () {
+                resolve(responseString);
+            });
+
+            if (res.statusCode != 200) {
+                reject(new Error(`Kiuwan call error (${res.statusCode}): ' + ${res.statusMessage}`));
+            }
+
+            res.on('error', function (error) {
+                reject(new Error(`Response error: ${error}`));
+            })
+        });
+
+        req.on('error', (e) => {
+            reject(new Error(`Kiuwan API request error: ${e}`));
+        });
+
+        req.end();
+    });
+}
+
+export function saveKiuwanResults(result: string): string {
+    // write result to file
+    const resultsDirPath = path.join(tl.getVariable('build.artifactStagingDirectory'), '.kiuwanResults');
+    const resultsFilePath = path.join(resultsDirPath, 'kiuwanResults.json');
+
+    fs.mkdirSync(resultsDirPath);
+    fs.writeFileSync(resultsFilePath, result);
+
+    return resultsFilePath;
+}
+
+export function uploadKiuwanResults(resultsPath: string, title: string) {
+    tl.debug(`[KW] Uploading Kiuwan results from ${resultsPath}`);
+
+    tl.command (
+        'task.addattachment',
+        {
+            type: 'Kiuwantask.Baseline.Results',
+            name: title
+        },
+        resultsPath
+    );
+
+    tl.debug('[KW] Results uploaded successfully')
+}
 
 export async function buildKlaCommand(klaPath: string, platform: string) {
     let command: string;
@@ -13,7 +84,7 @@ export async function buildKlaCommand(klaPath: string, platform: string) {
     if (platform === 'linux' || platform === 'darwin') {
         // Define the KLA command if install directory exisits
         dirExist = _exist(`${klaPath}/${defaultKiuwanDir}`);
-        console.log(`${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
+        console.log(`[KW] ${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
         command = dirExist ? `${klaPath}/${defaultKiuwanDir}/bin/agent.sh` : "";
     }
     else {
@@ -30,8 +101,8 @@ export async function downloadInstallKla(endpointConnectionName: string, toolNam
     let toolPath = ttl.findLocalTool(toolName, toolVersion);
 
     if (!toolPath) {
-        let downloadUrl: string = tl.getEndpointUrl(endpointConnectionName,false) + '/pub/analyzer/KiuwanLocalAnalyzer.zip';
-        console.log(`Downloading KLA from ${downloadUrl}`);
+        let downloadUrl: string = tl.getEndpointUrl(endpointConnectionName, false) + '/pub/analyzer/KiuwanLocalAnalyzer.zip';
+        console.log(`[KW] Downloading KLA from ${downloadUrl}`);
         let downloadPath: string = await ttl.downloadTool(downloadUrl, 'KiuwanLocalAnalyzer.zip');
 
         let extPath: string = await ttl.extractZip(downloadPath);
@@ -40,9 +111,9 @@ export async function downloadInstallKla(endpointConnectionName: string, toolNam
         // Setting +x permision to the kla shell script in unix based platforms
         if (platform === 'linux' || platform === 'darwin') {
             let ret = await tl.exec('chmod', `+x ${toolPath}/${defaultKiuwanDir}/bin/agent.sh`);
-            console.log(`chmod retuned: ${ret}`);
+            tl.debug(`[KW] chmod retuned: ${ret}`);
         }
-        console.log(`KLA downloaded and  installed in ${toolPath}`)
+        console.log(`[KW] KLA downloaded and  installed in ${toolPath}`)
     }
 
     return toolPath;
@@ -85,7 +156,7 @@ export function setAgentTempDir(agentHomeDir: string, platform: string) {
     }
 
     // Creates the temp directory if it doesn't exists
-    if (! _exist(tempDir)) {
+    if (!_exist(tempDir)) {
         fs.mkdirSync(tempDir);
     }
 

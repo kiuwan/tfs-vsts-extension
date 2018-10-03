@@ -1,16 +1,21 @@
 import os = require('os');
+import url = require('url');
 import tl = require('vsts-task-lib/task');
-import { buildKlaCommand,setAgentTempDir,setAgentToolsDir,downloadInstallKla,runKiuwanLocalAnalyzer,getKiuwanRetMsg } from 'kiuwan-common/utils';
+import {
+    buildKlaCommand, setAgentTempDir, setAgentToolsDir,
+    downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
+    getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults
+} from 'kiuwan-common/utils';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
 var agentTempDir = tl.getVariable('Agent.TempDirectory');
 if (!agentTempDir) {
-    agentTempDir = setAgentTempDir(agentHomeDir,osPlat);
+    agentTempDir = setAgentTempDir(agentHomeDir, osPlat);
 }
 var agentToolsDir = tl.getVariable('Agent.ToolsDirectory');
 if (!agentToolsDir) {
-    agentToolsDir = setAgentToolsDir(agentHomeDir,osPlat);
+    agentToolsDir = setAgentToolsDir(agentHomeDir, osPlat);
 }
 const toolName = 'KiuwanLocalAnalyzer';
 const toolVersion = '1.0.0';
@@ -36,7 +41,7 @@ async function run() {
         else if (skiparch) {
             ignoreclause = "ignore=architecture";
         }
-        if ( !includeinsight ) {
+        if (!includeinsight) {
             ignoreclause += ",insights";
         }
 
@@ -56,8 +61,14 @@ async function run() {
             technologies += dbtechnology;
         }
 
-        // Get the Kiuwan connection service authorization
+        // Get the Kiuwan connection URL for API Calls based on the Kiuwan connection service nane selected in the task
         let kiuwanConnection = tl.getInput("kiuwanConnection", true);
+
+        // For DEBUG mode only since we dont have a TFS EndpointUrl object available
+        //let kiuwanUrl = tl.getEndpointUrl(kiuwanConnection, false);
+        let kiuwanUrl = url.parse("https://www.kiuwan.com/");
+
+        // Get the Kiuwan connection service authorization
         let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
         // Get user and password from variables defined in the build, otherwise get them from
         // the Kiuwan service endpoint authorization
@@ -78,15 +89,15 @@ async function run() {
         let projectName = '';
         if (projectSelector === 'default') {
             projectName = tl.getVariable('System.TeamProject');
-            console.log(`Kiuwan application from System.TeamProject: ${projectName}`);
+            console.log(`[KW] Kiuwan application from System.TeamProject: ${projectName}`);
         }
         if (projectSelector === 'kiuwanapp') {
             projectName = tl.getInput('kiuwanappname');
-            console.log(`Kiuwan application from Kiuwan app list: ${projectName}`);
+            console.log(`[KW] Kiuwan application from Kiuwan app list: ${projectName}`);
         }
         if (projectSelector === 'appname') {
             projectName = tl.getInput('customappname');
-            console.log(`Kiuwan application from user input: ${projectName}`);
+            console.log(`[KW] Kiuwan application from user input: ${projectName}`);
         }
 
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
@@ -100,19 +111,20 @@ async function run() {
         var kiuwanHome: string;
         kiuwanHome = tl.getVariable('KIUWAN_HOME');
 
-        console.log(`Running on Agent: ${agentName} (${osPlat})`);
+        /*
+        console.log(`[KW] Running on Agent: ${agentName} (${osPlat})`);
 
         if (kiuwanHome !== undefined && kiuwanHome !== "") {
             let klaDefaultPath = 'KiuwanLocalAnalyzer';
             let hasDefaultPath = kiuwanHome.endsWith(klaDefaultPath);
-            console.log(`KIUWAN_HOME env variable defined: ${kiuwanHome}`);
+            console.log(`[KW] KIUWAN_HOME env variable defined: ${kiuwanHome}`);
             kiuwanHome = hasDefaultPath ? kiuwanHome.substring(0, kiuwanHome.lastIndexOf(klaDefaultPath)) : kiuwanHome;
             kla = await buildKlaCommand(kiuwanHome, osPlat);
         }
         else {
             // Check if it is installed in the Agent tools directory from a previosu task run
             // It will download and install it in the Agent Tools directory if not found
-            let klaInstallPath = await downloadInstallKla(kiuwanConnection,toolName,toolVersion,osPlat);
+            let klaInstallPath = await downloadInstallKla(kiuwanConnection, toolName, toolVersion, osPlat);
 
             // Get the appropriate kla command depending on the platform
             kla = await buildKlaCommand(klaInstallPath, osPlat);
@@ -134,14 +146,25 @@ async function run() {
             `timeout=${timeout} ` +
             `${ignoreclause}`;
 
-        console.log(`Running Kiuwan analysis: ${kla} ${klaArgs}`);
+        console.log(`[KW] Running Kiuwan analysis: ${kla} ${klaArgs}`);
 
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
+        */
 
-        let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
+       let kiuwanRetCode = 0;
 
-        if ( kiuwanRetCode === 0 ) {
-            tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);
+       let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
+
+        if (kiuwanRetCode === 0) {
+            let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl.host, kiuwanUser, kiuwanPasswd, projectName);
+
+            tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
+
+            const kiuwanResultsPath = saveKiuwanResults(`${kiuwanAnalysisResult}`);
+
+            uploadKiuwanResults(kiuwanResultsPath, 'Kiuwan Results');
+
+            tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg + ", Results uploaded.");
         }
         else {
             tl.setResult(tl.TaskResult.Failed, kiuwanMsg);
@@ -149,7 +172,7 @@ async function run() {
     }
     catch (err) {
         tl.setResult(tl.TaskResult.Failed, err.message);
-        console.error('Task failed: ' + err.message);
+        console.error('[KW] Task failed: ' + err.message);
     }
 }
 

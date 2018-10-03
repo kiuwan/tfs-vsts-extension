@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.3.14",
+    "version": "2.3.39",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -60,9 +60,8 @@
     "scopes": [
         "vso.work",
         "vso.code",
-        "vso.project",
-        "vso.symbols",
-        "vso.work"
+        "vso.build",
+        "vso.test"
     ],
     "files": [
         {
@@ -77,11 +76,11 @@
             "addressable": true
         },
         {
-            "path": "kiuwanStatusSection.html",
+            "path": "kiuwanStatus.html",
             "addressable": true
         },
         {
-            "path": "builtInTaskContribution.html",
+            "path": "kiuwanAuditTab.html",
             "addressable": true
         },
         {
@@ -119,12 +118,11 @@
             "type": "ms.vss-build-web.build-results-section",
             "description": "A section contributing to our own new tab and also to existing build 'summary' tab",
             "targets": [
-                ".kiuwan-info-tab",
                 "ms.vss-build-web.build-results-summary-tab"
             ],
             "properties": {
                  "name": "Kiuwan Status Section",
-                 "uri": "kiuwanStatusSection.html",
+                 "uri": "kiuwanStatus.html",
                  "order": 20
             }
         },
@@ -137,7 +135,7 @@
             ],
             "properties": {
                 "name": "Kiuwan Audit",
-                 "uri": "builtInTaskContribution.html",
+                 "uri": "kiuwanAuditTab.html",
                  "supportsTasks": ["4e6e25e3-c0b5-4986-8714-5c751945c15f"]
             }
         },
