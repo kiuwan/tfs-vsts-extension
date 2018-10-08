@@ -61,7 +61,7 @@
   },
   "include": [
     "enhancer/kiuwanAuditTab.ts",
-    "enhancer/kiuwanStatus.ts",
+    "enhancer/kiuwanSummary.ts",
     "enhancer/kiuwanTab.ts"
   ]
 }

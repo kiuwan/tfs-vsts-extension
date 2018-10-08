@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.3.39",
+    "version": "2.3.75",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -69,6 +69,10 @@
             "addressable": true
         },
         {
+            "path": "css",
+            "addressable": true
+        },
+        {
             "path": "screenshots"
         },
         {
@@ -76,7 +80,7 @@
             "addressable": true
         },
         {
-            "path": "kiuwanStatus.html",
+            "path": "kiuwanSummary.html",
             "addressable": true
         },
         {
@@ -114,15 +118,15 @@
             }
         },
         {
-            "id": "build-kiuwan-status-section",
+            "id": "build-kiuwan-summary-section",
             "type": "ms.vss-build-web.build-results-section",
             "description": "A section contributing to our own new tab and also to existing build 'summary' tab",
             "targets": [
                 "ms.vss-build-web.build-results-summary-tab"
             ],
             "properties": {
-                 "name": "Kiuwan Status Section",
-                 "uri": "kiuwanStatus.html",
+                 "name": "Kiuwan Summary",
+                 "uri": "kiuwanSummary.html",
                  "order": 20
             }
         },
