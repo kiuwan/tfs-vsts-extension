@@ -111,7 +111,6 @@ async function run() {
         var kiuwanHome: string;
         kiuwanHome = tl.getVariable('KIUWAN_HOME');
 
-        /*
         console.log(`[KW] Running on Agent: ${agentName} (${osPlat})`);
 
         if (kiuwanHome !== undefined && kiuwanHome !== "") {
@@ -135,13 +134,13 @@ async function run() {
 
         if (overrideDotKiuwan) {
             advancedArgs = `.kiuwan.analysis.excludesPattern=${excludePatterns} ` +
-            `.kiuwan.analysis.includesPattern=${includePatterns} ` +
-            `.kiuwan.analysis.encoding=${encoding}`;
+                `.kiuwan.analysis.includesPattern=${includePatterns} ` +
+                `.kiuwan.analysis.encoding=${encoding}`;
         }
         else {
             advancedArgs = `exclude.patterns=${excludePatterns} ` +
-            `include.patterns=${includePatterns} ` +
-            `encoding=${encoding}`;
+                `include.patterns=${includePatterns} ` +
+                `encoding=${encoding}`;
         }
 
         let klaArgs: string =
@@ -161,11 +160,8 @@ async function run() {
         console.log(`[KW] Running Kiuwan analysis: ${kla} ${klaArgs}`);
 
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
-        */
 
-       let kiuwanRetCode = 0;
-
-       let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
+        let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
 
         if (kiuwanRetCode === 0) {
             let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl.host, kiuwanUser, kiuwanPasswd, projectName);
