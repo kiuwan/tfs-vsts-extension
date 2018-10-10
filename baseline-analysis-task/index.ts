@@ -130,6 +130,20 @@ async function run() {
             kla = await buildKlaCommand(klaInstallPath, osPlat);
         }
 
+        let advancedArgs = "";
+        let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');;
+
+        if (overrideDotKiuwan) {
+            advancedArgs = `.kiuwan.analysis.excludesPattern=${excludePatterns} ` +
+            `.kiuwan.analysis.includesPattern=${includePatterns} ` +
+            `.kiuwan.analysis.encoding=${encoding}`;
+        }
+        else {
+            advancedArgs = `exclude.patterns=${excludePatterns} ` +
+            `include.patterns=${includePatterns} ` +
+            `encoding=${encoding}`;
+        }
+
         let klaArgs: string =
             `-n "${projectName}" ` +
             `-s "${sourceDirectory}" ` +
@@ -138,9 +152,7 @@ async function run() {
             '-wr ' +
             `--user ${kiuwanUser} ` +
             `--pass ${kiuwanPasswd} ` +
-            `exclude.patterns=${excludePatterns} ` +
-            `include.patterns=${includePatterns} ` +
-            `encoding=${encoding} ` +
+            `${advancedArgs} ` +
             `supported.technologies=${technologies} ` +
             `memory.max=${memory} ` +
             `timeout=${timeout} ` +

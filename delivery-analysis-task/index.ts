@@ -1,16 +1,17 @@
 import os = require('os');
 import tl = require('vsts-task-lib/task');
 import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed } from 'kiuwan-common/utils';
+import { _exist } from 'vsts-task-lib/internal';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
 var agentTempDir = tl.getVariable('Agent.TempDirectory');
 if (!agentTempDir) {
-    agentTempDir = setAgentTempDir(agentHomeDir,osPlat);
+    agentTempDir = setAgentTempDir(agentHomeDir, osPlat);
 }
 var agentToolsDir = tl.getVariable('Agent.ToolsDirectory');
 if (!agentToolsDir) {
-    agentToolsDir = setAgentToolsDir(agentHomeDir,osPlat);
+    agentToolsDir = setAgentToolsDir(agentHomeDir, osPlat);
 }
 const toolName = 'KiuwanLocalAnalyzer';
 const toolVersion = '1.0.0';
@@ -87,6 +88,14 @@ async function run() {
         }
 
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
+        // Change the source directory to the alternate, if set for partial deliveries
+        if (analysisScope === "partialDelivery") {
+            let altSourceDirectory = tl.getInput('alternativesourcedir');
+            if (altSourceDirectory !== undefined || altSourceDirectory !== "") {
+                sourceDirectory = altSourceDirectory;
+            }
+        }
+
         let agentName = tl.getVariable('Agent.Name');
 
         let kla = 'Not installed yet';
@@ -107,10 +116,24 @@ async function run() {
         else {
             // Check if it is installed in the Agent tools directory from a previosu task run
             // It will download and install it in the Agent Tools directory if not found
-            let klaInstallPath = await downloadInstallKla(kiuwanConnection,toolName,toolVersion,osPlat);
+            let klaInstallPath = await downloadInstallKla(kiuwanConnection, toolName, toolVersion, osPlat);
 
             // Get the appropriate kla command depending on the platform
             kla = await buildKlaCommand(klaInstallPath, osPlat);
+        }
+
+        let advancedArgs = "";
+        let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');;
+
+        if (overrideDotKiuwan) {
+            advancedArgs = `.kiuwan.analysis.excludesPattern=${excludePatterns} ` +
+            `.kiuwan.analysis.includesPattern=${includePatterns} ` +
+            `.kiuwan.analysis.encoding=${encoding}`;
+        }
+        else {
+            advancedArgs = `exclude.patterns=${excludePatterns} ` +
+            `include.patterns=${includePatterns} ` +
+            `encoding=${encoding}`;
         }
 
         let klaArgs: string =
@@ -124,9 +147,7 @@ async function run() {
             '-wr ' +
             `--user ${kiuwanUser} ` +
             `--pass ${kiuwanPasswd} ` +
-            `exclude.patterns=${excludePatterns} ` +
-            `include.patterns=${includePatterns} ` +
-            `encoding=${encoding} ` +
+            `${advancedArgs} ` +
             `supported.technologies=${technologies} ` +
             `memory.max=${memory} ` +
             `timeout=${timeout} ` +
@@ -134,15 +155,16 @@ async function run() {
 
         console.log('Running Kiuwan analysis');
 
+        console.log(`${kla} ${klaArgs}`);
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
 
         let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
 
-        if ( kiuwanRetCode === 0 ) {
+        if (kiuwanRetCode === 0) {
             tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);
         }
         else {
-            if ( auditFailed(kiuwanRetCode) && !failOnAudit ) {
+            if (auditFailed(kiuwanRetCode) && !failOnAudit) {
                 tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);
             }
             else {

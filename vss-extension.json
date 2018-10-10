@@ -58,7 +58,6 @@
         "SCA"
     ],
     "scopes": [
-        "vso.work",
         "vso.code",
         "vso.build",
         "vso.test"

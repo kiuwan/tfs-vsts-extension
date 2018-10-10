@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 2,
-        "Patch": 21
+        "Patch": 26
     },
     "visibility": [
         "Build",
@@ -89,7 +89,6 @@
             "label": "Include Insights analysis?",
             "defaultValue": true,
             "required": true,
-            "groupName": "security",
             "helpMarkDown": "Insights is the Kiuwan SCA product<br />This anaysis will give you the risk exposure to open source libraries used in your application<br />Applies only to Kiuwan accounts with the Insights module."
         },
         {
@@ -109,6 +108,15 @@
             "required": true,
             "groupName": "security",
             "helpMarkDown": "Skipping the architecture code analysis is recommended for code security analysis only.<br />Applies only to Kiuwan accounts with the Architecture module."
+        },
+        {
+            "name": "overridedotkiuwan",
+            "type": "boolean",
+            "label": "Override .kiuwan file?",
+            "defaultValue": false,
+            "required": true,
+            "groupName": "advanced",
+            "helpMarkDown": "Check if you want to overrirde the values of the encoding and include/exclude patterns from the .kiuwan file in the application with the values set here.<br />If there is no .kiuwan file in your project these settings will always apply."
         },
         {
             "name": "encoding",
