@@ -2,7 +2,6 @@ import tl = require('vsts-task-lib/task');
 import ttl = require('vsts-task-tool-lib/tool')
 import trm = require('vsts-task-lib/toolrunner');
 import fs = require('fs');
-import { extractZip } from 'vsts-task-tool-lib/tool';
 import { _exist } from 'vsts-task-lib/internal';
 
 export async function buildKlaCommand(klaPath: string, platform: string) {

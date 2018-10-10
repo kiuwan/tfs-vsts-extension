@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 2,
-        "Patch": 11
+        "Patch": 26
     },
     "visibility": [
         "Build",
@@ -89,11 +89,20 @@
             "label": "Anlysis Scope",
             "defaultValue": "completeDelivery",
             "required": true,
-            "helpMarkDown": "Kiuwan analysis scope.<br />Complete application including changes (i.e. a developement branch)<br />Analyze just the changes, like a change set, or pull request<br /> YOu have to make sure you checkout the appropriate code in the previous stage for each case.",
+            "helpMarkDown": "Kiuwan analysis scope.<br />Complete application including changes (i.e. a developement branch)<br />Analyze just the changes, like a change set, or pull request<br /> You have to make sure you checkout the appropriate code in the previous stage for each case.",
             "options": {
                 "completeDelivery": "Complete application",
                 "partialDelivery": "Only changes"
             }
+        },
+        {
+            "name": "alternativesourcedir",
+            "type": "string",
+            "label": "Alternative source directory",
+            "defaultValue": "$(Build.SourcesDirectory)",
+            "required": false,
+            "visibleRule": "analysisscope = partialDelivery",
+            "helpMarkDown": "Specify an alternative source code directory with the application changes only.<br />This directory could have been created by a previous custom task that extracts those changes from the repository.<br />You can use variables well known variable like $(Build.SourcesDirectory) to define it."
         },
         {
             "name": "failonaudit",
@@ -123,6 +132,15 @@
                 "inprogress": "In progress",
                 "resolved": "Resolved"
             }
+        },
+        {
+            "name": "overridedotkiuwan",
+            "type": "boolean",
+            "label": "Override .kiuwan file?",
+            "defaultValue": false,
+            "required": true,
+            "groupName": "advanced",
+            "helpMarkDown": "Check if you want to overrirde the values of the encoding and include/exclude patterns from the .kiuwan file in the application with the values set here.<br />If there is no .kiuwan file in your project these settings will always apply."
         },
         {
             "name": "encoding",

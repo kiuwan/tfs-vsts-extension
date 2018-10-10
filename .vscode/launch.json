@@ -8,9 +8,8 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Kiuwan task",
-            "program": "${workspaceFolder}\\baseline-analysis-task\\index.js",
+            "program": "${workspaceFolder}\\delivery-analysis-task\\index.js",
             "env": {
-                // "KIUWAN_HOME": "",
                 "INPUT_ANALYSISLABEL": "My label",
                 "INPUT_SKIPCLONES": "true",
                 "INPUT_SKIPARCH": "true",
@@ -29,11 +28,11 @@
                 "KIUWANUSER": "jellyfish@kiuwan.com",
                 "KIUWANPASSWD": "J4v13rS4l4d0",
                 "SYSTEM_TEAMPROJECT": "My project",
-                "BUILD_SOURCESDIRECTORY": "${workspaceFolder}\\temp\\MyProjectCode",
+                "BUILD_SOURCESDIRECTORY": "${workspaceFolder}\\_temp\\MyProjectCode",
                 "BUILD_SOURCEBRANCHNAME": "Development Branch",
                 "AGENT_NAME": "Any Agent",
                 "AGENT_HOMEDIRECTORY": "${workspaceFolder}",
-                "KIUWAN_HOME": ""
+                "KIUWAN_HOME": "c:\\KiuwanLocalAnalyzer.cloud"
             },
             "sourceMaps": true,
             "outFiles": [
