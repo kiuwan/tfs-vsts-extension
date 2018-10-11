@@ -6,17 +6,87 @@ import fs = require('fs');
 import https = require('https');
 import { _exist } from 'vsts-task-lib/internal';
 
-export async function getLastAnalysisResults(kiuwanUrl: string, kiuwanUser: string, kiuwanPassword: string, appName: string) {
+export async function getLastDeliveryResults(kiuwanHost: string, kiuwanUser: string, kiuwanPassword: string, appName: string, changeRequest: string, deliveryLabel: string) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
+    const encodedPath = encodeURI(`/saas/rest/v1/apps/${appName}/deliveries?changeRequest=${changeRequest}&label=${deliveryLabel}`);
 
     const options: https.RequestOptions = {
-        host: kiuwanUrl,
-        path: `/saas/rest/v1/apps/${appName}`,
+        host: kiuwanHost,
+        path: encodedPath,
         method: method,
         auth: auth
     }
 
+    return callKiuwanApi(options);
+}
+
+export async function getLastAnalysisResults(kiuwanHost: string, kiuwanUser: string, kiuwanPassword: string, appName: string) {
+    const method = 'GET';
+    const auth = `${kiuwanUser}:${kiuwanPassword}`;
+    const encodedPath = encodeURI(`/saas/rest/v1/apps/${appName}`);
+
+    const options: https.RequestOptions = {
+        host: kiuwanHost,
+        path: encodedPath,
+        method: method,
+        auth: auth
+    }
+
+    return callKiuwanApi(options);
+}
+
+export function saveKiuwanResults(result: string, type: string): string {
+    // write result to file
+    let fileName = "";
+    switch (type) {
+        case "baseline":
+            fileName = "kiuwanBaselineResult.json";
+            break;
+        case "delivery":
+            fileName = "kiuwanDeliveryResult.json";
+            break;
+        default:
+    }
+
+    const resultsDirPath = path.join(tl.getVariable('build.artifactStagingDirectory'), '.kiuwanResults');
+    const resultsFilePath = path.join(resultsDirPath, fileName);
+
+    if (!_exist(resultsDirPath)) {
+        fs.mkdirSync(resultsDirPath);
+    }
+    fs.writeFileSync(resultsFilePath, result);
+
+    return resultsFilePath;
+}
+
+export function uploadKiuwanResults(resultsPath: string, title: string, type: string) {
+    tl.debug(`[KW] Uploading Kiuwan results from ${resultsPath}`);
+
+    let attachmentType = "";
+    switch (type) {
+        case "baseline":
+            attachmentType = "Kiuwantask.Baseline.Results";
+            break;
+        case "delivery":
+            attachmentType = "Kiuwantask.Delivery.Results";
+            break;
+        default:
+    }
+
+    tl.command(
+        'task.addattachment',
+        {
+            type: attachmentType,
+            name: title
+        },
+        resultsPath
+    );
+
+    tl.debug('[KW] Results uploaded successfully')
+}
+
+async function callKiuwanApi(options: https.RequestOptions) {
     tl.debug("[KW] Calling Kiuwan API");
 
     let responseString = '';
@@ -48,32 +118,6 @@ export async function getLastAnalysisResults(kiuwanUrl: string, kiuwanUser: stri
 
         req.end();
     });
-}
-
-export function saveKiuwanResults(result: string): string {
-    // write result to file
-    const resultsDirPath = path.join(tl.getVariable('build.artifactStagingDirectory'), '.kiuwanResults');
-    const resultsFilePath = path.join(resultsDirPath, 'kiuwanResults.json');
-
-    fs.mkdirSync(resultsDirPath);
-    fs.writeFileSync(resultsFilePath, result);
-
-    return resultsFilePath;
-}
-
-export function uploadKiuwanResults(resultsPath: string, title: string) {
-    tl.debug(`[KW] Uploading Kiuwan results from ${resultsPath}`);
-
-    tl.command (
-        'task.addattachment',
-        {
-            type: 'Kiuwantask.Baseline.Results',
-            name: title
-        },
-        resultsPath
-    );
-
-    tl.debug('[KW] Results uploaded successfully')
 }
 
 export async function buildKlaCommand(klaPath: string, platform: string) {

@@ -1,0 +1,164 @@
+{
+    "name": "WebGoat.Net",
+    "description": "",
+    "label": "Delivery 177",
+    "date": "2018-10-09T13:55:27Z",
+    "encoding": "UTF-8",
+    "applicationBusinessValue": "CRITICAL",
+    "applicationProvider": "Mels factory",
+    "applicationPortfolios": {
+        "Application Type": "Web",
+        "Functional": "Mortgage",
+        "Information sensitivity": "Secret",
+        "Dev Team": "Team C",
+        "Methodology": "RUP",
+        "Project Manager": "Jarry Fish",
+        "Country": "New Zealand",
+        "Mobile": "Not mobile"
+    },
+    "analysisCode": "A-7e2-16658b82b9c",
+    "auditResultURL": "https://www.kiuwan.com/saas/web/dashboard/delivery?h=08TYCKRZYJBJDH0UMRGDSM2N3L3MX0RQM5KH3LTQKREPIPMBQP73ETCBIL62AQOQ",
+    "modelId": 33059,
+    "analysisBusinessValue": "CRITICAL",
+    "analysisProvider": "Mels factory",
+    "analysisPortfolios": {
+        "Application Type": "Web",
+        "Functional": "Mortgage",
+        "Information sensitivity": "Secret",
+        "Dev Team": "Team C",
+        "Methodology": "RUP",
+        "Project Manager": "Jarry Fish",
+        "Country": "New Zealand",
+        "Mobile": "Not mobile"
+    },
+    "analysisStatus": "FINISHED",
+    "languages": [
+        {
+            "name": "aspnet",
+            "size": 1380
+        },
+        {
+            "name": "csharp",
+            "size": 6692
+        },
+        {
+            "name": "javascript",
+            "size": 767
+        }
+    ],
+    "changeRequest": "master",
+    "changeRequestStatus": "In progress",
+    "branchName": "master",
+    "analysisScope": "Complete delivery",
+    "baselineAnalysisCode": "A-7e2-16658f3146c",
+    "deliveryFiles": {
+        "count": 177
+    },
+    "deliveryDefects": {
+        "newDefects": 3,
+        "removedDefects": 4000,
+        "defects": 1798
+    },
+    "auditResult": {
+        "approvalThreshold": 50.0,
+        "overallResult": "FAIL",
+        "score": 0.0,
+        "checkpointResults": [
+            {
+                "checkpoint": "1",
+                "result": "FAIL",
+                "name": "No new defects",
+                "description": "If a new defect is detected, the checkpoint will not pass.",
+                "weight": 1,
+                "mandatory": true,
+                "type": "Threshold for maximum new defects",
+                "score": 0.0,
+                "violatedRules": [
+                    {
+                        "ruleCode": "OPT.CSHARP.Csharp.NumMaxClassByNamespace",
+                        "modelId": 33059,
+                        "defectsCount": 1,
+                        "filesCount": 1,
+                        "effort": "4h 00",
+                        "characteristic": "Maintainability",
+                        "priority": "Normal",
+                        "language": "C#",
+                        "files": {
+                            "href": "https://api.kiuwan.com/audits/checkpoints/violatedrules/files?application=WebGoat.Net&deliveryCode=A-7e2-16658b82b9c&checkpoint=1&ruleCode=OPT.CSHARP.Csharp.NumMaxClassByNamespace"
+                        }
+                    },
+                    {
+                        "ruleCode": "OPT.CSHARP.Csharp.AvoidNamespacesWithFewTypes",
+                        "modelId": 33059,
+                        "defectsCount": 2,
+                        "filesCount": 2,
+                        "effort": "20h 00",
+                        "characteristic": "Maintainability",
+                        "priority": "Low",
+                        "language": "C#",
+                        "files": {
+                            "href": "https://api.kiuwan.com/audits/checkpoints/violatedrules/files?application=WebGoat.Net&deliveryCode=A-7e2-16658b82b9c&checkpoint=1&ruleCode=OPT.CSHARP.Csharp.AvoidNamespacesWithFewTypes"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "quality_model": ".Net model",
+    "ordered_by": "Jerry Fish",
+    "Quality indicator": {
+        "value": 46.74384482986067,
+        "children": [
+            {
+                "name": "Efficiency",
+                "value": 76.82139172143188
+            },
+            {
+                "name": "Maintainability",
+                "value": 73.8254872831474
+            },
+            {
+                "name": "Portability",
+                "value": 98.92949169989586
+            },
+            {
+                "name": "Reliability",
+                "value": 16.251082887801587
+            },
+            {
+                "name": "Security",
+                "value": 1.0337035847647667E-4
+            }
+        ]
+    },
+    "Main metrics": [
+        {
+            "name": "Duplicated code",
+            "value": 0.019627223948037276
+        },
+        {
+            "name": "Total defects",
+            "value": 1798.0
+        },
+        {
+            "name": "Very high defects",
+            "value": 79.0
+        },
+        {
+            "name": "Files",
+            "value": 177.0
+        },
+        {
+            "name": "Lines of code",
+            "value": 8839.0
+        },
+        {
+            "name": "Audit result",
+            "value": 0.0
+        },
+        {
+            "name": "Complexity",
+            "value": 3.554913294797688
+        }
+    ]
+}

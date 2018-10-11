@@ -62,6 +62,8 @@
   "exclude": [
     "enhancer/dump.ts",
     "enhancer/status.ts",
-    "enhancer/tab.ts"
+    "enhancer/tab.ts",
+    "baseline-analysis-task/node_modules.remove",
+    "delivery-analysis-task/node_modules.remove"
   ]
 }

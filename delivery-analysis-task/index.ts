@@ -1,7 +1,11 @@
 import os = require('os');
+import url = require('url');
 import tl = require('vsts-task-lib/task');
-import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed } from 'kiuwan-common/utils';
-import { _exist } from 'vsts-task-lib/internal';
+import {
+    buildKlaCommand, setAgentTempDir, setAgentToolsDir,
+    downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
+    auditFailed, getLastDeliveryResults, saveKiuwanResults, uploadKiuwanResults
+} from '../kiuwan-common/utils';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -54,6 +58,11 @@ async function run() {
 
         // Get the Kiuwan connection service authorization
         let kiuwanConnection = tl.getInput("kiuwanConnection", true);
+
+        // For DEBUG mode only since we dont have a TFS EndpointUrl object available
+        // let kiuwanUrl = url.parse("https://www.kiuwan.com/");
+        let kiuwanUrl = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
+
         let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
         // Get user and password from variables defined in the build, otherwise get them from
         // the Kiuwan service endpoint authorization
@@ -127,13 +136,13 @@ async function run() {
 
         if (overrideDotKiuwan) {
             advancedArgs = `.kiuwan.analysis.excludesPattern=${excludePatterns} ` +
-            `.kiuwan.analysis.includesPattern=${includePatterns} ` +
-            `.kiuwan.analysis.encoding=${encoding}`;
+                `.kiuwan.analysis.includesPattern=${includePatterns} ` +
+                `.kiuwan.analysis.encoding=${encoding}`;
         }
         else {
             advancedArgs = `exclude.patterns=${excludePatterns} ` +
-            `include.patterns=${includePatterns} ` +
-            `encoding=${encoding}`;
+                `include.patterns=${includePatterns} ` +
+                `encoding=${encoding}`;
         }
 
         let klaArgs: string =
@@ -159,6 +168,16 @@ async function run() {
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
 
         let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
+
+        if (kiuwanRetCode === 0 || auditFailed(kiuwanRetCode)) {
+            let kiuwanDeliveryResult = await getLastDeliveryResults(kiuwanUrl.host, kiuwanUser, kiuwanPasswd, projectName, changeRequest, `${analysisLabel} ${buildNumber}`);
+
+            tl.debug(`[KW] Result of last delivery for ${projectName}: ${kiuwanDeliveryResult}`);
+
+            const kiuwanResultsPath = saveKiuwanResults(`${kiuwanDeliveryResult}`, "delivery");
+
+            uploadKiuwanResults(kiuwanResultsPath, 'Kiuwan Delivery Results', "delivery");
+        }
 
         if (kiuwanRetCode === 0) {
             tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);

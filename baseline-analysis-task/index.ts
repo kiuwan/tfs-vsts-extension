@@ -5,7 +5,7 @@ import {
     buildKlaCommand, setAgentTempDir, setAgentToolsDir,
     downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
     getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults
-} from 'kiuwan-common/utils';
+} from '../kiuwan-common/utils';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -65,8 +65,8 @@ async function run() {
         let kiuwanConnection = tl.getInput("kiuwanConnection", true);
 
         // For DEBUG mode only since we dont have a TFS EndpointUrl object available
-        //let kiuwanUrl = tl.getEndpointUrl(kiuwanConnection, false);
-        let kiuwanUrl = url.parse("https://www.kiuwan.com/");
+        // let kiuwanUrl = url.parse("https://www.kiuwan.com/");
+        let kiuwanUrl = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
 
         // Get the Kiuwan connection service authorization
         let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
@@ -168,9 +168,9 @@ async function run() {
 
             tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
 
-            const kiuwanResultsPath = saveKiuwanResults(`${kiuwanAnalysisResult}`);
+            const kiuwanResultsPath = saveKiuwanResults(`${kiuwanAnalysisResult}`, "baseline");
 
-            uploadKiuwanResults(kiuwanResultsPath, 'Kiuwan Results');
+            uploadKiuwanResults(kiuwanResultsPath, 'Kiuwan Baseline Results', "baseline");
 
             tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg + ", Results uploaded.");
         }
