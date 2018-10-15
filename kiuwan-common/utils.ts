@@ -310,3 +310,7 @@ export function getKiuwanRetMsg(kiuwanRetCode: Number): string {
 export function auditFailed(retCode: Number): boolean {
     return (retCode === 10);
 }
+
+export function noFilesToAnalyze(retCode: Number): boolean {
+    return (retCode === 18);
+}

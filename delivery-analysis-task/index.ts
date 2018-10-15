@@ -1,11 +1,8 @@
 import os = require('os');
 import url = require('url');
 import tl = require('vsts-task-lib/task');
-import {
-    buildKlaCommand, setAgentTempDir, setAgentToolsDir,
-    downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
-    auditFailed, getLastDeliveryResults, saveKiuwanResults, uploadKiuwanResults
-} from '../kiuwan-common/utils';
+import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed, getLastDeliveryResults, saveKiuwanResults, uploadKiuwanResults, noFilesToAnalyze } from 'kiuwan-common/utils';
+import { _exist } from 'vsts-task-lib/internal';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -28,6 +25,7 @@ async function run() {
         // Get the values from the task's inputs bythe user
         let analysisLabel = tl.getInput('analysislabel');
         let failOnAudit = tl.getBoolInput('failonaudit');
+        let failOnNoFiles = tl.getBoolInput('failonnofiles');
 
         let skipclones = tl.getBoolInput('skipclones');
         let ignoreclause: string = "";
@@ -132,7 +130,7 @@ async function run() {
         }
 
         let advancedArgs = "";
-        let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');;
+        let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');
 
         if (overrideDotKiuwan) {
             advancedArgs = `.kiuwan.analysis.excludesPattern=${excludePatterns} ` +
@@ -187,7 +185,12 @@ async function run() {
                 tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);
             }
             else {
-                tl.setResult(tl.TaskResult.Failed, kiuwanMsg);
+                if (noFilesToAnalyze(kiuwanRetCode) && !failOnNoFiles) {
+                    tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg);
+                }
+                else {
+                    tl.setResult(tl.TaskResult.Failed, kiuwanMsg);
+                }
             }
         }
     }

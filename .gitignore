@@ -4,6 +4,7 @@ node_modules.remove
 *.vsix
 *.code-workspace
 node_modules
+node_modules.remove
 ps_modules
 settings.json
 .eslint*
@@ -17,6 +18,8 @@ baseline-analysis-task/ps_modules
 delivery-analysis-task/ps_modules
 baseline-analysis-task/node_modules
 delivery-analysis-task/node_modules
+baseline-analysis-task/node_modules.remove
+delivery-analysis-task/node_modules.remove
 *.zip
 *.txt
 endpoin-definition.json
