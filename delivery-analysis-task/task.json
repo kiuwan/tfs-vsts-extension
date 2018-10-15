@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 2,
-        "Patch": 26
+        "Patch": 27
     },
     "visibility": [
         "Build",
@@ -103,6 +103,15 @@
             "required": false,
             "visibleRule": "analysisscope = partialDelivery",
             "helpMarkDown": "Specify an alternative source code directory with the application changes only.<br />This directory could have been created by a previous custom task that extracts those changes from the repository.<br />You can use variables well known variable like $(Build.SourcesDirectory) to define it."
+        },
+        {
+            "name": "failonnofiles",
+            "type": "boolean",
+            "label": "Fail when no files to analyze?",
+            "defaultValue": true,
+            "required": true,
+            "visibleRule": "analysisscope = partialDelivery",
+            "helpMarkDown": "Should the task fail if the Kiuwan can't find any files to analyze?"
         },
         {
             "name": "failonaudit",

@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.2.26",
+    "version": "2.2.27",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -64,6 +64,9 @@
         "vso.work"
     ],
     "files": [
+        {
+            "path": "kiuwan-common"
+        },
         {
             "path": "baseline-analysis-task"
         },
