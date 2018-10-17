@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.3.75",
+    "version": "2.3.45",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -87,9 +87,6 @@
             "addressable": true
         },
         {
-            "path": "kiuwan-common"
-        },
-        {
             "path": "baseline-analysis-task"
         },
         {
@@ -116,7 +113,8 @@
             ],
             "properties": {
                 "name": "Kiuwan",
-                 "uri": "kiuwanTab.html"
+                 "uri": "kiuwanTab.html",
+                 "supportsTasks": ["f345ac07-f8a0-4859-bcaf-d71fd62bcf37"]
             }
         },
         {
@@ -129,7 +127,9 @@
             "properties": {
                  "name": "Kiuwan Summary",
                  "uri": "kiuwanSummary.html",
-                 "order": 20
+                 "supportsTasks": ["f345ac07-f8a0-4859-bcaf-d71fd62bcf37"],
+                 "order": 20,
+                 "height": 300
             }
         },
         {

@@ -77,5 +77,40 @@
     float: left;
 }
 .kiuwan-link {
+    padding-top: 10px;
     display: block;
+}
+.audit-result-text {
+    padding-left: 10px;
+    font-size: 40px;
+    font-weight: 300;
+}
+.align-bottom{
+    padding-top: 10px;
+}
+.audit-score-text {
+    padding-left: 45px;
+    font-size: 20px;
+    font-weight: 300;
+}
+.audit-score-num {
+    padding-left: 10px;
+    font-size: 30px;
+    font-weight: 300;
+}
+.fail {
+    color: #cf3241;
+}
+.success {
+    color: #66cc66;
+}
+.checkpoint-summary {
+    font-size: 20px;
+}.checkpoint {
+    padding-left: 30px;
+    font-size: 15px;
+    font-weight: lighter;
+}
+.hide {
+    display: none;
 }

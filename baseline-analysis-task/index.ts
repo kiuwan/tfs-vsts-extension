@@ -5,7 +5,7 @@ import {
     buildKlaCommand, setAgentTempDir, setAgentToolsDir,
     downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
     getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults
-} from '../kiuwan-common/utils';
+} from 'kiuwan-common/utils';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -65,7 +65,7 @@ async function run() {
         let kiuwanConnection = tl.getInput("kiuwanConnection", true);
 
         // For DEBUG mode only since we dont have a TFS EndpointUrl object available
-        // let kiuwanUrl = url.parse("https://www.kiuwan.com/");
+        // let kiuwanUrl: url.UrlWithStringQuery = url.parse("https://www.kiuwan.com/");
         let kiuwanUrl = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
 
         // Get the Kiuwan connection service authorization
@@ -162,7 +162,7 @@ async function run() {
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
 
         let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
-
+        
         if (kiuwanRetCode === 0) {
             let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl.host, kiuwanUser, kiuwanPasswd, projectName);
 

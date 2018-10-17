@@ -1,25 +1,55 @@
 ﻿<!DOCTYPE html>
+
 <head>
+    <link href="css/kiuwan.css" type="text/css" rel="stylesheet">
     <script src="lib/VSS.SDK.min.js"></script>
-    
+
     <script type="text/javascript">
-        VSS.init( { 
-            usePlatformScripts: true, 
-            moduleLoaderConfig: { 
-                paths: { 
-                    "enhancer": "scripts" 
-                } 
+        VSS.init({
+            usePlatformScripts: true,
+            moduleLoaderConfig: {
+                paths: {
+                    "enhancer": "scripts"
+                }
             }
         });
-        
-        VSS.ready(function() {
+
+        VSS.ready(function () {
+            require(["enhancer/kiuwanAuditTab"], function () { });
         });      
     </script>
+    <style>
+        .kiuwan-info {
+            padding: 10px;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="task-contribution">
-        We will display the audit result here, and much more... stay tuned...
+    <div class="kiuwan-audit">
+        <div id="disclaimer" class="hide">
+            There is no Kiuwan audit info for this build
+        </div>
+        <div id="kiuwan-audit-tab" class="hide">
+            <h2>Kiuwan Audit Result</h2>
+            <div id="audit-result" class="box-alignment">
+                <img id="result-icon" class="box-alignment" />
+                <span id="result-text" class="audit-result-text"></span>
+            </div>
+            <div id="audit-score" class="box-alignment align-bottom">
+                <span class="audit-score-text">SCORE:</span><span id="score-num" class="audit-score-num"></span>
+            </div>
+            <div id="checkpoints-summary" class="clear align-bottom checkpoint-summary">
+            </div>
+            <div id="checkpoints-list" class="align-bottom">
+            </div>
+            <div id="effort-summary" class="align-bottom">
+            </div>
+            <a target="_parent" id="kiuwan-link" class="kiuwan-link clear" href="">
+                See the audit results in Kiuwan
+            </a>
+        </div>
     </div>
 </body>
+
 </html>

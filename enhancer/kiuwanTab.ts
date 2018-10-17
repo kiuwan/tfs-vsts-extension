@@ -22,6 +22,12 @@ export class KiuwanTab extends Controls.BaseControl {
                 // Get Kiuwan analysis results from the server stored there as build attachment inthe artifacts directory
                 var taskClient = DT_Client.getClient();
                 taskClient.getPlanAttachments(vsoContext.project.id, "build", build.orchestrationPlan.planId, "Kiuwantask.Baseline.Results").then((taskAttachments) => {
+                    if (taskAttachments.length == 0) {
+                         this._element.find("#disclaimer").show();
+                    }
+                    else {
+                        this._element.find("#kiuwan-info-tab").show();
+                    }
                     $.each(taskAttachments, (index, taskAttachment) => {
                         taskClient.getAttachmentContent(vsoContext.project.id,
                             "build",
@@ -56,9 +62,9 @@ export class KiuwanTab extends Controls.BaseControl {
 
     private populateSecurityInfo(kiuwanJson): void {
         // Only if Kiuwan returned security info
-        if (kiuwanJson.security !== undefined) {
+        if (kiuwanJson.Security !== undefined) {
             // Get the data from the JSON returned by Kiuwan
-            let totalVulns = kiuwanJson.security.vulnerabilities.total.toFixed(0);
+            let totalVulns = kiuwanJson.Security.Vulnerabilities.Total.toFixed(0);
             let totalLoc = kiuwanJson["Main metrics"][4].value.toFixed(0);
 
             this._element.find("#sec-vulns-num").text(totalVulns);
@@ -66,7 +72,7 @@ export class KiuwanTab extends Controls.BaseControl {
 
             // Get security rating and display the stars accordingly
             let starYes = `<img src="images/star-yes.png" />`;
-            let secRating = kiuwanJson.security.rating;
+            let secRating = kiuwanJson.Security.Rating;
             switch (secRating) {
                 case 1:
                     this._element.find("#sec-star-1").html(starYes);
@@ -97,10 +103,10 @@ export class KiuwanTab extends Controls.BaseControl {
             }
 
             // Get the vulnerabilities by priority and display the numbers
-            let vhVulns = kiuwanJson.security.vunerabilities.veryhigh.toFixed(0);
-            let hVulns = kiuwanJson.security.vunerabilities.high.toFixed(0);
-            let nVulns = kiuwanJson.security.vunerabilities.normal.toFixed(0);
-            let lVulns = kiuwanJson.security.vunerabilities.low.toFixed(0);
+            let vhVulns = kiuwanJson.Security.Vulnerabilities.VeryHigh.toFixed(0);
+            let hVulns = kiuwanJson.Security.Vulnerabilities.High.toFixed(0);
+            let nVulns = kiuwanJson.Security.Vulnerabilities.Normal.toFixed(0);
+            let lVulns = kiuwanJson.Security.Vulnerabilities.Low.toFixed(0);
             
             this._element.find("#vh-vulns-num").text(vhVulns);
             this._element.find("#h-vulns-num").text(hVulns);

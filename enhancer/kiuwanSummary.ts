@@ -5,6 +5,8 @@ import TFS_Build_Extension_Contracts = require("TFS/Build/ExtensionContracts");
 import DT_Client = require("TFS/DistributedTask/TaskRestClient");
 
 export class KiuwanSummary extends Controls.BaseControl {
+    private K_FAIL: string = "FAIL";
+    private K_OK: string = "OK";
     constructor() {
         super();
     }
@@ -22,6 +24,12 @@ export class KiuwanSummary extends Controls.BaseControl {
                 // Get Kiuwan analysis results from the server stored there as build attachment inthe artifacts directory
                 var taskClient = DT_Client.getClient();
                 taskClient.getPlanAttachments(vsoContext.project.id, "build", build.orchestrationPlan.planId, "Kiuwantask.Baseline.Results").then((taskAttachments) => {
+                    if (taskAttachments.length == 0) {
+                        this._element.find("#baseline-disclaimer").show();
+                    }
+                    else {
+                        this._element.find("#kiuwan-summary-content").show();
+                    }
                     $.each(taskAttachments, (index, taskAttachment) => {
                         taskClient.getAttachmentContent(vsoContext.project.id,
                             "build",
@@ -39,12 +47,70 @@ export class KiuwanSummary extends Controls.BaseControl {
                         );
                     });
                 });
-
+                // CHeck for dlivery results
+                taskClient.getPlanAttachments(vsoContext.project.id, "build", build.orchestrationPlan.planId, "Kiuwantask.Delivery.Results").then((taskAttachments) => {
+                    if (taskAttachments.length == 0) {
+                        this._element.find("#audit-disclaimer").show();
+                    }
+                    else {
+                        this._element.find("#kiuwan-audit-content").show();
+                    }
+                    $.each(taskAttachments, (index, taskAttachment) => {
+                        taskClient.getAttachmentContent(vsoContext.project.id,
+                            "build",
+                            build.orchestrationPlan.planId,
+                            taskAttachment.timelineId,
+                            taskAttachment.recordId,
+                            taskAttachment.type,
+                            taskAttachment.name).then((kiuwanResults) => {
+                                let kiuwanJsonStr = String.fromCharCode.apply(null, new Uint8Array(kiuwanResults));
+                                let kiuwanJson = JSON.parse(kiuwanJsonStr);
+                                let kiuwanAuditResult = kiuwanJson.auditResult.overallResult;
+                                this.setKiuwanAuditLink(kiuwanJson.auditResultURL);
+                                this.setAuditResult(kiuwanAuditResult);
+                                this.setAuditScore(kiuwanAuditResult, kiuwanJson.auditResult.score);
+                            }
+                        );
+                    });
+                });
             });
         }
     }
 
     private _initBuildInfo(build: TFS_Build_Contracts.Build) {
+    }
+
+    private setKiuwanAuditLink(url) {
+        this._element.find("#kiuwan-link").attr("href", url);
+    }
+
+    private setAuditResult(auditResult) {
+        let displayIcon = "";
+        let resultTextElement = this._element.find("#result-text");
+        if (auditResult === this.K_FAIL) {
+            displayIcon = "images/ball-red.png";
+            resultTextElement.addClass("fail");
+        }
+        else if (auditResult === this.K_OK) {
+            displayIcon = "images/ball-green.png";
+            resultTextElement.addClass("success");
+        }
+
+        this._element.find("#result-icon").attr("src", displayIcon);
+        resultTextElement.text(auditResult);
+    }
+
+    private setAuditScore(auditResult, score) {
+        let scoreNumElement = this._element.find("#score-num");
+
+        if (auditResult === this.K_FAIL) {
+            scoreNumElement.addClass("fail");
+        }
+        else if (auditResult === this.K_OK) {
+            scoreNumElement.addClass("success");
+        }
+
+        scoreNumElement.text(score.toFixed(2));
     }
 
     private setKiuwanResultsLink(url) {
@@ -53,11 +119,11 @@ export class KiuwanSummary extends Controls.BaseControl {
 
     private populateSecuritySummary(kiuwanJson): void {
         // Only if Kiuwan returned security info
-        if (kiuwanJson.security !== undefined) {
+        if (kiuwanJson.Security !== undefined) {
             // Get the data from the JSON returned by Kiuwan
             // Get security rating and display the stars accordingly
             let starYes = `<img src="images/star-yes.png" />`;
-            let secRating = kiuwanJson.security.rating;
+            let secRating = kiuwanJson.Security.Rating;
             switch (secRating) {
                 case 1:
                     this._element.find("#sec-star-1").html(starYes);

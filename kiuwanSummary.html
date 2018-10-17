@@ -21,50 +21,68 @@
 
 <body>
     <div class="kiuwan-summary">
-        <br /><br />
-        <div id="sec-empty"></div>
-        <div id="sec-summary">
-            <div id="sec-rating">
-                <div id="sec-rating-text" class="box-margin text-width box-alignment">
-                    Security Rating
-                </div>
-                <div id="sec-star-1" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-2" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-3" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-4" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-5" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-            </div>
-        </div> <!-- security-summary -->
-        <br /><br /><br />
-        <div id="qa-empty"></div>
-        <div id="qa-summary">
-            <div id="qa-qa-indicator" class="clear">
-                <div id="qa-text" class="box-margin text-width box-alignment">
-                    Quality indicator
-                </div>
-                <div id="qa-indicator" class="box-alignment">
-                    <div id="qa-indicator-num" class="bold-num-w centered number-box"></div>
-                    <div id="qa-indicator-legend" class="remove-top-gap">
-                        <img src="images/qa-legend.png" />
+        <div id="baseline-disclaimer" class="hide">
+            There is no Kiuwan baseline info for this build
+        </div>
+        <div id="kiuwan-summary-content" class="hide">
+            <br /><br />
+            <div id="sec-empty"></div>
+            <div id="sec-summary">
+                <div id="sec-rating">
+                    <div id="sec-rating-text" class="box-margin text-width box-alignment">
+                        Security Rating
+                    </div>
+                    <div id="sec-star-1" class="box-alignment">
+                        <img src="images/star-no.png" />
+                    </div>
+                    <div id="sec-star-2" class="box-alignment">
+                        <img src="images/star-no.png" />
+                    </div>
+                    <div id="sec-star-3" class="box-alignment">
+                        <img src="images/star-no.png" />
+                    </div>
+                    <div id="sec-star-4" class="box-alignment">
+                        <img src="images/star-no.png" />
+                    </div>
+                    <div id="sec-star-5" class="box-alignment">
+                        <img src="images/star-no.png" />
                     </div>
                 </div>
-            </div> <!-- quality indicator -->
-        </div> <!-- qa-summary -->
-    </div> <!-- kiuwan-summry -->
-    <br />
-    <a id="kiuwan-link" class="kiuwan-link clear" href="">
-        See the details in Kiuwan
-    </a>
+            </div> <!-- security-summary -->
+            <br /><br /><br />
+            <div id="qa-empty"></div>
+            <div id="qa-summary">
+                <div id="qa-qa-indicator" class="clear">
+                    <div id="qa-text" class="box-margin text-width box-alignment">
+                        Quality indicator
+                    </div>
+                    <div id="qa-indicator" class="box-alignment">
+                        <div id="qa-indicator-num" class="bold-num-w centered number-box"></div>
+                        <div id="qa-indicator-legend" class="remove-top-gap">
+                            <img src="images/qa-legend.png" />
+                        </div>
+                    </div>
+                </div> <!-- quality indicator -->
+            </div> <!-- qa-summary -->
+            <br />
+            <a id="kiuwan-link" class="kiuwan-link clear" href="">
+                See the details in Kiuwan
+            </a>
+        </div> <!-- kiuwan-summry -->
+        <div id="baseline-disclaimer" class="hide">
+            There is no Kiuwan audit info for this build
+        </div>
+        <div id="kiuwan-audit-content" class="hide">
+            <h2>Kiuwan Audit Result</h2>
+            <div id="audit-result" class="box-alignment">
+                <img id="result-icon" class="box-alignment" />
+                <span id="result-text" class="audit-result-text"></span>
+            </div>
+            <div id="audit-score" class="box-alignment align-bottom">
+                <span class="audit-score-text">SCORE:</span><span id="score-num" class="audit-score-num"></span>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

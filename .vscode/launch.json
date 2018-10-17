@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Kiuwan task",
-            "program": "${workspaceFolder}\\delivery-analysis-task\\index.js",
+            "program": "${workspaceFolder}\\baseline-analysis-task\\index.js",
             "env": {
                 "INPUT_ANALYSISLABEL": "Delivery",
                 "INPUT_SKIPCLONES": "true",

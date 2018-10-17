@@ -8,8 +8,8 @@
     "author": "Javier Salado",
     "version": {
         "Major": 2,
-        "Minor": 2,
-        "Patch": 27
+        "Minor": 3,
+        "Patch": 2
     },
     "visibility": [
         "Build",

@@ -26,106 +26,111 @@
 
 <body>
     <div class="kiuwan-info">
-        <h2>Security summary</h2>
-        <div id="sec-empty"></div>
-        <div id="sec-summary">
-            <div id="sec-sum-text" class="text-margin">
-                <span id="sec-vulns-num" class="bold-num-b"></span> vulnerabilities found in <span id="sec-loc-num"
-                    class="bold-num-b"></span> lines of code
-            </div>
-            <div id="sec-rating">
-                <div id="sec-rating-text" class="box-margin text-width box-alignment">
-                    Security Rating
+        <div id="disclaimer" class="hide">
+            There is no Kiuwan baseline info for this build
+        </div>
+        <div id="kiuwan-info-tab" class="hide">
+            <h2>Security summary</h2>
+            <div id="sec-empty"></div>
+            <div id="sec-summary">
+                <div id="sec-sum-text" class="text-margin">
+                    <span id="sec-vulns-num" class="bold-num-b"></span> vulnerabilities found in <span id="sec-loc-num"
+                        class="bold-num-b"></span> lines of code
                 </div>
-                <div id="sec-star-1" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-2" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-3" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-4" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-                <div id="sec-star-5" class="box-alignment">
-                    <img src="images/star-no.png" />
-                </div>
-            </div>
-            <div id="sec-vulns" class="clear">
-                <div id="sec-vulns-text" class="box-margin text-width box-alignment">
-                    Vulnerabilities
-                </div>
-                <div>
-                    <div id="sec-vh-vulns" class="sec-vh-vulns number-box centered box-alignment">
-                        <span id="vh-vulns-num" class="bold-num-w"></span><span class="white"> VERY HIGH</span>
+                <div id="sec-rating">
+                    <div id="sec-rating-text" class="box-margin text-width box-alignment">
+                        Security Rating
                     </div>
-                    <div id="sec-h-vulns" class="sec-h-vulns number-box centered box-alignment">
-                        <span id="h-vulns-num" class="bold-num-w"></span><span class="white"> HIGH</span>
+                    <div id="sec-star-1" class="box-alignment">
+                        <img src="images/star-no.png" />
                     </div>
-                    <div id="sec-n-vulns" class="sec-n-vulns number-box centered box-alignment">
-                        <span id="n-vulns-num" class="bold-num-w"></span><span class="white"> NORMAL</span>
+                    <div id="sec-star-2" class="box-alignment">
+                        <img src="images/star-no.png" />
                     </div>
-                    <div id="sec-l-vulns" class="sec-l-vulns number-box centered box-alignment">
-                        <span id="l-vulns-num" class="bold-num-w"></span><span class="white"> LOW</span>
+                    <div id="sec-star-3" class="box-alignment">
+                        <img src="images/star-no.png" />
+                    </div>
+                    <div id="sec-star-4" class="box-alignment">
+                        <img src="images/star-no.png" />
+                    </div>
+                    <div id="sec-star-5" class="box-alignment">
+                        <img src="images/star-no.png" />
                     </div>
                 </div>
-            </div>
-        </div> <!-- security-summary -->
-        <br /><br />
-        <h2 class="clear">Quality summary</h2>
-        <div id="qa-summary">
-            <div id="qa-sum-text" class="text-margin">
-                <span id="qa-defects-num" class="bold-num-b"></span> defects found in <span id="qa-loc-num" class="bold-num-b"></span>
-                lines of code
-            </div>
-            <div id="risk-empty"></div>
-            <div id="qa-risk">
-                <div id="qa-risk-text" class="box-margin text-width box-alignment">
-                    Risk index
-                </div>
-                <div id="qa-risk-index" class="box-alignment">
-                    <div id="qa-risk-num" class="bold-num-w centered number-box"></div>
-                    <div id="qa-risk-legend" class="remove-top-gap">
-                        <img src="images/risk-legend.png" />
+                <div id="sec-vulns" class="clear">
+                    <div id="sec-vulns-text" class="box-margin text-width box-alignment">
+                        Vulnerabilities
+                    </div>
+                    <div>
+                        <div id="sec-vh-vulns" class="sec-vh-vulns number-box centered box-alignment">
+                            <span id="vh-vulns-num" class="bold-num-w"></span><span class="white"> VERY HIGH</span>
+                        </div>
+                        <div id="sec-h-vulns" class="sec-h-vulns number-box centered box-alignment">
+                            <span id="h-vulns-num" class="bold-num-w"></span><span class="white"> HIGH</span>
+                        </div>
+                        <div id="sec-n-vulns" class="sec-n-vulns number-box centered box-alignment">
+                            <span id="n-vulns-num" class="bold-num-w"></span><span class="white"> NORMAL</span>
+                        </div>
+                        <div id="sec-l-vulns" class="sec-l-vulns number-box centered box-alignment">
+                            <span id="l-vulns-num" class="bold-num-w"></span><span class="white"> LOW</span>
+                        </div>
                     </div>
                 </div>
-            </div> <!-- risk index -->
-            <div id="qa-empty"></div>
-            <div id="qa-qa-indicator">
-                <div id="qa-text" class="box-margin text-width box-alignment">
-                    Quality indicator
+            </div> <!-- security-summary -->
+            <br /><br />
+            <h2 class="clear">Quality summary</h2>
+            <div id="qa-summary">
+                <div id="qa-sum-text" class="text-margin">
+                    <span id="qa-defects-num" class="bold-num-b"></span> defects found in <span id="qa-loc-num" class="bold-num-b"></span>
+                    lines of code
                 </div>
-                <div id="qa-indicator" class="box-alignment">
-                    <div id="qa-indicator-num" class="bold-num-w centered number-box"></div>
-                    <div id="qa-indicator-legend" class="remove-top-gap">
-                        <img src="images/qa-legend.png" />
+                <div id="risk-empty"></div>
+                <div id="qa-risk">
+                    <div id="qa-risk-text" class="box-margin text-width box-alignment">
+                        Risk index
                     </div>
+                    <div id="qa-risk-index" class="box-alignment">
+                        <div id="qa-risk-num" class="bold-num-w centered number-box"></div>
+                        <div id="qa-risk-legend" class="remove-top-gap">
+                            <img src="images/risk-legend.png" />
+                        </div>
+                    </div>
+                </div> <!-- risk index -->
+                <div id="qa-empty"></div>
+                <div id="qa-qa-indicator">
+                    <div id="qa-text" class="box-margin text-width box-alignment">
+                        Quality indicator
+                    </div>
+                    <div id="qa-indicator" class="box-alignment">
+                        <div id="qa-indicator-num" class="bold-num-w centered number-box"></div>
+                        <div id="qa-indicator-legend" class="remove-top-gap">
+                            <img src="images/qa-legend.png" />
+                        </div>
+                    </div>
+                </div> <!-- quality indicator -->
+                <div id="effort-empty"></div>
+                <div id="qa-effort-target">
+                    <div id="qa-effort-text" class="box-margin text-width box-alignment">
+                        Effort to target
+                    </div>
+                    <div id="qa-effort" class="box-alignment">
+                        <div id="qa-effort-num" class="qa-vh bold-num-w centered number-box"></div>
+                    </div>
+                </div> <!-- effort to target -->
+                <div id="qa-dist" class="clear">
+                    Global indicator distribution: Efficiency <span id="efficiency-num" class="bold-num-blue"></span>
+                    Maintainabilty <span id="maintainabilty-num" class="bold-num-blue"></span>
+                    Portability <span id="portability-num" class="bold-num-blue"></span>
+                    Reliability <span id="reliability-num" class="bold-num-blue"></span>
+                    Security <span id="security-num" class="bold-num-blue"></span>
                 </div>
-            </div> <!-- quality indicator -->
-            <div id="effort-empty"></div>
-            <div id="qa-effort-target">
-                <div id="qa-effort-text" class="box-margin text-width box-alignment">
-                    Effort to target
-                </div>
-                <div id="qa-effort" class="box-alignment">
-                    <div id="qa-effort-num" class="qa-vh bold-num-w centered number-box"></div>
-                </div>
-            </div> <!-- effort to target -->
-            <div id="qa-dist" class="clear">
-                Global indicator distribution: Efficiency <span id="efficiency-num" class="bold-num-blue"></span>
-                Maintainabilty <span id="maintainabilty-num" class="bold-num-blue"></span>
-                Portability <span id="portability-num" class="bold-num-blue"></span>
-                Reliability <span id="reliability-num" class="bold-num-blue"></span>
-                Security <span id="security-num" class="bold-num-blue"></span>
-            </div>
-        </div> <!-- qa-summary -->
-        <br />
-        <a id="kiuwan-link" class="kiuwan-link" href="">
+            </div> <!-- qa-summary -->
+            <br />
+            <a target="_parent" rel="noopener noreferrer" id="kiuwan-link" class="kiuwan-link" href="">
                 See the details in Kiuwan
             </a>
-        </div> <!-- kiuwan-info -->
+        </div> <!-- kiuwan-info-tab -->
+    </div>
 </body>
 
 </html>
