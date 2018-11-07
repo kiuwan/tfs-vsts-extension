@@ -1,15 +1,15 @@
 {
     "manifestVersion": 1,
-    "id": "kiuwan-analysis-extension",
-    "name": "Kiuwan",
-    "version": "2.3.2",
+    "id": "kiuwan-analysis-extension-dev",
+    "name": "Kiuwan Dev",
+    "version": "2.3.58",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
         }
     ],
-    "public": true,
+    "public": false,
     "description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
     "content": {
         "details": {
@@ -128,10 +128,10 @@
                  "name": "Kiuwan Summary",
                  "uri": "kiuwanSummary.html",
                  "supportsTasks": [
-                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
-                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
-                   ],
-                "order": 20,
+                     "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
+                     "4e6e25e3-c0b5-4986-8714-5c751945c15f"
+                    ],
+                 "order": 20,
                  "height": 300
             }
         },

@@ -1,3 +1,4 @@
+node_modules.remove
 *.bak
 .git
 *.vsix
@@ -25,3 +26,5 @@ endpoin-definition.json
 sample.json
 _temp
 _tools
+**/*.js
+tsconfig.json.ok

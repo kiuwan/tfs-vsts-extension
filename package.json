@@ -4,18 +4,22 @@
   "description": "VSTS extension for Kiuwan written in Node.js",
   "main": "index.js",
   "scripts": {
+    "lint": "tslint --project",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
   "author": "Javier Salado",
   "license": "ISC",
   "dependencies": {
-    "vsts-task-lib": "^2.2.1"
+    "vsts-task-lib": "^2.2.1",
+    "@types/jquery": "^2.0.34",
+    "@types/q": "0.0.32"
   },
   "devDependencies": {
     "typescript": "^2.7.2",
     "@types/node": "^9.4.6",
     "@types/q": "^1.0.7",
+    "vss-web-extension-sdk": "^4.125.2",
     "vsts-task-tool-lib": "^0.4.1"
   }
 }

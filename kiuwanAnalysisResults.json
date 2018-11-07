@@ -1,0 +1,152 @@
+{
+    "name": "WebGoat.Net",
+    "description": "",
+    "label": "TFS Kiuwan ext 185",
+    "date": "2018-10-02T10:05:19Z",
+    "encoding": "UTF-8",
+    "applicationBusinessValue": "CRITICAL",
+    "applicationProvider": "Mels factory",
+    "applicationPortfolios": {
+        "Application Type": "Web",
+        "Functional": "Mortgage",
+        "Information sensitivity": "Secret",
+        "Dev Team": "Team C",
+        "Methodology": "RUP",
+        "Project Manager": "Jarry Fish",
+        "Country": "New Zealand",
+        "Mobile": "Not mobile"
+    },
+    "analysisCode": "A-7e2-16634286efa",
+    "analysisURL": "https://www.kiuwan.com/saas/web/dashboard/dashboard#$pe=application$sei=48899$mi=dashboard$ac=A-7e2-16634286efa",
+    "modelId": 33059,
+    "analysisBusinessValue": "CRITICAL",
+    "analysisProvider": "Mels factory",
+    "analysisPortfolios": {
+        "Application Type": "Web",
+        "Functional": "Mortgage",
+        "Information sensitivity": "Secret",
+        "Dev Team": "Team C",
+        "Methodology": "RUP",
+        "Project Manager": "Jarry Fish",
+        "Country": "New Zealand",
+        "Mobile": "Not mobile"
+    },
+    "analysisStatus": "FINISHED",
+    "languages": [
+        {
+            "name": "aspnet",
+            "size": 1291
+        },
+        {
+            "name": "csharp",
+            "size": 4085
+        },
+        {
+            "name": "javascript",
+            "size": 747
+        }
+    ],
+    "quality_model": ".Net model",
+    "ordered_by": "Jerry Fish",
+    "Risk index": {
+        "value": 99.99996989506818,
+        "children": [
+            {
+                "name": "Efficiency",
+                "value": 0.007901533516108117
+            },
+            {
+                "name": "Maintainability",
+                "value": 99.99999999999501
+            },
+            {
+                "name": "Portability",
+                "value": 0.0
+            },
+            {
+                "name": "Reliability",
+                "value": 0.2209570085761281
+            },
+            {
+                "name": "Security",
+                "value": 100.0
+            }
+        ]
+    },
+    "Quality indicator": {
+        "value": 42.71821429306999,
+        "children": [
+            {
+                "name": "Efficiency",
+                "value": 78.73986805526725
+            },
+            {
+                "name": "Maintainability",
+                "value": 17.162754110960357
+            },
+            {
+                "name": "Portability",
+                "value": 98.17071933802592
+            },
+            {
+                "name": "Reliability",
+                "value": 45.886551480213456
+            },
+            {
+                "name": "Security",
+                "value": 8.561761755800378
+            }
+        ]
+    },
+    "Effort to target": {
+        "value": 283.79999999999995,
+        "children": [
+            {
+                "name": "Efficiency",
+                "value": 1.2000000000000004
+            },
+            {
+                "name": "Maintainability",
+                "value": 162.85
+            },
+            {
+                "name": "Portability",
+                "value": 0.0
+            },
+            {
+                "name": "Reliability",
+                "value": 3.7
+            },
+            {
+                "name": "Security",
+                "value": 116.04999999999998
+            }
+        ]
+    },
+    "Main metrics": [
+        {
+            "name": "Duplicated code",
+            "value": 0.027922589832922208
+        },
+        {
+            "name": "Total defects",
+            "value": 1633.0
+        },
+        {
+            "name": "Very high defects",
+            "value": 88.0
+        },
+        {
+            "name": "Files",
+            "value": 222.0
+        },
+        {
+            "name": "Lines of code",
+            "value": 6123.0
+        },
+        {
+            "name": "Complexity",
+            "value": 2.68859649122807
+        }
+    ]
+}
