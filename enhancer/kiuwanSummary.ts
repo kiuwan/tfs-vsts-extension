@@ -24,10 +24,7 @@ export class KiuwanSummary extends Controls.BaseControl {
                 // Get Kiuwan analysis results from the server stored there as build attachment inthe artifacts directory
                 var taskClient = DT_Client.getClient();
                 taskClient.getPlanAttachments(vsoContext.project.id, "build", build.orchestrationPlan.planId, "Kiuwantask.Baseline.Results").then((taskAttachments) => {
-                    if (taskAttachments.length == 0) {
-                        this._element.find("#baseline-disclaimer").show();
-                    }
-                    else {
+                    if (taskAttachments.length !== 0) {
                         this._element.find("#kiuwan-summary-content").show();
                     }
                     $.each(taskAttachments, (index, taskAttachment) => {
@@ -47,12 +44,9 @@ export class KiuwanSummary extends Controls.BaseControl {
                         );
                     });
                 });
-                // CHeck for dlivery results
+                // Check for dlivery results
                 taskClient.getPlanAttachments(vsoContext.project.id, "build", build.orchestrationPlan.planId, "Kiuwantask.Delivery.Results").then((taskAttachments) => {
-                    if (taskAttachments.length == 0) {
-                        this._element.find("#audit-disclaimer").show();
-                    }
-                    else {
+                    if (taskAttachments.length !== 0) {
                         this._element.find("#kiuwan-audit-content").show();
                     }
                     $.each(taskAttachments, (index, taskAttachment) => {

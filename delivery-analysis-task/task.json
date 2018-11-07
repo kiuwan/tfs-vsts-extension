@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 2
+        "Patch": 6
     },
     "visibility": [
         "Build",
@@ -76,12 +76,12 @@
             "helpMarkDown": "Custom application name in Kiuwan to associate results to. It will be cautomatically created if it doesn't exist in your account."
         },
         {
-            "name": "analysislabel",
+            "name": "changerequest",
             "type": "string",
-            "label": "Analysis label",
-            "defaultValue": "",
+            "label": "Change request name",
+            "defaultValue": "$(Build.SourceBranchName)",
             "required": false,
-            "helpMarkDown": "A label to identify this analysis in Kiuwan. The build number is always appended to the specified label. if empty, the label will be the build number."
+            "helpMarkDown": "The Change Request name that the change we are analyzing belongs to.<br />Think of the change request as the project management object specifying the change requirements.<br />The CR concept does not belong the life cycle itself is a management concept."
         },
         {
             "name": "analysisscope",

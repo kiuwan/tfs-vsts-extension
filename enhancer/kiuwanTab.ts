@@ -209,7 +209,7 @@ export class KiuwanTab extends Controls.BaseControl {
             let efficiency = kiuwanJson["Quality indicator"].children[0].value.toFixed(2);
             this._element.find("#efficiency-num").text(efficiency);
             let maintainability = kiuwanJson["Quality indicator"].children[1].value.toFixed(2);
-            this._element.find("#maintainability-num").text(maintainability);
+            this._element.find("#maintainabilty-num").text(maintainability);
             let portability = kiuwanJson["Quality indicator"].children[2].value.toFixed(2);
             this._element.find("#portability-num").text(portability);
             let reliability = kiuwanJson["Quality indicator"].children[3].value.toFixed(2);
