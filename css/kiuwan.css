@@ -1,0 +1,126 @@
+.bold-num-b {
+    color: black;
+    font-weight: bold;
+}
+.bold-num-w {
+    color: white;
+    font-weight: bold;
+}
+.white {
+    color: white;
+}
+.bold-num-blue {
+    color: #42acc0;
+    font-weight: bold;
+}
+.sec-vh-vulns {
+    background-color: #c21b2c;
+}
+.sec-h-vulns {
+    background-color: #e34b1d;
+}
+.sec-n-vulns {
+    background-color: #e3971d;
+}
+.sec-l-vulns {
+    background-color: #e3d31d;
+}
+.risk-vh {
+    background-color: #cf3241;
+}
+.risk-h {
+    background-color: #d95d68;
+}
+.risk-n {
+    background-color: #e8a0a7;
+}
+.risk-l {
+    background-color: #ecc2c6;
+}
+.qa-vh {
+    background-color: #42acc0;
+}
+.qa-h {
+    background-color: #69bdcd;
+}
+.qa-n {
+    background-color: #a7d8e1;
+}
+.qa-l {
+    background-color: #c6e3e8;
+}
+.number-box {
+    height: 28px;
+    width: 158px;
+    padding-top: 5px;
+}
+.remove-top-gap {
+    margin-top: -3px;
+}
+.centered {
+    text-align: center;
+}
+.text-margin {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.box-margin {
+    margin-bottom: 35px;
+}
+.clear {
+    clear: both;
+}
+.text-width {
+    font-size: 14px;
+    padding-right: 15px;
+    padding-left: 30px;
+}
+.box-alignment {
+    float: left;
+}
+.kiuwan-link {
+    padding-top: 15px;
+    display: block;
+}
+.audit-result-text {
+    padding-left: 10px;
+    font-size: 40px;
+    font-weight: 300;
+}
+.align-bottom{
+    padding-top: 10px;
+}
+.audit-score-text {
+    padding-left: 45px;
+    font-size: 20px;
+    font-weight: 300;
+}
+.audit-score-num {
+    padding-left: 10px;
+    font-size: 30px;
+    font-weight: 300;
+}
+.fail {
+    color: #cf3241;
+}
+.success {
+    color: #66cc66;
+}
+.checkpoint-summary {
+    font-size: 19px;
+}.checkpoint {
+    padding-left: 30px;
+    font-size: 14px;
+    font-weight: lighter;
+}
+.hide {
+    display: none;
+}
+.kiuwan-subtitle {
+    font-size: 17px;
+    padding-bottom: 15px;
+}
+.kiuwan-text {
+    font-size: 14px;
+}
