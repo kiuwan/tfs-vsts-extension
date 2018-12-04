@@ -2,12 +2,12 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.2015.2",
+    "version": "2.2015.3",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
             "id": "Microsoft.TeamFoundation.Server",
-            "version": "[15.2,15.4)"
+            "version": "[14.2,14.4]"
         }
     ],
     "public": true,
