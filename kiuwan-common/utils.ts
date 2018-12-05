@@ -298,6 +298,26 @@ export function getKiuwanRetMsg(kiuwanRetCode: Number): string {
             kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: Application already exists`;
             break;
         }
+        case 30: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: Delivery analysis not permitted: baseline analysis not found. A delivery analysis is being executed but there's not any baseline analysis for that application.`;
+            break;
+        }
+        case 31: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: No engine available. The analysis fails because there's no any available engine to process the source files. This situation is very unusual but could be produced because the upgrade failed due to some blocking situation.`;
+            break;
+        }
+        case 32: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: 	Unexpected error. Contact Kiuwan Technical Support.`;
+            break;
+        }
+        case 33: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: Out of Memory. The analysis fails because the configured max memory is not enough to finish the analysis.`;
+            break;
+        }
+        case 34: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: JVM Error. Error at JVM level. Contact Kiuwan Technical Support.`;
+            break;
+        }
         default: {
             kiuwanErrorMsg = `KLA returned ${kiuwanRetCode} Analysis finished successfully!`;
         }
