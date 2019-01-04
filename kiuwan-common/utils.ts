@@ -4,36 +4,36 @@ import trm = require('vsts-task-lib/toolrunner');
 import path = require('path');
 import fs = require('fs');
 import https = require('https');
+import http = require('http');
+import { Url } from 'url';
 import { _exist } from 'vsts-task-lib/internal';
 
-export async function getLastDeliveryResults(kiuwanHost: string, kiuwanUser: string, kiuwanPassword: string, appName: string, changeRequest: string, deliveryLabel: string) {
+export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, kiuwanEndpoint: string) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
-    const encodedPath = encodeURI(`/saas/rest/v1/apps/${appName}/deliveries?changeRequest=${changeRequest}&label=${deliveryLabel}`);
+    const encodedPath = encodeURI(kiuwanEndpoint);
 
-    const options: https.RequestOptions = {
-        host: kiuwanHost,
+    var options: https.RequestOptions | http.RequestOptions;
+    var host = ( kiuwanUrl.host.indexOf(':') == -1) ? kiuwanUrl.host : kiuwanUrl.host.substring(0,kiuwanUrl.host.indexOf(':'));
+    tl.debug(`[KW] Host: ${host}`);
+     options = {
+        protocol: kiuwanUrl.protocol,
+        host: host,
+        port: kiuwanUrl.port,
         path: encodedPath,
         method: method,
+        rejectUnauthorized: false,
         auth: auth
     }
 
-    return callKiuwanApi(options);
-}
+    tl.debug(`[KW] kiuwan API call: ${kiuwanUrl.protocol}//${kiuwanUrl.host}${encodedPath}`);
 
-export async function getLastAnalysisResults(kiuwanHost: string, kiuwanUser: string, kiuwanPassword: string, appName: string) {
-    const method = 'GET';
-    const auth = `${kiuwanUser}:${kiuwanPassword}`;
-    const encodedPath = encodeURI(`/saas/rest/v1/apps/${appName}`);
-
-    const options: https.RequestOptions = {
-        host: kiuwanHost,
-        path: encodedPath,
-        method: method,
-        auth: auth
+    if (kiuwanUrl.protocol === 'http:') {
+        return callKiuwanApiHttp(options);
     }
-
-    return callKiuwanApi(options);
+    if (kiuwanUrl.protocol === 'https:') {
+        return callKiuwanApiHttps(options);
+    }
 }
 
 export function saveKiuwanResults(result: string, type: string): string {
@@ -86,13 +86,47 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
     tl.debug('[KW] Results uploaded successfully')
 }
 
-async function callKiuwanApi(options: https.RequestOptions) {
-    tl.debug("[KW] Calling Kiuwan API");
+async function callKiuwanApiHttps(options: https.RequestOptions) {
+    tl.debug("[KW] Calling Kiuwan API with HTTPS");
 
     let responseString = '';
 
     return new Promise((resolve, reject) => {
         let req = https.request(options, function (res) {
+            res.setEncoding('utf-8');
+
+            res.on('data', function (data) {
+                responseString += data;
+            });
+
+            res.on('end', function () {
+                resolve(responseString);
+            });
+
+            if (res.statusCode != 200) {
+                reject(new Error(`Kiuwan call error (${res.statusCode}): ' + ${res.statusMessage}`));
+            }
+
+            res.on('error', function (error) {
+                reject(new Error(`Response error: ${error}`));
+            })
+        });
+
+        req.on('error', (e) => {
+            reject(new Error(`Kiuwan API request error: ${e}`));
+        });
+
+        req.end();
+    });
+}
+
+async function callKiuwanApiHttp(options: http.RequestOptions) {
+    tl.debug("[KW] Calling Kiuwan API HTTP");
+
+    let responseString = '';
+
+    return new Promise((resolve, reject) => {
+        let req = http.request(options, function (res) {
             res.setEncoding('utf-8');
 
             res.on('data', function (data) {
@@ -296,6 +330,26 @@ export function getKiuwanRetMsg(kiuwanRetCode: Number): string {
         }
         case 28: {
             kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: Application already exists`;
+            break;
+        }
+        case 30: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: Delivery analysis not permitted: baseline analysis not found. A delivery analysis is being executed but there's not any baseline analysis for that application.`;
+            break;
+        }
+        case 31: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: No engine available. The analysis fails because there's no any available engine to process the source files. This situation is very unusual but could be produced because the upgrade failed due to some blocking situation.`;
+            break;
+        }
+        case 32: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: 	Unexpected error. Contact Kiuwan Technical Support.`;
+            break;
+        }
+        case 33: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: Out of Memory. The analysis fails because the configured max memory is not enough to finish the analysis.`;
+            break;
+        }
+        case 34: {
+            kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: JVM Error. Error at JVM level. Contact Kiuwan Technical Support.`;
             break;
         }
         default: {

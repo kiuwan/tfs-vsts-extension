@@ -2,11 +2,15 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.3.2",
+    "version": "2.3.8",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
-            "id": "Microsoft.VisualStudio.Services"
+            "id": "Microsoft.VisualStudio.Services.Cloud"
+        },
+        {
+            "id": "Microsoft.TeamFoundation.Server",
+            "version": "[15.0,)"
         }
     ],
     "public": true,
@@ -180,9 +184,8 @@
                 "displayName": "Kiuwan Platform",
                 "url": {
                     "displayName": "Kiuwan URL",
-                    "value": "https://www.kiuwan.com/",
-                    "isVisible": true,
-                    "helpText": "For the cloud Kiuwan Service use: https://www.kiuwan.com This is the default.</br>For Kiuwan Enterprise on-premises use your Kiuwan server URL (i.e. http://kiuwan.mycompany.com)."
+                    "helpText": "For the cloud Kiuwan Service use: https://www.kiuwan.com This is the default.</br>For Kiuwan Enterprise on-premises use your Kiuwan server URL (i.e. http://kiuwan.mycompany.com).",
+                    "isVisible": true
                 },
                 "dataSources": [
                     {

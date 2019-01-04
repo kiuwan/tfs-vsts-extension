@@ -5,7 +5,7 @@ You can, as well, define a Kiuwan service endpoint. This will allow you to store
 
 ## What you need to know before installing it ##
 
-**NOTE: For TFS 2015 (update 2 and up) you need version 2.2015.1 of the extension. You can [download a zip file with the VSIX file](https://www.kiuwan.com/pub/tfs2015/kiuwan-publisher.kiuwan-analysis-extension-2.2015.1.vsix.zip) from Kiuwan**
+**NOTE: For TFS 2015 (update 2 and up) you need version 2.2015.1 of the extension. You can [download a zip file with the VSIX file](https://www.kiuwan.com/pub/tfs2015/kiuwan-publisher.kiuwan-analysis-extension-2.2015.4.vsix.zip) from Kiuwan**
 
 This extension works with the Kiuwan Application Security platform. So you need a Kiuwan account in our cloud service, or an on-premises installation of the Kiuwan platform, to use it.
 
