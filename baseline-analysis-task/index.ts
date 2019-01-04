@@ -6,6 +6,7 @@ import {
     downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
     getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults
 } from 'kiuwan-common/utils';
+import { debug } from 'vsts-task-tool-lib';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -57,8 +58,10 @@ async function run() {
         timeout = timeout * 60000
         let dbanalysis = tl.getBoolInput('dbanalysis');
         if (dbanalysis) {
-            let dbtechnology = tl.getInput('dbtchenology');
-            technologies += dbtechnology;
+            let dbtechnology = tl.getInput('dbtechnology');
+            technologies += ',' + dbtechnology;
+            debug(`Including database technology: ${dbtechnology}`);
+            debug(`Analyzing technologies: ${technologies}`);
         }
 
         // Get the Kiuwan connection URL for API Calls based on the Kiuwan connection service nane selected in the task
@@ -66,7 +69,7 @@ async function run() {
 
         // For DEBUG mode only since we dont have a TFS EndpointUrl object available
         // let kiuwanUrl: url.UrlWithStringQuery = url.parse("https://www.kiuwan.com/");
-        let kiuwanUrl = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
+        let kiuwanUrl : url.Url = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
 
         // Get the Kiuwan connection service authorization
         let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
@@ -160,11 +163,13 @@ async function run() {
         console.log(`[KW] Running Kiuwan analysis: ${kla} ${klaArgs}`);
 
         let kiuwanRetCode: Number = await runKiuwanLocalAnalyzer(kla, klaArgs);
+        // let kiuwanRetCode = 0;
 
         let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
         
         if (kiuwanRetCode === 0) {
-            let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl.host, kiuwanUser, kiuwanPasswd, projectName);
+            let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}`;
+            let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanEndpoint);
 
             tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
 

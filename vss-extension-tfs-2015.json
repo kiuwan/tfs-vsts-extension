@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan analysis",
-    "version": "2.2015.3",
+    "version": "2.2015.4",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -59,7 +59,6 @@
         "SCA"
     ],
     "scopes": [
-        "vso.work",
         "vso.code",
         "vso.project",
         "vso.symbols",
@@ -113,8 +112,6 @@
                 "displayName": "Kiuwan Platform",
                 "url": {
                     "displayName": "Kiuwan URL",
-                    "value": "https://www.kiuwan.com/",
-                    "isVisible": true,
                     "helpText": "For the cloud Kiuwan Service use: https://www.kiuwan.com This is the default.</br>For Kiuwan Enterprise on-premises use your Kiuwan server URL (i.e. http://kiuwan.mycompany.com)."
                 },
                 "dataSources": [

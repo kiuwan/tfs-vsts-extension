@@ -1,8 +1,10 @@
 import os = require('os');
 import url = require('url');
 import tl = require('vsts-task-lib/task');
-import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed, getLastDeliveryResults, saveKiuwanResults, uploadKiuwanResults, noFilesToAnalyze } from 'kiuwan-common/utils';
+import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed, getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults, noFilesToAnalyze } from 'kiuwan-common/utils';
 import { _exist } from 'vsts-task-lib/internal';
+import { debug } from 'vsts-task-tool-lib';
+import { isUndefined } from 'util';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -50,8 +52,10 @@ async function run() {
         timeout = timeout * 60000
         let dbanalysis = tl.getBoolInput('dbanalysis');
         if (dbanalysis) {
-            let dbtechnology = tl.getInput('dbtchenology');
-            technologies += dbtechnology;
+            let dbtechnology = tl.getInput('dbtechnology');
+            technologies += ',' + dbtechnology;
+            debug(`Including database technology: ${dbtechnology}`);
+            debug(`Analyzing technologies: ${technologies}`);
         }
 
         // Get the Kiuwan connection service authorization
@@ -59,7 +63,7 @@ async function run() {
 
         // For DEBUG mode only since we dont have a TFS EndpointUrl object available
         // let kiuwanUrl = url.parse("https://www.kiuwan.com/");
-        let kiuwanUrl = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
+        let kiuwanUrl: url.Url = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
 
         let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
         // Get user and password from variables defined in the build, otherwise get them from
@@ -90,7 +94,9 @@ async function run() {
          * PullRequest: The build was triggered by a Git branch policy that requires a build.
          * BuildCompletion: The build was triggered by another build
          **/
-        let buildReason = tl.getVariable("Build.Reason");
+        let buildReason = isUndefined( tl.getVariable("Build.Reason") ) ? "Manual" : tl.getVariable("Build.Reason");
+
+        console.log(`BuildReason: ${buildReason}`);
 
         // Build.Repository.Provider possible values: TfsGit, TfsVersionControl, Git, GitHub, Svn
         let repositoryType = tl.getVariable("Build.Repository.Provider");
@@ -222,7 +228,8 @@ async function run() {
         let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
 
         if (kiuwanRetCode === 0 || auditFailed(kiuwanRetCode)) {
-            let kiuwanDeliveryResult = await getLastDeliveryResults(kiuwanUrl.host, kiuwanUser, kiuwanPasswd, projectName, changeRequest, deliveryLabel);
+            let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}/deliveries?changeRequest=${changeRequest}&label=${deliveryLabel}`;
+            let kiuwanDeliveryResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanEndpoint);
 
             tl.debug(`[KW] Result of last delivery for ${projectName}: ${kiuwanDeliveryResult}`);
 
