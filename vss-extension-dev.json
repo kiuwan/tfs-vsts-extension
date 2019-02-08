@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension-dev",
     "name": "Kiuwan Dev",
-    "version": "2.3.64",
+    "version": "2.3.87",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -10,7 +10,7 @@
         },
         {
             "id": "Microsoft.TeamFoundation.Server",
-            "version": "[15.0,)"
+            "version": "[14.2,)"
         }
     ],
     "public": false,
@@ -91,6 +91,9 @@
             "addressable": true
         },
         {
+            "path": "kiuwan-common"
+        },
+        {
             "path": "baseline-analysis-task"
         },
         {
@@ -105,7 +108,7 @@
             "path": "node_modules/vss-web-extension-sdk/lib",
             "addressable": true,
             "packagePath": "lib"
-        }        
+        }
     ],
     "contributions": [
         {
@@ -189,12 +192,12 @@
                 "dataSources": [
                     {
                         "name": "TestConnection",
-                        "endpointUrl": "{{endpoint.url}}saas/rest/v1/info",
+                        "endpointUrl": "saas/rest/v1/info",
                         "resultSelector": "jsonpath:$.username"
                     },
                     {
                         "name": "ListApplications",
-                        "endpointUrl": "{{endpoint.url}}saas/rest/v1/apps/list",
+                        "endpointUrl": "saas/rest/v1/apps/list",
                         "resultSelector": "jsonpath:$[*].name"
                     }
                 ],

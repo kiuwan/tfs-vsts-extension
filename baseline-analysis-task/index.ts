@@ -4,7 +4,8 @@ import tl = require('vsts-task-lib/task');
 import {
     buildKlaCommand, setAgentTempDir, setAgentToolsDir,
     downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
-    getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults
+    getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults,
+    isBuild
 } from 'kiuwan-common/utils';
 import { debug } from 'vsts-task-tool-lib';
 
@@ -21,6 +22,16 @@ if (!agentToolsDir) {
 const toolName = 'KiuwanLocalAnalyzer';
 const toolVersion = '1.0.0';
 
+function getPathSeparator(os: string) {
+    let sep: string = "\\";
+
+    if (!os.startsWith("win")) {
+        sep = "/";
+    }
+
+    return sep;
+}
+
 async function run() {
     try {
         // Default technologies to analyze
@@ -28,10 +39,16 @@ async function run() {
 
         // Get the values from the task's inputs bythe user
         let analysisLabel = tl.getInput('analysislabel');
+        if (analysisLabel === null || analysisLabel === undefined) {
+            analysisLabel = "";
+        }
 
         let includeinsight = tl.getBoolInput('includeinsight');
+
         let skipclones = tl.getBoolInput('skipclones');
+
         let skiparch = tl.getBoolInput('skiparch');
+
         let ignoreclause: string = "";
         if (skipclones) {
             ignoreclause = "ignore=clones";
@@ -47,15 +64,29 @@ async function run() {
         }
 
         let encoding = tl.getInput('encoding');
+        if (encoding === null) {
+            encoding = "UTF-8";
+        }
+
         let includePatterns = tl.getInput('includepatterns');
         if (includePatterns === null) {
             includePatterns = "**/*";
         }
+
         let excludePatterns = tl.getInput('excludepatterns');
+        if (excludePatterns === null) {
+            excludePatterns = "";
+        }
+
         let memory = tl.getInput('memory');
+        if (memory === null) {
+            memory = "1024";
+        }
         memory += 'm';
-        let timeout = Number(tl.getInput('timeout'));
-        timeout = timeout * 60000
+
+        let timeout = tl.getInput('timeout') === null ? Number('60') : Number(tl.getInput('timeout'));
+        timeout = timeout * 60000;
+
         let dbanalysis = tl.getBoolInput('dbanalysis');
         if (dbanalysis) {
             let dbtechnology = tl.getInput('dbtechnology');
@@ -69,7 +100,7 @@ async function run() {
 
         // For DEBUG mode only since we dont have a TFS EndpointUrl object available
         // let kiuwanUrl: url.UrlWithStringQuery = url.parse("https://www.kiuwan.com/");
-        let kiuwanUrl : url.Url = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
+        let kiuwanUrl: url.Url = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
 
         // Get the Kiuwan connection service authorization
         let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
@@ -86,6 +117,7 @@ async function run() {
 
         // Get other relevant Variables from the task
         let buildNumber = tl.getVariable('Build.BuildNumber');
+        let sourceBranchName = tl.getVariable('Build.SourceBranchName');
         // Now the project name may come from different sources
         // the System.TeamProject variable, an existing Kiuwan app name or a new one
         let projectSelector = tl.getInput('projectnameselector');
@@ -104,33 +136,34 @@ async function run() {
         }
 
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
+        if (!isBuild()) {
+            // This means the task is running from a release pipeline
+            console.log(`[KW] This is a release.`);
+            // We assume that the task is executed in a Release pipeline and construct the sourceDirectory 
+            // with the Agent release directory and the Primary Artifact's source alias
+            let primaryArtifactSourceAlias = tl.getVariable('Release.PrimaryArtifactSourceAlias');
+
+            if (primaryArtifactSourceAlias === undefined) {
+                console.log("[KW] Release.PrimaryArtifactSourceAlias not set... Trying to use the the project name as artifact alias to build the source path");
+                primaryArtifactSourceAlias = tl.getVariable('Build.ProjectName');
+            }
+            sourceDirectory = tl.getVariable('Agent.ReleaseDirectory') +
+                getPathSeparator(osPlat) +
+                primaryArtifactSourceAlias;
+        }
+        console.log(`[KW] Kiuwan sourcecode directory: ${sourceDirectory}`);
+
         let agentName = tl.getVariable('Agent.Name');
 
         let kla = 'Not installed yet';
 
-        // We treat al agents equal now:
-        // Check if the KLA is already installed, either because the KIUWAN_HOME variable
-        // is set or because it was installed by a previous task execution.
-        var kiuwanHome: string;
-        kiuwanHome = tl.getVariable('KIUWAN_HOME');
+        // We treat all agents equal now:
+        // Check if the KLA is already installed in the Agent tools directory from a previosu task run
+        // It will download and install it in the Agent Tools directory if not found
+        let klaInstallPath = await downloadInstallKla(kiuwanConnection, toolName, toolVersion, osPlat);
 
-        console.log(`[KW] Running on Agent: ${agentName} (${osPlat})`);
-
-        if (kiuwanHome !== undefined && kiuwanHome !== "") {
-            let klaDefaultPath = 'KiuwanLocalAnalyzer';
-            let hasDefaultPath = kiuwanHome.endsWith(klaDefaultPath);
-            console.log(`[KW] KIUWAN_HOME env variable defined: ${kiuwanHome}`);
-            kiuwanHome = hasDefaultPath ? kiuwanHome.substring(0, kiuwanHome.lastIndexOf(klaDefaultPath)) : kiuwanHome;
-            kla = await buildKlaCommand(kiuwanHome, osPlat);
-        }
-        else {
-            // Check if it is installed in the Agent tools directory from a previosu task run
-            // It will download and install it in the Agent Tools directory if not found
-            let klaInstallPath = await downloadInstallKla(kiuwanConnection, toolName, toolVersion, osPlat);
-
-            // Get the appropriate kla command depending on the platform
-            kla = await buildKlaCommand(klaInstallPath, osPlat);
-        }
+        // Get the appropriate kla command depending on the platform
+        kla = await buildKlaCommand(klaInstallPath, osPlat);
 
         let advancedArgs = "";
         let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');;
@@ -149,7 +182,7 @@ async function run() {
         let klaArgs: string =
             `-n "${projectName}" ` +
             `-s "${sourceDirectory}" ` +
-            `-l "${analysisLabel} ${buildNumber}" ` +
+            `-l "${analysisLabel} ${sourceBranchName} ${buildNumber}" ` +
             '-c ' +
             '-wr ' +
             `--user ${kiuwanUser} ` +
@@ -166,18 +199,24 @@ async function run() {
         // let kiuwanRetCode = 0;
 
         let kiuwanMsg: string = getKiuwanRetMsg(kiuwanRetCode);
-        
+
         if (kiuwanRetCode === 0) {
-            let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}`;
-            let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanEndpoint);
+            if (!isBuild()) {
+                console.log("[KW] this is a release, we don't need to get the results");
+                tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg + ", Results uploaded to Kiuwan. Go check!");
+            }
+            else {
+                let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}`;
+                let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanEndpoint);
 
-            tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
+                tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
 
-            const kiuwanResultsPath = saveKiuwanResults(`${kiuwanAnalysisResult}`, "baseline");
+                const kiuwanResultsPath = saveKiuwanResults(`${kiuwanAnalysisResult}`, "baseline");
 
-            uploadKiuwanResults(kiuwanResultsPath, 'Kiuwan Baseline Results', "baseline");
+                uploadKiuwanResults(kiuwanResultsPath, 'Kiuwan Baseline Results', "baseline");
 
-            tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg + ", Results uploaded.");
+                tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg + ", Results uploaded.");
+            }
         }
         else {
             tl.setResult(tl.TaskResult.Failed, kiuwanMsg);

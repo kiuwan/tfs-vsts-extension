@@ -9,11 +9,10 @@
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 22
+        "Patch": 33
     },
     "visibility": [
-        "Build",
-        "Release"
+        "Build"
     ],
     "runsOn": [
         "Agent"

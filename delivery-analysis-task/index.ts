@@ -1,7 +1,7 @@
 import os = require('os');
 import url = require('url');
 import tl = require('vsts-task-lib/task');
-import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed, getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults, noFilesToAnalyze } from 'kiuwan-common/utils';
+import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed, getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults, noFilesToAnalyze, isBuild } from 'kiuwan-common/utils';
 import { _exist } from 'vsts-task-lib/internal';
 import { debug } from 'vsts-task-tool-lib';
 import { isUndefined } from 'util';
@@ -19,6 +19,18 @@ if (!agentToolsDir) {
 const toolName = 'KiuwanLocalAnalyzer';
 const toolVersion = '1.0.0';
 
+const inBuild = isBuild();
+console.log(`[KW] in build?: ${inBuild}`);
+
+if (inBuild) {
+    console.log('[KW] Running build logic...');
+    run();
+}
+else {
+    console.log('[KW] Running release logic... Exisiting, basically!');
+    exit();
+}
+
 async function run() {
     try {
         // Default technologies to analyze
@@ -26,10 +38,16 @@ async function run() {
 
         // Get the values from the task's inputs by the user
         let changeRequest = tl.getInput('changerequest');
+        if (changeRequest === null) {
+            changeRequest = "";
+        }
+
         let failOnAudit = tl.getBoolInput('failonaudit');
+
         let failOnNoFiles = tl.getBoolInput('failonnofiles');
 
         let skipclones = tl.getBoolInput('skipclones');
+
         let ignoreclause: string = "";
         if (skipclones) {
             ignoreclause = "ignore=clones,architecture,insights";
@@ -39,17 +57,33 @@ async function run() {
         }
 
         let analysisScope = tl.getInput('analysisscope');
+
         let crStatus = tl.getInput('crstatus');
+
         let encoding = tl.getInput('encoding');
+        if (encoding === null) {
+            encoding = "UTF-8";
+        }
+
         let includePatterns = tl.getInput('includepatterns');
         if (includePatterns === null) {
             includePatterns = "**/*";
         }
+
         let excludePatterns = tl.getInput('excludepatterns');
+        if (excludePatterns === null) {
+            excludePatterns = "";
+        }
+
         let memory = tl.getInput('memory');
+        if (memory === null) {
+            memory = "1024";
+        }
         memory += 'm';
-        let timeout = Number(tl.getInput('timeout'));
-        timeout = timeout * 60000
+
+        let timeout = tl.getInput('timeout') === null ? Number('60') : Number(tl.getInput('timeout'));
+        timeout = timeout * 60000;
+
         let dbanalysis = tl.getBoolInput('dbanalysis');
         if (dbanalysis) {
             let dbtechnology = tl.getInput('dbtechnology');
@@ -94,7 +128,7 @@ async function run() {
          * PullRequest: The build was triggered by a Git branch policy that requires a build.
          * BuildCompletion: The build was triggered by another build
          **/
-        let buildReason = isUndefined( tl.getVariable("Build.Reason") ) ? "Manual" : tl.getVariable("Build.Reason");
+        let buildReason = isUndefined(tl.getVariable("Build.Reason")) ? "Manual" : tl.getVariable("Build.Reason");
 
         console.log(`BuildReason: ${buildReason}`);
 
@@ -168,26 +202,12 @@ async function run() {
         let kla = 'Not installed yet';
 
         // We treat al agents equal now:
-        // Check if the KLA is already installed, either because the KIUWAN_HOME variable
-        // is set or because it was installed by a previous task execution.
-        var kiuwanHome: string;
-        kiuwanHome = tl.getVariable('KIUWAN_HOME');
+        // Check if the KLA is already installed in the Agent tools directory from a previosu task run
+        // It will download and install it in the Agent Tools directory if not found
+        let klaInstallPath = await downloadInstallKla(kiuwanConnection, toolName, toolVersion, osPlat);
 
-        if (kiuwanHome !== undefined && kiuwanHome !== "") {
-            let klaDefaultPath = 'KiuwanLocalAnalyzer';
-            let hasDefaultPath = kiuwanHome.endsWith(klaDefaultPath);
-            console.log(`Kiuwan_HOME env variable defined: ${kiuwanHome}`);
-            kiuwanHome = hasDefaultPath ? kiuwanHome.substring(0, kiuwanHome.lastIndexOf(klaDefaultPath)) : kiuwanHome;
-            kla = await buildKlaCommand(kiuwanHome, osPlat);
-        }
-        else {
-            // Check if it is installed in the Agent tools directory from a previosu task run
-            // It will download and install it in the Agent Tools directory if not found
-            let klaInstallPath = await downloadInstallKla(kiuwanConnection, toolName, toolVersion, osPlat);
-
-            // Get the appropriate kla command depending on the platform
-            kla = await buildKlaCommand(klaInstallPath, osPlat);
-        }
+        // Get the appropriate kla command depending on the platform
+        kla = await buildKlaCommand(klaInstallPath, osPlat);
 
         let advancedArgs = "";
         let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');
@@ -261,4 +281,6 @@ async function run() {
     }
 }
 
-run();
+async function exit() {
+    tl.setResult(tl.TaskResult.SucceededWithIssues, "This task is for build pipelines only. Skipped...")
+}

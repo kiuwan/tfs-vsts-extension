@@ -2,14 +2,14 @@
     "id": "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
     "name": "kiuwan-baseline-analysis-task",
     "friendlyName": "Kiuwan Baseline Analysis",
-    "description": "Run a Kiuwan baseline Kiuwan analysis on the source code extracted by the build configuration.",
-    "helpMarkDown": "WARNING: To use this build task you need to have valid credentials to a Kiuwan account.",
+    "description": "Run a Kiuwan baseline Kiuwan analysis on the source code extracted by the build or release configuration.",
+    "helpMarkDown": "WARNING: To use this build task you need to have valid credentials to a Kiuwan account.<br />If used in a release pipeline, you need to define the primary artifact that points the source code to be analyzed.",
     "category": "Build",
     "author": "Javier Salado",
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 22
+        "Patch": 33
     },
     "visibility": [
         "Build",
@@ -81,7 +81,7 @@
             "label": "Analysis label",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "A label to identify this analysis in Kiuwan. The build number is always appended to the specified label. if empty, the label will be the build number."
+            "helpMarkDown": "A label to identify this analysis in Kiuwan. The branch name and build number are always appended to the specified label. if empty, the label will be the branch name and build number."
         },
         {
             "name": "includeinsight",

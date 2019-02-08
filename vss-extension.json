@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.3.8",
+    "version": "2.3.15",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -10,7 +10,7 @@
         },
         {
             "id": "Microsoft.TeamFoundation.Server",
-            "version": "[15.0,)"
+            "version": "[14.2,)"
         }
     ],
     "public": true,
@@ -190,12 +190,12 @@
                 "dataSources": [
                     {
                         "name": "TestConnection",
-                        "endpointUrl": "{{endpoint.url}}saas/rest/v1/info",
+                        "endpointUrl": "saas/rest/v1/info",
                         "resultSelector": "jsonpath:$.username"
                     },
                     {
                         "name": "ListApplications",
-                        "endpointUrl": "{{endpoint.url}}saas/rest/v1/apps/list",
+                        "endpointUrl": "saas/rest/v1/apps/list",
                         "resultSelector": "jsonpath:$[*].name"
                     }
                 ],
