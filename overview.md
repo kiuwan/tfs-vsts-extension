@@ -1,17 +1,15 @@
-The Kiuwan extension for FTS and VSTS includes 2 new build tasks to run Kiuwan analyses as part of your application builds. In this latest version we have added visual extensions to show results in the build's summary tab and specific Kiuwan tabs with more result details of baselina and delivery analyses. Including links to go to see the full reports in Kiuwan directly from the build screens.
+The Kiuwan extension for Azure DevOps and Azure DevOps Server includes 2 build tasks to run Kiuwan analyses as part of your application builds. In this latest version we have added visual extensions to show results in the build's summary tab and specific Kiuwan tabs with more result details of baselina and delivery analyses. Including links to go to see the full reports in Kiuwan directly from the build screens.
 
 You can, as well, define a Kiuwan service endpoint. This will allow you to store you Kiuwan credentials at the project level. At the same time this service endpoint allows the extension to get information from your Kiuwan account to provide new exciting features and more to come.
 
 
 ## What you need to know before installing it ##
 
-**NOTE: For TFS 2015 (update 2 and up) you need version 2.2015.1 of the extension. You can [download a zip file with the VSIX file](https://www.kiuwan.com/pub/tfs2015/kiuwan-publisher.kiuwan-analysis-extension-2.2015.4.vsix.zip) from Kiuwan**
-
 This extension works with the Kiuwan Application Security platform. So you need a Kiuwan account in our cloud service, or an on-premises installation of the Kiuwan platform, to use it.
 
-The included build tasks will work on Windows, Linux or MacOS TFS agents and VSTS private or hosted Windows, Linux and MacOS agents.
+The included build tasks will work on Windows, Linux or MacOS Azure DevOps Server (former TFS) agents and Azure DevOps private or hosted Windows, Linux and MacOS agents.
 
-For TFS and VSTS private agents, you don't need to pre-install the Kiuwan Local Analyzer (KLA). The first time you run a Kiuwan task the KLA will be downloaded and installed in the agent tools directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation. However, if you tighter control, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME environment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer).
+For Azure DevOps Server and Azure DevOps private agents, you don't need to pre-install the Kiuwan Local Analyzer (KLA). The first time you run a Kiuwan task the KLA will be downloaded and installed in the agent tools directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation. However, if you tighter control, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME environment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer).
 
 If the Agent.TempDirectory and the the Agent.ToolsDirectory variables are not set in your private agents they are set by the build tasks to ${Agent.HomeDirectory}/_temp and ${Agent.ToolsDirectory}/_tools respectively for the tasks to work properly.
 
@@ -21,7 +19,7 @@ For hosted agents (that are spawned dynamically), the KLA is downloaded and inst
 
 A service endpoint type and 2 build tasks. One to run Kiuwan baseline analyses to analyze your releases. And one to run Kiuwan delivery analyses for your change or pull requests.
 
-- **New Service Endpoint type.** To connect to the Kiuwan platform form TFS/VSTS. Now you can define a new service endpoint to the Kiuwan platform. You just need to select the Kiuwan Platform service connection type from the "New Service Endpoint" pulldown in the TFS/VSTS Services configuration tab.
+- **New Service Endpoint type.** To connect to the Kiuwan platform form Azure DevOps Server and Azure DevOps. Now you can define a new service endpoint to the Kiuwan platform. You just need to select the Kiuwan Platform service connection type from the "New Service Endpoint" pulldown in the Azure DevOps Server and Azure DevOps Services configuration tab.
 
 <img src="https://www.kiuwan.com/wp-content/uploads/2018/03/vsts-services.png">
 

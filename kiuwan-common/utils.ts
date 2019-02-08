@@ -8,6 +8,16 @@ import http = require('http');
 import { Url } from 'url';
 import { _exist } from 'vsts-task-lib/internal';
 
+export function isBuild(): boolean {
+    let s = tl.getVariable("System.HostType");
+    if (s === "build") {
+        return true;
+    }
+    else { // For any other value, 'release' or 'deployent', and even undefined we assume is not a build
+        return false;
+    }
+}
+
 export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, kiuwanEndpoint: string) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
