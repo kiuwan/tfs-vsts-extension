@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 33
+        "Patch": 36
     },
     "visibility": [
         "Build",
@@ -92,6 +92,22 @@
             "helpMarkDown": "Insights is the Kiuwan SCA product<br />This anaysis will give you the risk exposure to open source libraries used in your application<br />Applies only to Kiuwan accounts with the Insights module."
         },
         {
+            "name": "uploadsnippets",
+            "type": "boolean",
+            "label": "Upload code fragments of defects found?",
+            "defaultValue": true,
+            "required": true,
+            "helpMarkDown": "Upload the code found in the line of code where vulnerabilities and defects are. Only one single line out of context"
+        },
+        {
+            "name": "uploadfiles",
+            "type": "boolean",
+            "label": "Upload analyzed source code files?",
+            "defaultValue": false,
+            "required": true,
+            "helpMarkDown": "WARNING: This options requires that Kiuwan support enables this option in your account. With the option enabled, setting it to true will upload the files with defects to Kiuwan to browse defects and vulnerabilities within the whole source code context in the Kiuwan. If the option is not enabled in the Kiuwan account this check has no effect."
+        },
+        {
             "name": "skipclones",
             "type": "boolean",
             "label": "Skip duplication of code analysis?",
@@ -99,15 +115,6 @@
             "required": true,
             "groupName": "security",
             "helpMarkDown": "Skipping the duplicated code analysis is recommended for code security analysis only.<br />For Kiuwan accounts with the Code Analysis module we recommend to leave this unchecked."
-        },
-        {
-            "name": "skiparch",
-            "type": "boolean",
-            "label": "Skip architecture analysis?",
-            "defaultValue": true,
-            "required": true,
-            "groupName": "security",
-            "helpMarkDown": "Skipping the architecture code analysis is recommended for code security analysis only.<br />Applies only to Kiuwan accounts with the Architecture module."
         },
         {
             "name": "overridedotkiuwan",

@@ -112,6 +112,8 @@ async function run() {
         }
 
         // Get other relevant Variables from the task
+        let uploadsnippets = tl.getBoolInput('uploadsnippets');
+        let uploadfiles = tl.getBoolInput('uploadfiles');
         let buildNumber = tl.getVariable('Build.BuildNumber');
         let branch = tl.getVariable('Build.SourceBranch');
         let branchName = tl.getVariable('Build.SourceBranchName');
@@ -238,6 +240,8 @@ async function run() {
             `supported.technologies=${technologies} ` +
             `memory.max=${memory} ` +
             `timeout=${timeout} ` +
+            `dump.code=${uploadsnippets} ` +
+            `upload.analyzed.code=${uploadfiles} ` +
             `${ignoreclause}`;
 
         console.log('Running Kiuwan analysis');
