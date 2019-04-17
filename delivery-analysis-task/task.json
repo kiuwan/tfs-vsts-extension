@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 33
+        "Patch": 36
     },
     "visibility": [
         "Build"
@@ -119,6 +119,22 @@
             "defaultValue": true,
             "required": true,
             "helpMarkDown": "Should the task fail if the Kiuwan audit fails?"
+        },
+        {
+            "name": "uploadsnippets",
+            "type": "boolean",
+            "label": "Upload code fragments as part of the results?",
+            "defaultValue": true,
+            "required": true,
+            "helpMarkDown": "Upload the code found in the line of code where vulnerabilities and defects are. Only one single line out of context"
+        },
+        {
+            "name": "uploadfiles",
+            "type": "boolean",
+            "label": "Upload analyzed source code files?",
+            "defaultValue": false,
+            "required": true,
+            "helpMarkDown": "WARNING: This options requires that Kiuwan support enables this option in your account. With the option enabled, setting it to true will upload the files with defects to Kiuwan to browse defects and vulnerabilities within the whole source code context in the Kiuwan. If the option is not enabled in the Kiuwan account this check has no effect."
         },
         {
             "name": "skipclones",

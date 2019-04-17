@@ -47,21 +47,19 @@ async function run() {
 
         let skipclones = tl.getBoolInput('skipclones');
 
-        let skiparch = tl.getBoolInput('skiparch');
-
         let ignoreclause: string = "";
         if (skipclones) {
             ignoreclause = "ignore=clones";
-            if (skiparch) {
-                ignoreclause += ",architecture";
-            }
-        }
-        else if (skiparch) {
-            ignoreclause = "ignore=architecture";
         }
         if (!includeinsight) {
-            ignoreclause += ",insights";
+            ignoreclause = "ignore=insights";
         }
+        if (skipclones && !includeinsight) {
+            ignoreclause = "ignore=clones,insights";
+        }
+
+        let uploadsnippets = tl.getBoolInput('uploadsnippets');
+        let uploadfiles = tl.getBoolInput('uploadfiles');
 
         let encoding = tl.getInput('encoding');
         if (encoding === null) {
@@ -191,6 +189,8 @@ async function run() {
             `supported.technologies=${technologies} ` +
             `memory.max=${memory} ` +
             `timeout=${timeout} ` +
+            `dump.code=${uploadsnippets} ` +
+            `upload.analyzed.code=${uploadfiles} ` +
             `${ignoreclause}`;
 
         console.log(`[KW] Running Kiuwan analysis: ${kla} ${klaArgs}`);
