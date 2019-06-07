@@ -100,16 +100,25 @@ async function run() {
         let kiuwanUrl: url.Url = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
 
         let kiuwanEndpointAuth = tl.getEndpointAuthorization(kiuwanConnection, true);
-        // Get user and password from variables defined in the build, otherwise get them from
+        // Get user, password and domain ID from variables defined in the build, otherwise get them from
         // the Kiuwan service endpoint authorization
         let kiuwanUser = tl.getVariable('KiuwanUser');
         if (kiuwanUser === undefined || kiuwanUser === "") {
-            kiuwanUser = kiuwanEndpointAuth.parameters["username"];
+            //kiuwanUser = kiuwanEndpointAuth.parameters["username"];
+            kiuwanUser = tl.getEndpointAuthorizationParameter(kiuwanConnection, "username", false);
         }
         let kiuwanPasswd = tl.getVariable('KiuwanPasswd');
         if (kiuwanPasswd === undefined || kiuwanPasswd === "") {
-            kiuwanPasswd = kiuwanEndpointAuth.parameters["password"];
+            //kiuwanPasswd = kiuwanEndpointAuth.parameters["password"];
+            kiuwanPasswd = tl.getEndpointAuthorizationParameter(kiuwanConnection, "password", false);
         }
+        let kiuwanDomainId = tl.getVariable('KiuwanDomainId');
+        let kiuwanDomainId_d = '';
+        if (kiuwanDomainId === undefined || kiuwanDomainId === "") {
+            //kiuwanDomainId = kiuwanEndpointAuth.parameters["domainid"];
+            kiuwanDomainId = tl.getEndpointDataParameter(kiuwanConnection, "domainid", true);
+        }
+        debug(`[KW] Kiuwan domain: ${kiuwanDomainId}`);
 
         // Get other relevant Variables from the task
         let uploadsnippets = tl.getBoolInput('uploadsnippets');
@@ -225,6 +234,12 @@ async function run() {
                 `encoding=${encoding}`;
         }
 
+        let domainOption = ' ';
+        if (kiuwanDomainId !== undefined && kiuwanDomainId !== "" && kiuwanDomainId !== "0") {
+            domainOption = `--domain-id ${kiuwanDomainId} `;
+        }
+        debug(`[KW] Domain option: ${domainOption}`);
+
         let klaArgs: string =
             `-n "${projectName}" ` +
             `-s "${sourceDirectory}" ` +
@@ -236,6 +251,7 @@ async function run() {
             '-wr ' +
             `--user ${kiuwanUser} ` +
             `--pass ${kiuwanPasswd} ` +
+            `${domainOption}` +
             `${advancedArgs} ` +
             `supported.technologies=${technologies} ` +
             `memory.max=${memory} ` +
@@ -253,7 +269,7 @@ async function run() {
 
         if (kiuwanRetCode === 0 || auditFailed(kiuwanRetCode)) {
             let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}/deliveries?changeRequest=${changeRequest}&label=${deliveryLabel}`;
-            let kiuwanDeliveryResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanEndpoint);
+            let kiuwanDeliveryResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint);
 
             tl.debug(`[KW] Result of last delivery for ${projectName}: ${kiuwanDeliveryResult}`);
 

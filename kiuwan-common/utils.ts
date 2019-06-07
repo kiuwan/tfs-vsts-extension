@@ -5,7 +5,7 @@ import path = require('path');
 import fs = require('fs');
 import https = require('https');
 import http = require('http');
-import { Url } from 'url';
+import { Url, domainToUnicode } from 'url';
 import { _exist } from 'vsts-task-lib/internal';
 
 export function isBuild(): boolean {
@@ -18,15 +18,15 @@ export function isBuild(): boolean {
     }
 }
 
-export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, kiuwanEndpoint: string) {
+export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, domainId: string, kiuwanEndpoint: string) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
     const encodedPath = encodeURI(kiuwanEndpoint);
 
     var options: https.RequestOptions | http.RequestOptions;
-    var host = ( kiuwanUrl.host.indexOf(':') == -1) ? kiuwanUrl.host : kiuwanUrl.host.substring(0,kiuwanUrl.host.indexOf(':'));
+    var host = (kiuwanUrl.host.indexOf(':') == -1) ? kiuwanUrl.host : kiuwanUrl.host.substring(0, kiuwanUrl.host.indexOf(':'));
     tl.debug(`[KW] Host: ${host}`);
-     options = {
+    options = {
         protocol: kiuwanUrl.protocol,
         host: host,
         port: kiuwanUrl.port,
@@ -34,6 +34,10 @@ export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string,
         method: method,
         rejectUnauthorized: false,
         auth: auth
+    }
+
+    if (domainId !== undefined && domainId !== '' && domainId !== "0") {
+        options.headers = { 'X-KW-CORPORATE-DOMAIN-ID': domainId };
     }
 
     tl.debug(`[KW] kiuwan API call: ${kiuwanUrl.protocol}//${kiuwanUrl.host}${encodedPath}`);

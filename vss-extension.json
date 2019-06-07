@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension",
     "name": "Kiuwan",
-    "version": "2.3.18",
+    "version": "2.3.34",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -105,7 +105,7 @@
             "path": "node_modules/vss-web-extension-sdk/lib",
             "addressable": true,
             "packagePath": "lib"
-        }        
+        }
     ],
     "contributions": [
         {
@@ -117,8 +117,10 @@
             ],
             "properties": {
                 "name": "Kiuwan",
-                 "uri": "kiuwanTab.html",
-                 "supportsTasks": ["f345ac07-f8a0-4859-bcaf-d71fd62bcf37"]
+                "uri": "kiuwanTab.html",
+                "supportsTasks": [
+                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37"
+                ]
             }
         },
         {
@@ -129,14 +131,14 @@
                 "ms.vss-build-web.build-results-summary-tab"
             ],
             "properties": {
-                 "name": "Kiuwan Summary",
-                 "uri": "kiuwanSummary.html",
-                 "supportsTasks": [
+                "name": "Kiuwan Summary",
+                "uri": "kiuwanSummary.html",
+                "supportsTasks": [
                     "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
                     "4e6e25e3-c0b5-4986-8714-5c751945c15f"
-                   ],
+                ],
                 "order": 20,
-                 "height": 300
+                "height": 300
             }
         },
         {
@@ -148,8 +150,10 @@
             ],
             "properties": {
                 "name": "Kiuwan Audit",
-                 "uri": "kiuwanAuditTab.html",
-                 "supportsTasks": ["4e6e25e3-c0b5-4986-8714-5c751945c15f"]
+                "uri": "kiuwanAuditTab.html",
+                "supportsTasks": [
+                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
+                ]
             }
         },
         {
@@ -187,6 +191,20 @@
                     "helpText": "For the cloud Kiuwan Service use: https://www.kiuwan.com This is the default.</br>For Kiuwan Enterprise on-premises use your Kiuwan server URL (i.e. http://kiuwan.mycompany.com).",
                     "isVisible": true
                 },
+                "inputDescriptors": [
+                    {
+                        "id": "domainid",
+                        "name": "Kiuwan Domain ID",
+                        "description": "If your Kiuwan account is configured for SSO authentication, set here the Domain ID for your account. Contact your Kiuwan admin for details.<br />Leave empty otherwise.<br /><b>WARNING</b>: for TFS 2005 set this to 0 (the number zero) for non-SSO Kiuwan accounts. In this case the combo with possible applications in the tasks definitions will not work. This is a shortcoming of TFS 2005 only",
+                        "inputMode": "textbox",
+                        "isConfidential": false,
+                        "validation": {
+                            "isRequired": false,
+                            "dataType": "string",
+                            "maxLength": 255
+                        }
+                    }
+                ],
                 "dataSources": [
                     {
                         "name": "TestConnection",
@@ -202,6 +220,12 @@
                 "authenticationSchemes": [
                     {
                         "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+                        "headers": [
+                            {
+                                "name": "X-KW-CORPORATE-DOMAIN-ID",
+                                "value": "{{endpoint.domainid}}"
+                            }
+                        ],
                         "inputDescriptors": [
                             {
                                 "id": "username",
@@ -210,7 +234,7 @@
                                 "inputMode": "textbox",
                                 "isConfidential": false,
                                 "validation": {
-                                    "isrequired": true,
+                                    "isRequired": true,
                                     "dataType": "string"
                                 }
                             },
@@ -221,7 +245,7 @@
                                 "inputMode": "passwordBox",
                                 "isConfidential": true,
                                 "validation": {
-                                    "isrequired": true,
+                                    "isRequired": true,
                                     "dataType": "string"
                                 }
                             }
