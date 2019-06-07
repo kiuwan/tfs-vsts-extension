@@ -9,11 +9,13 @@ This extension works with the Kiuwan Application Security platform. So you need 
 
 The included build tasks will work on Windows, Linux or MacOS Azure DevOps Server (former TFS) agents and Azure DevOps private or hosted Windows, Linux and MacOS agents.
 
-For Azure DevOps Server and Azure DevOps private agents, you don't need to pre-install the Kiuwan Local Analyzer (KLA). The first time you run a Kiuwan task the KLA will be downloaded and installed in the agent tools directory that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation. However, if you tighter control, you can download the Kiuwan Local Analyzer (KLA) from your Kiuwan account and pre-install it in the agent machines you want to use. Make sure you define the KIUWAN_HOME environment variable pointing to the directory where you installed the KLA (i.e. C:\KiuwanLocalAnalyzer).
+For Azure DevOps Server and Azure DevOps private agents, you don't need to pre-install the Kiuwan Local Analyzer (KLA). The first time you run a Kiuwan task the KLA will be downloaded and installed in the agent's tools directory (in a Windows host it is typically `C:\agent\_work\_tool`) that ran the Kiuwan build task. Next time the same agent runs a Kiuwan task it will use that installation. 
 
-If the Agent.TempDirectory and the the Agent.ToolsDirectory variables are not set in your private agents they are set by the build tasks to ${Agent.HomeDirectory}/_temp and ${Agent.ToolsDirectory}/_tools respectively for the tasks to work properly.
+If there are any issues with the KLA installation or you need to remove it to have fresh install in the next task run, go to that directory and just delete the `KiuwanLocalAnalyzer` folder found there.
 
-For hosted agents (that are spawned dynamically), the KLA is downloaded and installed every time a Kiuwan task runs.
+If the Agent.TempDirectory and the the Agent.ToolsDirectory variables are not set in your private agents they are set by the build tasks to `${Agent.HomeDirectory}/_temp` and `${Agent.ToolsDirectory}/_tools` respectively for the tasks to work properly.
+
+For hosted agents (that are provisioned dynamically), the KLA is downloaded and installed every time a Kiuwan task runs.
 
 ## What you get with the extension ##
 
@@ -27,7 +29,9 @@ A service endpoint type and 2 build tasks. One to run Kiuwan baseline analyses t
 
 Then you just configure a name for the Kiuwan connection, the URL of the Kiuwan platform you are using (cloud or on-premises) and your Kiuwan account credentials to use to connect to Kiuwan.
 
-<img src="https://www.kiuwan.com/wp-content/uploads/2018/03/kiuwan-endpoint-config.png">
+Additionally if you have configured your Kiuwan account to use SSO authentication you have to configure your Kiuwan Domain ID provided by your Kiuwan administrator.
+
+<img src="https://www.kiuwan.com/wp-content/uploads/2019/06/kiuwan-endpoint-config.png">
 
 ### **NOTE**: Kiuwan credentials for your build tasks
 You can now configure the Kiuwan connection in your existing tasks. The credentials configured the selected Kiuwan connection will be used to run the analysis. For backward compatibility, if you don't configure the Kiuwan connection in the task, the build definition variables: KiuwanUser and KiuwanPasswd, will be use for credentials. These variables can be used as well to override the Kiuwan connection credentials. This can be useful if you want a particular build definition to run analyses with a different user.

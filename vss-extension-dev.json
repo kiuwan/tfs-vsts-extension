@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension-dev",
     "name": "Kiuwan Dev",
-    "version": "2.3.92",
+    "version": "2.3.94",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -187,8 +187,23 @@
                 "displayName": "Kiuwan Platform",
                 "url": {
                     "displayName": "Kiuwan URL",
-                    "helpText": "For the cloud Kiuwan Service use: https://www.kiuwan.com This is the default.</br>For Kiuwan Enterprise on-premises use your Kiuwan server URL (i.e. http://kiuwan.mycompany.com)."
+                    "helpText": "For the cloud Kiuwan Service use: https://www.kiuwan.com This is the default.</br>For Kiuwan Enterprise on-premises use your Kiuwan server URL (i.e. http://kiuwan.mycompany.com).",
+                    "isVisible": true
                 },
+                "inputDescriptors": [
+                    {
+                        "id": "domainid",
+                        "name": "Kiuwan Domain ID",
+                        "description": "If your Kiuwan account is configured for SSO authentication, set here the Domain ID for your account. Contact your Kiuwan admin for details.<br />Leave empty otherwise.<br /><b>WARNING</b>: for TFS 2005 set this to 0 (the number zero) for non-SSO Kiuwan accounts. In this case the combo with possible applications in the tasks definitions will not work. This is a shortcoming of TFS 2005 only",
+                        "inputMode": "textbox",
+                        "isConfidential": false,
+                        "validation": {
+                            "isRequired": false,
+                            "dataType": "string",
+                            "maxLength": 255
+                        }
+                    }
+                ],
                 "dataSources": [
                     {
                         "name": "TestConnection",
@@ -204,6 +219,12 @@
                 "authenticationSchemes": [
                     {
                         "type": "ms.vss-endpoint.endpoint-auth-scheme-basic",
+                        "headers": [
+                            {
+                                "name": "X-KW-CORPORATE-DOMAIN-ID",
+                                "value": "{{endpoint.domainid}}"
+                            }
+                        ],
                         "inputDescriptors": [
                             {
                                 "id": "username",
@@ -212,7 +233,7 @@
                                 "inputMode": "textbox",
                                 "isConfidential": false,
                                 "validation": {
-                                    "isrequired": true,
+                                    "isRequired": true,
                                     "dataType": "string"
                                 }
                             },
@@ -223,7 +244,7 @@
                                 "inputMode": "passwordBox",
                                 "isConfidential": true,
                                 "validation": {
-                                    "isrequired": true,
+                                    "isRequired": true,
                                     "dataType": "string"
                                 }
                             }
