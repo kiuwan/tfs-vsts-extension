@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension-dev",
     "name": "Kiuwan Dev",
-    "version": "2.3.94",
+    "version": "2.3.102",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -213,6 +213,11 @@
                     {
                         "name": "ListApplications",
                         "endpointUrl": "saas/rest/v1/apps/list",
+                        "resultSelector": "jsonpath:$[*].name"
+                    },
+                    {
+                        "name": "ListModels",
+                        "endpointUrl": "saas/rest/v1/qualitymodels",
                         "resultSelector": "jsonpath:$[*].name"
                     }
                 ],

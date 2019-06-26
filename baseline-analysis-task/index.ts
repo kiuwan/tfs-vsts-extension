@@ -173,7 +173,7 @@ async function run() {
         kla = await buildKlaCommand(klaInstallPath, osPlat);
 
         let advancedArgs = "";
-        let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');;
+        let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');
 
         if (overrideDotKiuwan) {
             advancedArgs = `.kiuwan.analysis.excludesPattern=${excludePatterns} ` +
@@ -186,11 +186,24 @@ async function run() {
                 `encoding=${encoding}`;
         }
 
+        let overrideModel: boolean = tl.getBoolInput('overrideappmodel');
+        let appModel: string = tl.getInput('appmodel');
+        let modelOption= ' ';
+        if (overrideModel) {
+            console.log(`[KW] OverrideModel ${overrideModel} value ${appModel}.`);
+            modelOption = `--model-name "${appModel}" `;
+        }
+        else {    
+            console.log(`[KW] OverrideModel ${overrideModel}.`);
+        }
+
+
         let domainOption = ' ';
         if (kiuwanDomainId !== undefined && kiuwanDomainId !== "" && kiuwanDomainId !== "0") {
             domainOption = `--domain-id ${kiuwanDomainId} `;
         }
         debug(`[KW] Domain option: ${domainOption}`);
+        debug(`[KW] Model option: ${modelOption}`);
 
         let klaArgs: string =
             `-n "${projectName}" ` +
@@ -198,9 +211,10 @@ async function run() {
             `-l "${analysisLabel} ${sourceBranchName} ${buildNumber}" ` +
             '-c ' +
             '-wr ' +
-            `--user ${kiuwanUser} ` +
+            `--user "${kiuwanUser}" ` +
             `--pass ${kiuwanPasswd} ` +
             `${domainOption}` +
+            `${modelOption}` +
             `${advancedArgs} ` +
             `supported.technologies=${technologies} ` +
             `memory.max=${memory} ` +

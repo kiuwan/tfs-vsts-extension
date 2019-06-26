@@ -126,60 +126,71 @@ async function run() {
         let buildNumber = tl.getVariable('Build.BuildNumber');
         let branch = tl.getVariable('Build.SourceBranch');
         let branchName = tl.getVariable('Build.SourceBranchName');
+        let overridelabel: boolean = tl.getBoolInput('overridedeliverylabel');
         let deliveryLabel = "";
-        /**
-         * Build.Reason Possible values
-         * 
-         * Manual: A user manually queued the build.
-         * IndividualCI: Continuous integration (CI) triggered by a Git push or a TFVC check-in.
-         * BatchedCI: Continuous integration (CI) triggered by a Git push or a TFVC check-in, and the Batch changes was selected.
-         * Schedule: Scheduled trigger.
-         * ValidateShelveset: A user manually queued the build of a specific TFVC shelveset.
-         * CheckInShelveset: Gated check-in trigger.
-         * PullRequest: The build was triggered by a Git branch policy that requires a build.
-         * BuildCompletion: The build was triggered by another build
-         **/
-        let buildReason = isUndefined(tl.getVariable("Build.Reason")) ? "Manual" : tl.getVariable("Build.Reason");
 
-        console.log(`BuildReason: ${buildReason}`);
+        if (!overridelabel) {
 
-        // Build.Repository.Provider possible values: TfsGit, TfsVersionControl, Git, GitHub, Svn
-        let repositoryType = tl.getVariable("Build.Repository.Provider");
-        switch (repositoryType) {
-            case "TfsVersionControl": {
-                let ChangeSet = tl.getVariable("Build.SourceVersion"); // Tfvc
-                let ChangeSetMsg = tl.getVariable("Build.SourceVersionMessage"); // Tfvc
-                let shelveSet = tl.getVariable("Build.SourceTfvcShelveset"); //Tfvc
-                if (buildReason === "ValidateShelveset" || buildReason === "CheckInShelveset") {
-                    deliveryLabel = `${shelveSet} Build ${buildNumber}`;
+            /**
+             * Build.Reason Possible values
+             * 
+             * Manual: A user manually queued the build.
+             * IndividualCI: Continuous integration (CI) triggered by a Git push or a TFVC check-in.
+             * BatchedCI: Continuous integration (CI) triggered by a Git push or a TFVC check-in, and the Batch changes was selected.
+             * Schedule: Scheduled trigger.
+             * ValidateShelveset: A user manually queued the build of a specific TFVC shelveset.
+             * CheckInShelveset: Gated check-in trigger.
+             * PullRequest: The build was triggered by a Git branch policy that requires a build.
+             * BuildCompletion: The build was triggered by another build
+             **/
+            let buildReason = isUndefined(tl.getVariable("Build.Reason")) ? "Manual" : tl.getVariable("Build.Reason");
+
+            console.log(`BuildReason: ${buildReason}`);
+
+
+            // Build.Repository.Provider possible values: TfsGit, TfsVersionControl, Git, GitHub, Svn
+            let repositoryType = tl.getVariable("Build.Repository.Provider");
+            switch (repositoryType) {
+                case "TfsVersionControl": {
+                    let ChangeSet = tl.getVariable("Build.SourceVersion"); // Tfvc
+                    let ChangeSetMsg = tl.getVariable("Build.SourceVersionMessage"); // Tfvc
+                    let shelveSet = tl.getVariable("Build.SourceTfvcShelveset"); //Tfvc
+                    if (buildReason === "ValidateShelveset" || buildReason === "CheckInShelveset") {
+                        deliveryLabel = `${shelveSet} Build ${buildNumber}`;
+                    }
+                    else if (buildReason.includes("CI")) {
+                        deliveryLabel = `C${ChangeSet}: ${ChangeSetMsg} Build: ${buildNumber}`;
+                    }
+                    else {
+                        deliveryLabel = `${branchName} Build ${buildNumber}`;
+                    }
+                    break;
                 }
-                else if (buildReason.includes("CI")) {
-                    deliveryLabel = `C${ChangeSet}: ${ChangeSetMsg} Build: ${buildNumber}`;
+                case "Git":
+                case "GitHub":
+                case "TfsGit": {
+                    let commitId = tl.getVariable("Build.SourceVersion"); // Git
+                    let commitMsg = tl.getVariable("Build.SourceVersionMessage"); // Git
+                    if (buildReason === "PullRequest" || buildReason.includes("CI")) {
+                        deliveryLabel = `${commitId}: ${commitMsg} Build ${buildNumber}`;
+                    }
+                    else {
+                        deliveryLabel = `${branchName} Build ${buildNumber}`;
+                    }
+                    break;
                 }
-                else {
+                case "Svn": {
                     deliveryLabel = `${branchName} Build ${buildNumber}`;
+                    break;
                 }
-                break;
-            }
-            case "Git":
-            case "GitHub":
-            case "TfsGit": {
-                let commitId = tl.getVariable("Build.SourceVersion"); // Git
-                let commitMsg = tl.getVariable("Build.SourceVersionMessage"); // Git
-                if (buildReason === "PullRequest" || buildReason.includes("CI")) {
-                    deliveryLabel = `${commitId}: ${commitMsg} Build ${buildNumber}`;
-                }
-                else {
+                default:
                     deliveryLabel = `${branchName} Build ${buildNumber}`;
-                }
-                break;
             }
-            case "Svn": {
-                deliveryLabel = `${branchName} Build ${buildNumber}`;
-                break;
-            }
-            default:
-                deliveryLabel = `${branchName} Build ${buildNumber}`;
+
+        } else {
+
+            deliveryLabel = tl.getInput("deliverylabel");
+            
         }
 
         // Now the project name may come from different sources
@@ -249,7 +260,7 @@ async function run() {
             `-cr "${changeRequest}" ` +
             `-bn "${branch}" ` +
             '-wr ' +
-            `--user ${kiuwanUser} ` +
+            `--user "${kiuwanUser}" ` +
             `--pass ${kiuwanPasswd} ` +
             `${domainOption}` +
             `${advancedArgs} ` +
