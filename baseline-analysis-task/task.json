@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 44
+        "Patch": 50
     },
     "visibility": [
         "Build",
@@ -123,7 +123,25 @@
             "defaultValue": false,
             "required": true,
             "groupName": "advanced",
-            "helpMarkDown": "Check if you want to overrirde the values of the encoding and include/exclude patterns from the .kiuwan file in the application with the values set here.<br />If there is no .kiuwan file in your project these settings will always apply."
+            "helpMarkDown": "Check if you want to override the values of the encoding and include/exclude patterns from the .kiuwan file in the application with the values set here.<br />If there is no .kiuwan file in your project these settings will always apply."
+        },
+        {
+            "name": "overrideappmodel",
+            "type": "boolean",
+            "label": "Override application's model?",
+            "defaultValue": false,
+            "required": true,
+            "groupName": "advanced",
+            "helpMarkDown": "Check if you want to override the configured application's model.<br />Please, note that this model will be associated to the application and used for future analyses of this application."
+        },
+        {
+            "name": "appmodel",
+            "type": "pickList",
+            "label": "Available Kiuwan models",
+            "required": false,
+            "visibleRule": "overrideappmodel = true",
+            "groupName": "advanced",
+            "helpMarkDown": "Select an existing model to overrride the current application model."
         },
         {
             "name": "encoding",
@@ -201,6 +219,11 @@
             "target": "kiuwanappname",
             "endpointId": "$(kiuwanConnection)",
             "dataSourceName": "ListApplications"
+        },
+        {
+            "target": "appmodel",
+            "endpointId": "$(kiuwanConnection)",
+            "dataSourceName": "ListModels"
         }
     ],
     "execution": {

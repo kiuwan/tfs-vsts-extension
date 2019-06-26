@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 44
+        "Patch": 50
     },
     "visibility": [
         "Build"
@@ -81,6 +81,23 @@
             "defaultValue": "$(Build.SourceBranchName)",
             "required": false,
             "helpMarkDown": "The Change Request name that the change we are analyzing belongs to.<br />Think of the change request as the project management object specifying the change requirements.<br />The CR concept does not belong the life cycle itself is a management concept."
+        },
+        {
+            "name": "overridedeliverylabel",
+            "type": "boolean",
+            "label": "Override delivery label?",
+            "defaultValue": false,
+            "required": false,
+            "helpMarkDown": "By default, delivery label is a combination fo different Azude DevOps/TFS variables taking into account the repositoy type and the build triggers.<br /> Check this to specify your custom label."
+        },
+        {
+            "name": "deliverylabel",
+            "type": "string",
+            "label": "Delivery label",
+            "defaultValue": "",
+            "required": false,
+            "visibleRule": "overridedeliverylabel == true",
+            "helpMarkDown": "Custom label that uniquely identifies this delivery analysis.<br />You can use Azure DevOps/TFS variables."
         },
         {
             "name": "analysisscope",
