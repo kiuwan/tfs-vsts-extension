@@ -65,7 +65,7 @@ export class KiuwanTab extends Controls.BaseControl {
         if (kiuwanJson.Security !== undefined) {
             // Get the data from the JSON returned by Kiuwan
             let totalVulns = kiuwanJson.Security.Vulnerabilities.Total.toFixed(0);
-            let totalLoc = kiuwanJson["Main metrics"][4].value.toFixed(0);
+            let totalLoc = kiuwanJson["Main metrics"][5].value.toFixed(0);
 
             this._element.find("#sec-vulns-num").text(totalVulns);
             this._element.find("#sec-loc-num").text(totalLoc);
@@ -123,7 +123,7 @@ export class KiuwanTab extends Controls.BaseControl {
     private populateDefectsInfo(kiuwanJson) {
         let defects = kiuwanJson["Main metrics"][1].value.toFixed(0);
         this._element.find("#qa-defects-num").text(defects);
-        let loc = kiuwanJson["Main metrics"][4].value.toFixed(0);
+        let loc = kiuwanJson["Main metrics"][5].value.toFixed(0);
         this._element.find("#qa-loc-num").text(loc);
     }
 
