@@ -101,7 +101,7 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
 }
 
 async function callKiuwanApiHttps(options: https.RequestOptions) {
-    tl.debug("[KW] Calling Kiuwan API with HTTPS");
+    tl.debug("[KW] Calling Kiuwan API with HTTPS [LGV]");
 
     let responseString = '';
 

@@ -10,6 +10,14 @@
                 "base": "$tslint5",
                 "fileLocation": "relative"
             }
+        },
+        {
+            "type": "typescript",
+            "tsconfig": "tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "group": "build"
         }
     ]
 }

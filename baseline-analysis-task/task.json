@@ -5,11 +5,11 @@
     "description": "Run a Kiuwan baseline Kiuwan analysis on the source code extracted by the build or release configuration.",
     "helpMarkDown": "WARNING: To use this build task you need to have valid credentials to a Kiuwan account.<br />If used in a release pipeline, you need to define the primary artifact that points the source code to be analyzed.",
     "category": "Build",
-    "author": "Javier Salado",
+    "author": "Kiuwan",
     "version": {
         "Major": 2,
         "Minor": 3,
-        "Patch": 50
+        "Patch": 52
     },
     "visibility": [
         "Build",
