@@ -5,8 +5,9 @@ import path = require('path');
 import fs = require('fs');
 import https = require('https');
 import http = require('http');
-import { Url, domainToUnicode } from 'url';
+import { Url, domainToUnicode, resolve } from 'url';
 import { _exist } from 'vsts-task-lib/internal';
+import { reject } from 'q';
 
 export function isBuild(): boolean {
     let s = tl.getVariable("System.HostType");
@@ -101,6 +102,51 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
 }
 
 async function callKiuwanApiHttps(options: https.RequestOptions) {
+    tl.debug("[KW] Calling Kiuwan API with HTTPS (proxy)");
+
+    let responseString = '';
+
+    return new Promise((resolve, reject) => {
+
+        http.request({
+            host: '192.168.1.99', // IP address of proxy server
+            port: 3128, // port of proxy server
+            method: 'CONNECT',
+            path: 'www.kiuwan.com:443', // some destination, add 443 port for https!
+            headers: {
+              'Proxy-Authorization': 'None'
+            },
+          }).on('connect', (res, socket) => {
+            if (res.statusCode === 200) { // connected to proxy server
+              tl.debug("[KW] [callKiuwanApiHttps] Connect to proxy successfull");
+              https.get({
+                host: 'www.kiuwan.com',
+                //socket: socket,  using a tunnel
+                agent: false    // cannot use a default agent
+              }, (res) => {
+                let chunks = []
+                res.on('data', chunk => chunks.push(chunk))
+                res.on('end', () => {
+                  console.log('DONE', Buffer.concat(chunks).toString('utf8'));
+                  tl.debug("[KW] [callKiuwanApiHttps] data" + Buffer.concat(chunks).toString('utf8'));
+                  resolve(Buffer.concat(chunks).toString('utf8'));
+                })
+              })
+            }
+          }).on('error', (err) => {
+            tl.debug("[KW] [callKiuwanApiHttps] Connect to proxy error" + err);
+            console.error('error', err);
+            reject(new Error(`Response error: ${err}`));
+          }).end()
+
+    });
+
+
+    
+}
+
+
+async function old_callKiuwanApiHttps(options: https.RequestOptions) {
     tl.debug("[KW] Calling Kiuwan API with HTTPS");
 
     let responseString = '';
