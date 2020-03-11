@@ -2,11 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension-dev",
     "name": "Kiuwan Dev",
-<<<<<<< HEAD
-    "version": "2.3.111",
-=======
     "version": "2.3.125",
->>>>>>> 88f730e9e62b553a01250a79939b748063e76a7f
     "publisher": "kiuwan-publisher",
     "targets": [
         {
