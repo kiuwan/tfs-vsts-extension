@@ -16,9 +16,10 @@
     "@types/q": "0.0.32"
   },
   "devDependencies": {
-    "typescript": "^2.7.2",
     "@types/node": "^9.4.6",
     "@types/q": "^1.0.7",
+    "properties-reader": "^1.0.0",
+    "typescript": "^2.7.2",
     "vss-web-extension-sdk": "^4.125.2",
     "vsts-task-tool-lib": "^0.4.1"
   }

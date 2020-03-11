@@ -5,7 +5,7 @@ import {
     buildKlaCommand, setAgentTempDir, setAgentToolsDir,
     downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
     getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults,
-    isBuild
+    isBuild, getKlaAgentPropertiesPath
 } from 'kiuwan-common/utils';
 import { debug } from 'vsts-task-tool-lib';
 
@@ -172,6 +172,10 @@ async function run() {
         // Get the appropriate kla command depending on the platform
         kla = await buildKlaCommand(klaInstallPath, osPlat);
 
+        // Get the appropriate kla agent properties file depending on the platform
+        let klaAgentProperties = 'Not installed yet';
+        klaAgentProperties = await getKlaAgentPropertiesPath(klaInstallPath, osPlat);
+
         let advancedArgs = "";
         let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');
 
@@ -237,7 +241,7 @@ async function run() {
             }
             else {
                 let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}`;
-                let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint);
+                let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint, klaAgentProperties);
 
                 tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
 

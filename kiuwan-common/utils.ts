@@ -5,8 +5,12 @@ import path = require('path');
 import fs = require('fs');
 import https = require('https');
 import http = require('http');
-import { Url, domainToUnicode } from 'url';
+import { Url, domainToUnicode, resolve } from 'url';
 import { _exist } from 'vsts-task-lib/internal';
+import { reject, timeout } from 'q';
+
+var PropertiesReader = require('properties-reader');
+
 
 export function isBuild(): boolean {
     let s = tl.getVariable("System.HostType");
@@ -18,14 +22,56 @@ export function isBuild(): boolean {
     }
 }
 
-export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, domainId: string, kiuwanEndpoint: string) {
+export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, domainId: string, kiuwanEndpoint: string, klaAgentProperties: String) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
+
     const encodedPath = encodeURI(kiuwanEndpoint);
+
+    let agent_properties_file = klaAgentProperties;
+    tl.debug(`[KW_LGV] agent_properties_file: ${agent_properties_file}`);
+    let properties = PropertiesReader(agent_properties_file);
+    let property_proxy_host = properties.get('proxy.host');
+    let property_proxy_port = properties.get('proxy.port');
+    let property_proxy_auth = properties.get('proxy.authentication');
+    let property_proxy_un = properties.get('proxy.username');
+    let property_proxy_pw = properties.get('proxy.password');
+    tl.debug(`[KW_LGV] property_proxy_host: [${property_proxy_host}]`);
+    tl.debug(`[KW_LGV] property_proxy_port: ${property_proxy_port}`);
+    tl.debug(`[KW_LGV] property_proxy_auth: ${property_proxy_auth}`);
+    tl.debug(`[KW_LGV] property_proxy_un: ${property_proxy_un}`);
+    tl.debug(`[KW_LGV] property_proxy_pw: ${property_proxy_pw}`);
+
+    let use_proxy = false;
+    let proxy_auth= false;
+
+    if (property_proxy_host != "null" && property_proxy_host != "") {
+        use_proxy = true;
+        if (property_proxy_auth == "None") {
+            proxy_auth = false;
+        } else if (property_proxy_auth == "Basic") {
+            proxy_auth = true;
+        } else {
+            tl.debug(`[KW] Proxy auth protocol not supported: ${property_proxy_auth}`);
+        }
+    }
+
+    tl.debug(`[KW_LGV] use_proxy: ${use_proxy}`);
+    tl.debug(`[KW_LGV] proxy_auth: ${proxy_auth}`);
+
+
+
 
     var options: https.RequestOptions | http.RequestOptions;
     var host = (kiuwanUrl.host.indexOf(':') == -1) ? kiuwanUrl.host : kiuwanUrl.host.substring(0, kiuwanUrl.host.indexOf(':'));
     tl.debug(`[KW] Host: ${host}`);
+    tl.debug(`[KW] port: ${kiuwanUrl.port}`);
+    tl.debug(`[KW] path: ${encodedPath}`);
+    tl.debug(`[KW] method: ${method}`);
+    tl.debug(`[KW] auth: ${auth}`);
+    tl.debug(`[KW_LGV] kiuwanEndpoint: ${kiuwanEndpoint}`);
+    tl.debug(`[KW_LGV] protocol: ${kiuwanUrl.protocol}`);
+
     options = {
         protocol: kiuwanUrl.protocol,
         host: host,
@@ -46,7 +92,14 @@ export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string,
         return callKiuwanApiHttp(options);
     }
     if (kiuwanUrl.protocol === 'https:') {
-        return callKiuwanApiHttps(options);
+        if ( use_proxy ) {
+            tl.debug(`[KW] [getLastAnalysisResults] useproxy: ${use_proxy}`);
+            const auth_p = 'Basic ' + Buffer.from(property_proxy_un + ':' + property_proxy_pw).toString('base64')
+            return callKiuwanApiHttpsProxy(options, property_proxy_host, property_proxy_port, auth_p);
+        } else {
+            tl.debug(`[KW] [getLastAnalysisResults] useproxy: ${use_proxy}`);
+            return callKiuwanApiHttps(options);
+        }
     }
 }
 
@@ -99,6 +152,68 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
 
     tl.debug('[KW] Results uploaded successfully')
 }
+
+async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host, proxy_port, proxy_auth ) {
+    
+    tl.debug("[KW] Calling Kiuwan API with HTTPS (proxy)");
+
+    let k_host = options.host;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.host: ${k_host}`);
+    let k_path = options.path;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.path: ${k_path}`);
+    let k_auth = options.auth;  
+    let p_host = proxy_host;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.host: ${p_host}`);
+    let p_port = proxy_port;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.port: ${p_port}`);
+    let p_auth = proxy_auth;
+
+
+    return new Promise((resolve, reject) => {
+
+        const http = require('http')
+        const https = require('https')
+
+        http.request({
+            host: p_host, // IP address of proxy server
+            port: p_port, // port of proxy server
+            method: 'CONNECT',
+            path: k_host, //destination, add 443 port for https!
+            headers: {
+                'Proxy-Authorization': p_auth
+            },
+        }).on('connect', (res, socket) => {
+            if (res.statusCode === 200) { // connected to proxy server
+                https.get({
+                    host: k_host, 
+                    path: k_path, 
+                    auth: k_auth,
+                    socket: socket, // using a tunnel
+                    agent: false    // cannot use a default agent
+                }, (res) => {
+                    let chunks = []
+                    if (res.statusCode != 200) {
+                        tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error (${res.statusCode}): ${res.statusMessage}`)
+                        console.error('error', `Kiuwan call error (${res.statusCode}): ${res.statusMessage}`)
+                        reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
+                    }
+                    res.on('data', chunk => chunks.push(chunk))
+                    res.on('end', () => {
+                        console.log('DONE', Buffer.concat(chunks).toString('utf8'))
+                        resolve(Buffer.concat(chunks).toString('utf8'))
+                    })
+                })
+            } else {
+                tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error (${res.statusCode}): ${res.statusMessage}`)
+                console.error('error', `Kiuwan call error (${res.statusCode}): ${res.statusMessage}`)
+                reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
+            }
+        }).on('error', (err) => {
+            tl.debug(`[KW] [callKiuwanApiHttpsProxy] Response error: ${err}`)
+            console.error('error', err)
+            reject(new Error(`Response error: ${err}`))
+        }).end()
+
+    });
+
+}
+
 
 async function callKiuwanApiHttps(options: https.RequestOptions) {
     tl.debug("[KW] Calling Kiuwan API with HTTPS [LGV]");
@@ -167,6 +282,26 @@ async function callKiuwanApiHttp(options: http.RequestOptions) {
         req.end();
     });
 }
+
+export async function getKlaAgentPropertiesPath( klaPath: string, platform: string) {
+    let agentprops: string;
+    let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
+    let dirExist: boolean;
+
+    if (platform === 'linux' || platform === 'darwin') {
+        // Define the KLA command if install directory exisits
+        dirExist = _exist(`${klaPath}/${defaultKiuwanDir}`);
+        console.log(`[KW] ${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
+        agentprops = dirExist ? `${klaPath}/${defaultKiuwanDir}/conf/agent.properties` : "";
+    }
+    else {
+        dirExist = _exist(`${klaPath}\\${defaultKiuwanDir}`);
+        agentprops = dirExist ? `${klaPath}\\${defaultKiuwanDir}\\conf\\agent.properties` : "";
+    }
+
+    return agentprops;
+}
+
 
 export async function buildKlaCommand(klaPath: string, platform: string) {
     let command: string;

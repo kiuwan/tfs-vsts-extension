@@ -9,7 +9,11 @@
     "version": {
         "Major": 2,
         "Minor": 3,
+<<<<<<< HEAD
         "Patch": 52
+=======
+        "Patch": 66
+>>>>>>> 88f730e9e62b553a01250a79939b748063e76a7f
     },
     "visibility": [
         "Build"

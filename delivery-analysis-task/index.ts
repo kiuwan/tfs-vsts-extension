@@ -1,7 +1,13 @@
 import os = require('os');
 import url = require('url');
 import tl = require('vsts-task-lib/task');
-import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed, getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults, noFilesToAnalyze, isBuild } from 'kiuwan-common/utils';
+import { 
+    buildKlaCommand, setAgentTempDir, setAgentToolsDir, 
+    downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, 
+    auditFailed, getLastAnalysisResults, saveKiuwanResults, 
+    uploadKiuwanResults, noFilesToAnalyze, isBuild, getKlaAgentPropertiesPath 
+} from 'kiuwan-common/utils';
+
 import { _exist } from 'vsts-task-lib/internal';
 import { debug } from 'vsts-task-tool-lib';
 import { isUndefined } from 'util';
@@ -231,6 +237,10 @@ async function run() {
         // Get the appropriate kla command depending on the platform
         kla = await buildKlaCommand(klaInstallPath, osPlat);
 
+                // Get the appropriate kla agent properties file depending on the platform
+                let klaAgentProperties = 'Not installed yet';
+                klaAgentProperties = await getKlaAgentPropertiesPath(klaInstallPath, osPlat);
+
         let advancedArgs = "";
         let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');
 
@@ -280,7 +290,7 @@ async function run() {
 
         if (kiuwanRetCode === 0 || auditFailed(kiuwanRetCode)) {
             let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}/deliveries?changeRequest=${changeRequest}&label=${deliveryLabel}`;
-            let kiuwanDeliveryResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint);
+            let kiuwanDeliveryResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint, klaAgentProperties);
 
             tl.debug(`[KW] Result of last delivery for ${projectName}: ${kiuwanDeliveryResult}`);
 
