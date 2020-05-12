@@ -1,10 +1,13 @@
 {
-    "manifestVersion": 1,
-    "id": "kiuwan-analysis-extension",
-    "name": "Kiuwan",
-    "version": "2.3.37",
-    "publisher": "kiuwan-publisher",
-    "targets": [
+ 	"manifestVersion": 1,
+	"id": "kiuwan-analysis-extension",
+ 	"publisher": "kiuwan-publisher",
+ 	"version": "2.5.0",
+ 	"name": "Kiuwan TFS Extension",
+ 	"description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
+ 	"public": true,
+ 	"categories": ["Azure Pipelines"],
+ 	"targets": [
         {
             "id": "Microsoft.VisualStudio.Services.Cloud"
         },
@@ -12,15 +15,17 @@
             "id": "Microsoft.TeamFoundation.Server",
             "version": "[14.2,)"
         }
-    ],
-    "public": true,
-    "description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
-    "content": {
+	],
+	"content": {
         "details": {
             "path": "overview.md"
         }
     },
-    "links": {
+    "CustomerQnASupport": {
+        "enableqna": "true",
+        "url": "https://www.kiuwan.com/docs/display/K5/FAQs+-+Frequently+Asked+Questions"
+    },
+	"links": {
         "getstarted": {
             "uri": "https://www.kiuwan.com/docs/display/K5/Microsoft+TFS-Azure+DevOps+Extension"
         },
@@ -43,11 +48,8 @@
         {
             "path": "screenshots/tfs-build-progress.png"
         }
-    ],
-    "categories": [
-        "Build and release"
-    ],
-    "icons": {
+	],
+	"icons": {
         "default": "images/kiuwan-extension.png"
     },
     "tags": [
@@ -59,14 +61,16 @@
         "Security vulnerabilities",
         "OWASP Top 10",
         "Build Task",
-        "SCA"
+		"SCA",
+		"Security",
+		"Quality"
     ],
     "scopes": [
         "vso.code",
         "vso.build",
         "vso.test"
     ],
-    "files": [
+ 	"files": [
         {
             "path": "images",
             "addressable": true
@@ -97,6 +101,9 @@
             "path": "delivery-analysis-task"
         },
         {
+            "path": "testing-task"
+        },
+        {
             "path": "enhancer",
             "addressable": true,
             "packagePath": "scripts"
@@ -106,8 +113,8 @@
             "addressable": true,
             "packagePath": "lib"
         }
-    ],
-    "contributions": [
+	],
+	"contributions": [
         {
             "id": "kiuwan-info-tab",
             "type": "ms.vss-build-web.build-results-tab",
@@ -119,7 +126,7 @@
                 "name": "Kiuwan",
                 "uri": "kiuwanTab.html",
                 "supportsTasks": [
-                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37"
+                    "8a9e4e39-7889-46dd-bc30-5b792cfbaac1"
                 ]
             }
         },
@@ -134,8 +141,8 @@
                 "name": "Kiuwan Summary",
                 "uri": "kiuwanSummary.html",
                 "supportsTasks": [
-                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
-                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
+                    "8a9e4e39-7889-46dd-bc30-5b792cfbaac1",
+                    "98a6ba1e-1567-4341-b612-f8ec997ea046"
                 ],
                 "order": 20,
                 "height": 300
@@ -152,7 +159,7 @@
                 "name": "Kiuwan Audit",
                 "uri": "kiuwanAuditTab.html",
                 "supportsTasks": [
-                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
+                    "98a6ba1e-1567-4341-b612-f8ec997ea046"
                 ]
             }
         },
@@ -174,6 +181,16 @@
             ],
             "properties": {
                 "name": "delivery-analysis-task"
+            }
+        },
+        {
+            "id": "kiuwan-t-test-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "testing-task"
             }
         },
         {
@@ -261,4 +278,5 @@
             }
         }
     ]
-}
+	
+ }

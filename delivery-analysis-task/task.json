@@ -1,15 +1,15 @@
 {
-    "id": "4e6e25e3-c0b5-4986-8714-5c751945c15f",
+    "id": "98a6ba1e-1567-4341-b612-f8ec997ea046",
     "name": "kiuwan-delivery-analysis-task",
     "friendlyName": "Kiuwan Delivery Analysis",
-    "description": "Run a Kiuwan delivery Kiuwan analysis on the source code extracted by the build configuration.",
+    "description": "Run a Kiuwan delivery Kiuwan analysis on the source code extracted by the build configuration. This task uses the proxy defined in the TFS/Azure Agent (if any).",
     "helpMarkDown": "WARNING: To use this build task you need to have valid credentials to a Kiuwan account.",
     "category": "Build",
-    "author": "Javier Salado",
+    "author": "Kiuwan",
     "version": {
         "Major": 2,
-        "Minor": 3,
-        "Patch": 50
+        "Minor": 5,
+        "Patch": 0
     },
     "visibility": [
         "Build"

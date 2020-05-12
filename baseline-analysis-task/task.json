@@ -1,15 +1,15 @@
 {
-    "id": "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
+    "id": "8a9e4e39-7889-46dd-bc30-5b792cfbaac1",
     "name": "kiuwan-baseline-analysis-task",
     "friendlyName": "Kiuwan Baseline Analysis",
-    "description": "Run a Kiuwan baseline Kiuwan analysis on the source code extracted by the build or release configuration.",
+    "description": "Run a Kiuwan baseline Kiuwan analysis on the source code extracted by the build or release configuration. This task uses the proxy defined in the TFS/Azure Agent (if any).",
     "helpMarkDown": "WARNING: To use this build task you need to have valid credentials to a Kiuwan account.<br />If used in a release pipeline, you need to define the primary artifact that points the source code to be analyzed.",
     "category": "Build",
-    "author": "Javier Salado",
+    "author": "Kiuwan",
     "version": {
         "Major": 2,
-        "Minor": 3,
-        "Patch": 50
+        "Minor": 5,
+        "Patch": 0
     },
     "visibility": [
         "Build",
