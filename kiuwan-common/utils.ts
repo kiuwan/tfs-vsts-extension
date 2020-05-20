@@ -36,19 +36,54 @@ export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string,
 
     const encodedPath = encodeURI(kiuwanEndpoint);
 
-    let agent_properties_file = klaAgentProperties;
-    tl.debug(`[KW_LGV] kiuwan_agent_properties_file: ${agent_properties_file}`);
-    let properties = PropertiesReader(agent_properties_file);
-    let property_proxy_host = properties.get('proxy.host');
-    let property_proxy_port = properties.get('proxy.port');
-    let property_proxy_auth = properties.get('proxy.authentication');
-    let property_proxy_un = properties.get('proxy.username');
-    let property_proxy_pw = properties.get('proxy.password');
-    tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_host: [${property_proxy_host}]`);
-    tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_port: ${property_proxy_port}`);
-    tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_auth: ${property_proxy_auth}`);
-    tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_un: ${property_proxy_un}`);
-    tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_pw: ${property_proxy_pw}`);
+    //Luis Sanchez: get the proxy data from the properties file
+    //let agent_properties_file = klaAgentProperties;
+    //tl.debug(`[KW_LGV] kiuwan_agent_properties_file: ${agent_properties_file}`);
+    //let properties = PropertiesReader(agent_properties_file);
+    //let property_proxy_host = properties.get('proxy.host');
+    //let property_proxy_port = properties.get('proxy.port');
+    //let property_proxy_auth = properties.get('proxy.authentication');
+    //let property_proxy_un = properties.get('proxy.username');
+    //let property_proxy_pw = properties.get('proxy.password');
+    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_host: [${property_proxy_host}]`);
+    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_port: ${property_proxy_port}`);
+    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_auth: ${property_proxy_auth}`);
+    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_un: ${property_proxy_un}`);
+    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_pw: ${property_proxy_pw}`);
+    //end of taking data from the properties file
+
+    //Luis Sanchez: get the proxy information from the agent instead
+    //NOTE the names of the variables, kept from previous version reading the properties file.
+    let property_proxy_host = "";
+    let property_proxy_port = "";
+    let property_proxy_auth = "";
+    let property_proxy_un = "";
+    let property_proxy_pw = "";
+    let agent_proxy_conf = tl.getHttpProxyConfiguration();
+    let agentProxyUrl = agent_proxy_conf?.proxyUrl;
+    let agentProxyUser = agent_proxy_conf?.proxyUsername;
+    let agentProxyPassword = agent_proxy_conf?.proxyPassword;
+    //Luis Sanchez: from the proxy url I obtain the protocol, uri and port
+    if (agentProxyUrl.length > 0 && (agentProxyUrl.startsWith("socks") || agentProxyUrl.startsWith("http"))){
+        property_proxy_host =  agentProxyUrl.slice(agentProxyUrl.indexOf("://")+3, agentProxyUrl.lastIndexOf(":"));
+        property_proxy_port =  agentProxyUrl.slice(agentProxyUrl.lastIndexOf(":")+1);
+        if (agentProxyUser != null && agentProxyUser.length > 0){ //if there is user, then auth is basic and we need to put all in the file
+            property_proxy_auth = "Basic";
+            //set the rest of the properties properties parameters to the new ones:
+            property_proxy_un = agentProxyUser;
+            property_proxy_pw = agentProxyPassword;
+        }else{//if user.length=0 then no username, no authentication, so auth is going to be None
+            property_proxy_auth = "None";
+        }
+    }//end if
+    
+    //Luis Sanchez: debug parameters:
+    tl.debug(`[LS] [getLastAnalysisResult] proxy sever taken from agent: ${property_proxy_host}`);
+    tl.debug(`[LS] [getLastAnalysisResult] port taken from agent: ${property_proxy_port}`);
+    //tl.debug(`[LS] [getLastAnalysisResult] protocol taken from agent: ${property_proxy_protocol}`);
+    tl.debug(`[LS] [getLastAnalysisResult] proxy username from agent: ${property_proxy_un}`);
+    tl.debug(`[LS] [getLastAnalysisResult] password password from agent: ${property_proxy_pw}`);
+    //end getting proxy data from agent.
 
     let use_proxy = false;
     let proxy_auth= false;
@@ -164,12 +199,15 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
     tl.debug('[KW] Results uploaded successfully')
 }
 
+//This function calls the API from kiuwan using a authenticated proxy
 async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host, proxy_port, proxy_auth ) {
     
     tl.debug("[KW] Calling Kiuwan https API with proxy");
 
     let k_host = options.host;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.host: ${k_host}`);
     let k_path = options.path;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.path: ${k_path}`);
+    //Luis Sanchez: added port as this is always https
+    let k_hostandport = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
     let k_auth = options.auth;  
     let p_host = proxy_host;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.host: ${p_host}`);
     let p_port = proxy_port;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.port: ${p_port}`);
@@ -178,21 +216,24 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
 
     return new Promise((resolve, reject) => {
 
-        //Luis sanchez comment: why these new instances¿?
-        const http = require('http')
-        const https = require('https')
+        //Luis sanchez comment: why these new instances-->commenting them
+        //const http = require('http')
+        //const https = require('https')
 
         http.request({
             host: p_host, // IP address of proxy server
             port: p_port, // port of proxy server
             method: 'CONNECT',
-            path: k_host, //destination, add 443 port for https!
+            path: k_hostandport, //destination, added 443 port for https!
             headers: {
                 'Proxy-Authorization': p_auth
             },
         }).on('connect', (res, socket) => {
+            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ http.toString());
+            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ http.request.path);
+
             if (res.statusCode === 200) { // connected to proxy server
-                tl.debug ('[LS] Connected to proxy server, doing the https call...');
+                tl.debug ('[LS] [callKiuwanApiHttpsProxy] Connected to proxy server, doing the https call...');
                 https.get({
                     host: k_host, 
                     path: k_path, 
@@ -200,7 +241,7 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
                     socket: socket, // using a tunnel
                     agent: false    // cannot use a default agent
                 }, (res) => {
-                    tl.debug ('[LS] ...reading response ...');
+                    tl.debug ('[LS] [callKiuwanApiHttpsProxy] ...reading response ...');
                     let chunks = []
                     if (res.statusCode != 200) {
                         tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
@@ -237,20 +278,22 @@ async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, prox
 
     let k_host = options.host;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.host: ${k_host}`);
     let k_path = options.path;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.path: ${k_path}`);
+    //Luis Sanchez: added port as this is always https
+    let k_hostandport = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
     let k_auth = options.auth;  
     let p_host = proxy_host;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.host: ${p_host}`);
     let p_port = proxy_port;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.port: ${p_port}`);
     
     return new Promise((resolve, reject) => {
         //Luis sanchez comment: why these new instances¿?
-        const http = require('http')
-        const https = require('https')
+        //const http = require('http')
+        //const https = require('https')
 
         http.request({
             host: p_host, // IP address of proxy server
             port: p_port, // port of proxy server
             method: 'CONNECT',
-            path: k_host, //destination, add 443 port for https!
+            path: k_hostandport, //added 443 port for https!
         }).on('connect', (res, socket) => {
             if (res.statusCode === 200) { // connected to proxy server
                 tl.debug ('[KW_LS] Connected to proxy server, doing the https call...');
@@ -663,7 +706,7 @@ export async function processAgentProperties(agent_properties_file: string, prox
     propString = replaceProperty(propString, "proxy.host", property_proxy_host);
     propString = replaceProperty(propString, "proxy.port", property_proxy_port);
     propString = replaceProperty(propString, "proxy.authentication", property_proxy_auth);
-    propString = replaceProperty(propString, "proxy.username", property_proxy_un);
+    propString = replacePropertyWithHack(propString, "proxy.username", property_proxy_un);
     propString = replaceProperty(propString, "proxy.password", property_proxy_pw);
     propString = replaceProperty(propString, "proxy.protocol", property_proxy_protocol);
     fs.writeFileSync(agent_properties_file,propString);
@@ -690,6 +733,54 @@ function replaceProperty (inString: string, propertyName: string, propertyNewVal
     return out;
 }
 
+//This is a helper function to look for a property name in string "inString". The property comes from
+// a properties file, so it takes the line break into consideration.
+// input: string taken from file with <property>=<value> or <property>= lines
+// output: new string with the same lines but the one with the replacement of <property>=<value> 
+function replacePropertyWithHack (inString: string, propertyName: string, propertyNewValue: string) : string {
+    let out = "";
+    let firstPositon = 0;
+    let lastPosition = 0;
+
+    firstPositon = inString.indexOf(propertyName);
+    lastPosition = inString.indexOf("\n", firstPositon);
+
+    //LS: this is NOT a solution at all, but to avoid problems when the user has scape characters inside
+    //just removing some escape secuences... maybe throwing the problem to another part
+    tl.debug ("[LS][replacePropertyWithHack]->propertyvalue before hacking: " + propertyNewValue);
+    //check all possible escape characters...
+    if (propertyNewValue.indexOf("\\t") >= 0){
+       propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\t") ) + "\\\\t" + 
+           propertyNewValue.substring(propertyNewValue.indexOf("\\t") + 2, propertyNewValue.length); 
+    }
+    if (propertyNewValue.indexOf("\\v") >= 0){
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\v") ) + "\\\\v" + 
+            propertyNewValue.substring(propertyNewValue.indexOf("\\v") + 2, propertyNewValue.length); 
+    }
+    if (propertyNewValue.indexOf("\\0") >= 0){
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\0") ) + "\\\\0" + 
+            propertyNewValue.substring(propertyNewValue.indexOf("\\0") + 2, propertyNewValue.length); 
+    }
+    if (propertyNewValue.indexOf("\\b") >= 0){
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\b") ) + "\\\\b" + 
+            propertyNewValue.substring(propertyNewValue.indexOf("\\b") + 2, propertyNewValue.length); 
+    }
+    if (propertyNewValue.indexOf("\\f") >= 0){
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\f") ) + "\\\\f" + 
+            propertyNewValue.substring(propertyNewValue.indexOf("\\f") + 2, propertyNewValue.length); 
+    }
+    if (propertyNewValue.indexOf("\\n") >= 0){
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\n") ) + "\\\\n" + 
+            propertyNewValue.substring(propertyNewValue.indexOf("\\n") + 2, propertyNewValue.length); 
+    }
+    
+    tl.debug ("[LS][replacePropertyWithHack]->propertyvalue after hacking: " + propertyNewValue);
+
+    out = inString.slice(0,firstPositon) + propertyName + "=" 
+    + propertyNewValue +  inString.slice(lastPosition, inString.length);
+
+    return out;
+}
 
 
 //--- end changes Luis Sanchez ----
