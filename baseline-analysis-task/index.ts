@@ -39,7 +39,7 @@ function getPathSeparator(os: string) {
 async function run() {
     try {
         // Default technologies to analyze
-        let technologies = 'abap,actionscript,aspnet,c,cobol,cpp,csharp,html,java,javascript,jcl,jsp,natural,objectivec,oracleforms,perl,php,powerscript,python,rpg4,ruby,swift,vb6,vbnet,xml';
+        let technologies = 'abap,actionscript,aspnet,c,cobol,cpp,csharp,go,groovy,html,java,javascript,jcl,jsp,kotlin,natural,objectivec,oracleforms,other,perl,php,powerscript,python,rpg4,ruby,scala,sqlscript,swift,vb6,vbnet,xml';
 
         //NOTE (Luis Sanchez):
         // value == null is preferred to check if value is null or undefined, so I have changed
@@ -198,10 +198,21 @@ async function run() {
         //let proxyPassword = tl.getEndpointDataParameter(kiuwanConnection, "proxypassword", true);
 
         //get the proxy parameter from the AGENT configuration
-        let proxyUrl = agent_proxy_conf?.proxyUrl;
-        let proxyUser = agent_proxy_conf?.proxyUsername;
-        let proxyPassword = agent_proxy_conf?.proxyPassword;
-        //pass the parameters and the agent path to this function for processing
+        let proxyUrl = "";
+        let proxyUser = "";
+        let proxyPassword = "";
+        if (!(agent_proxy_conf?.proxyUrl === undefined)){ //if proxy defined, then get the rest
+            proxyUrl = agent_proxy_conf?.proxyUrl;
+            if (!(agent_proxy_conf?.proxyUsername === undefined)){ //user defined
+                proxyUser = agent_proxy_conf?.proxyUsername;
+            }//end checking user
+            if (!(agent_proxy_conf?.proxyPassword === undefined)){ //password defined
+                proxyPassword = agent_proxy_conf?.proxyPassword;
+            }//end checking pass
+        }//end checking proxy undefined
+
+        //In any other cases, proxy, user and pass are going to be empty string, processed in the function below
+        //Pass the parameters and the agent path to this function for processing
         await processAgentProperties(klaAgentProperties, proxyUrl, proxyUser, proxyPassword);
         //end Luis
         //End of Luis Sanchez addings

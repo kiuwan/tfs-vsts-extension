@@ -59,10 +59,22 @@ export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string,
     let property_proxy_auth = "";
     let property_proxy_un = "";
     let property_proxy_pw = "";
+    
+    //get the proxy parameter from the AGENT configuration
     let agent_proxy_conf = tl.getHttpProxyConfiguration();
-    let agentProxyUrl = agent_proxy_conf?.proxyUrl;
-    let agentProxyUser = agent_proxy_conf?.proxyUsername;
-    let agentProxyPassword = agent_proxy_conf?.proxyPassword;
+    let agentProxyUrl = "";
+    let agentProxyUser = "";
+    let agentProxyPassword = "";
+    if (!(agent_proxy_conf?.proxyUrl === undefined)){ //if proxy defined, then get the rest
+        agentProxyUrl = agent_proxy_conf?.proxyUrl;
+        if (!(agent_proxy_conf?.proxyUsername === undefined)){ //user defined
+         agentProxyUser = agent_proxy_conf?.proxyUsername;
+        }//end checking user
+        if (!(agent_proxy_conf?.proxyPassword === undefined)){ //password defined
+            agentProxyPassword = agent_proxy_conf?.proxyPassword;
+        }//end checking pass
+    }//end checking proxy undefined
+
     //Luis Sanchez: from the proxy url I obtain the protocol, uri and port
     if (agentProxyUrl.length > 0 && (agentProxyUrl.startsWith("socks") || agentProxyUrl.startsWith("http"))){
         property_proxy_host =  agentProxyUrl.slice(agentProxyUrl.indexOf("://")+3, agentProxyUrl.lastIndexOf(":"));
