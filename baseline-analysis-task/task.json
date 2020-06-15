@@ -1,5 +1,5 @@
 {
-    "id": "8a9e4e39-7889-46dd-bc30-5b792cfbaac1",
+    "id": "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
     "name": "kiuwan-baseline-analysis-task",
     "friendlyName": "Kiuwan Baseline Analysis",
     "description": "Run a Kiuwan baseline Kiuwan analysis on the source code extracted by the build or release configuration. This task uses the proxy defined in the TFS/Azure Agent (if any).",
@@ -165,7 +165,7 @@
             "name": "excludepatterns",
             "type": "string",
             "label": "Exclude patterns",
-            "defaultValue": "**/*.min.js,**/*.Designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.designer.vb,**/*reference.vb,**/*service.vb,**/*silverlight.vb,**/*.Designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/*.designer.cs,**/*reference.cs,**/*service.cs,**/*silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h",
+            "defaultValue": "**/src/test/**,**/__MACOSX/**,**/*.min.js,**/*.Designer.vb,**/*.designer.vb,**/*Reference.vb,**/*Service.vb,**/*Silverlight.vb,**/*.Designer.cs,**/*.designer.cs,**/*Reference.cs,**/*Service.cs,**/*Silverlight.cs,**/.*,**/Pods/BuildHeaders/**/*.h,**/Pods/Headers/**/*.h,**/node_modules/**,**/bower_components/**,**/target/**,**/bin/**,**/obj/**,**/dist/**,**/lib/**,**/bootstrap*.js,**/jquery*.js,**/umd/**,**/esm/**,**/fontawesome/**,**/respond*.js,**/toastr*.js,spcontext.js",
             "required": false,
             "groupName": "advanced",
             "helpMarkDown": "Comma separatedlist of ant like patterns to exclude specific files from the analysis"

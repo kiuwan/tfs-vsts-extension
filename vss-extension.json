@@ -101,9 +101,6 @@
             "path": "delivery-analysis-task"
         },
         {
-            "path": "testing-task"
-        },
-        {
             "path": "enhancer",
             "addressable": true,
             "packagePath": "scripts"
@@ -126,7 +123,7 @@
                 "name": "Kiuwan",
                 "uri": "kiuwanTab.html",
                 "supportsTasks": [
-                    "8a9e4e39-7889-46dd-bc30-5b792cfbaac1"
+                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37"
                 ]
             }
         },
@@ -141,8 +138,8 @@
                 "name": "Kiuwan Summary",
                 "uri": "kiuwanSummary.html",
                 "supportsTasks": [
-                    "8a9e4e39-7889-46dd-bc30-5b792cfbaac1",
-                    "98a6ba1e-1567-4341-b612-f8ec997ea046"
+                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
+                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
                 ],
                 "order": 20,
                 "height": 300
@@ -159,7 +156,7 @@
                 "name": "Kiuwan Audit",
                 "uri": "kiuwanAuditTab.html",
                 "supportsTasks": [
-                    "98a6ba1e-1567-4341-b612-f8ec997ea046"
+                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
                 ]
             }
         },
@@ -181,16 +178,6 @@
             ],
             "properties": {
                 "name": "delivery-analysis-task"
-            }
-        },
-        {
-            "id": "kiuwan-t-test-task",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "testing-task"
             }
         },
         {
