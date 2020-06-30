@@ -12,7 +12,7 @@ script:
   - wget -v https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip
   - unzip KiuwanLocalAnalyzer.zip -d $HOME/.
   # this is the command for baseline
-  - $HOME/KiuwanLocalAnalyzer/bin/agent.sh --user $kiuwan_user --pass $kiuwan_password -s $TRAVIS_BUILD_DIR -n $APPNAME -l $TRAVIS_BUILD_ID -wr 
+  #- $HOME/KiuwanLocalAnalyzer/bin/agent.sh --user $kiuwan_user --pass $kiuwan_password -s $TRAVIS_BUILD_DIR -n $APPNAME -l $TRAVIS_BUILD_ID -wr 
   # this is the command for delivery
-  #- $HOME/KiuwanLocalAnalyzer/bin/agent.sh --user $kiuwan_user --pass $kiuwan_password -s $TRAVIS_BUILD_DIR -n $APPNAME -cr $TRAVIS_BUILD_ID -l $TRAVIS_BUILD_ID -bn $BRANCH -wr 
+  - $HOME/KiuwanLocalAnalyzer/bin/agent.sh --user $kiuwan_user --pass $kiuwan_password -s $TRAVIS_BUILD_DIR -n $APPNAME -cr $TRAVIS_BUILD_ID -l $TRAVIS_BUILD_ID -bn $BRANCH -wr 
   #- mvn install -Dversion.webxml=30 #this script creates the java application.
