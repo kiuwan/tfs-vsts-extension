@@ -52,20 +52,24 @@ async function run() {
             analysisLabel = "";
         }
 
+        //Luis Sanchez: This block was totally wrong, and I ammended it. 
         let includeinsight = tl.getBoolInput('includeinsight');
-
         let skipclones = tl.getBoolInput('skipclones');
+        let ignoreclause = "";
 
-        let ignoreclause: string = "";
-        if (skipclones) {
-            ignoreclause = "ignore=clones";
+        if (skipclones) { 
+            if (!includeinsight){
+                ignoreclause = "ignore=clones,insights"
+            }else{ //include insights
+                ignoreclause = "ignore=clones";
+            }      
+        }else{ //skipclones = false
+            if (!includeinsight){
+                ignoreclause="ignore=insights"
+            }
         }
-        if (!includeinsight) {
-            ignoreclause = "ignore=insights";
-        }
-        if (skipclones && !includeinsight) {
-            ignoreclause = "ignore=clones,insights";
-        }
+        //in any other case, the ignoreclause will be empty (no insights and skipclones false)
+
 
         let uploadsnippets = tl.getBoolInput('uploadsnippets');
         let uploadfiles = tl.getBoolInput('uploadfiles');

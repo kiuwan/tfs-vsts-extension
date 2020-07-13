@@ -62,15 +62,24 @@ async function run() {
 
         let failOnNoFiles = tl.getBoolInput('failonnofiles');
 
+        //Luis Sanchez: This block was totally wrong, and I ammended it. 
+        // the difference with the baseline is that we skip architecture always
+        let includeinsight = tl.getBoolInput('includeinsight');
         let skipclones = tl.getBoolInput('skipclones');
+        let ignoreclause = "ignoreOnDelivery=architecture";
 
-        let ignoreclause: string = "";
-        if (skipclones) {
-            ignoreclause = "ignore=clones,architecture,insights";
+        if (skipclones) { 
+            if (!includeinsight){
+                ignoreclause = "ignoreOnDelivery=clones,insights,architecture"
+            }else{ //include insights
+                ignoreclause = "ignoreOnDelivery=clones,architecture";
+            }      
+        }else{ //skipclones = false
+            if (!includeinsight){
+                ignoreclause="ignoreOnDelivery=insights,architecture"
+            }
         }
-        else {
-            ignoreclause = "ignore=architecture,insights";
-        }
+        //in any other case, the ignoreclause will be empty (no insights and skipclones false)
 
         let analysisScope = tl.getInput('analysisscope');
 

@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 5,
-        "Patch": 0
+        "Patch": 2
     },
     "visibility": [
         "Build"
@@ -128,6 +128,14 @@
             "required": true,
             "visibleRule": "analysisscope = partialDelivery",
             "helpMarkDown": "Should the task fail if the Kiuwan can't find any files to analyze?"
+        },
+		{
+            "name": "includeinsight",
+            "type": "boolean",
+            "label": "Include Insights analysis?",
+            "defaultValue": true,
+            "required": true,
+            "helpMarkDown": "Insights is the Kiuwan SCA product<br />This anaysis will give you the risk exposure to open source libraries used in your application<br />Applies only to Kiuwan accounts with the Insights module."
         },
         {
             "name": "failonaudit",
