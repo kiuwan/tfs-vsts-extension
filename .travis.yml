@@ -1,0 +1,18 @@
+language: typescript
+install: skip
+sudo: false
+
+script:
+  # We obtain the app name we are using (git hub repo)
+  - echo $TRAVIS_BUILD_DIR
+  - export APPNAME=$(basename $TRAVIS_BUILD_DIR)
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  
+  # Download, unzip and use Kiuwan Local Analyzer with user and password. User and password defined in Travis-ci
+  - wget -v https://www.kiuwan.com/pub/analyzer/KiuwanLocalAnalyzer.zip
+  - unzip KiuwanLocalAnalyzer.zip -d $HOME/.
+  # this is the command for baseline
+  #- $HOME/KiuwanLocalAnalyzer/bin/agent.sh --user $kiuwan_user --pass $kiuwan_password -s $TRAVIS_BUILD_DIR -n $APPNAME -l $TRAVIS_BUILD_ID -wr 
+  # this is the command for delivery
+  - $HOME/KiuwanLocalAnalyzer/bin/agent.sh --user $kiuwan_user --pass $kiuwan_password -s $TRAVIS_BUILD_DIR -n $APPNAME -cr $TRAVIS_BUILD_ID -l $TRAVIS_BUILD_ID -bn $BRANCH -wr 
+  #- mvn install -Dversion.webxml=30 #this script creates the java application.

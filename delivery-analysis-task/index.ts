@@ -1,9 +1,20 @@
 import os = require('os');
 import url = require('url');
-import tl = require('vsts-task-lib/task');
-import { buildKlaCommand, setAgentTempDir, setAgentToolsDir, downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, auditFailed, getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults, noFilesToAnalyze, isBuild } from 'kiuwan-common/utils';
-import { _exist } from 'vsts-task-lib/internal';
-import { debug } from 'vsts-task-tool-lib';
+//LS: change old deprecated libraries from the new one
+//import tl = require('vsts-task-lib/task');
+import tl = require('azure-pipelines-task-lib/task');
+import { 
+    buildKlaCommand, setAgentTempDir, setAgentToolsDir, 
+    downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg, 
+    auditFailed, getLastAnalysisResults, saveKiuwanResults, 
+    uploadKiuwanResults, noFilesToAnalyze, isBuild, getKlaAgentPropertiesPath, processAgentProperties 
+} from 'kiuwan-common/utils';
+
+//LS: change old deprecated for the new one
+//import { _exist } from 'vsts-task-lib/internal';
+//import { debug } from 'vsts-task-tool-lib';
+import { _exist } from 'azure-pipelines-task-lib/internal';
+import { debug } from 'azure-pipelines-task-lib/task';
 import { isUndefined } from 'util';
 
 var osPlat: string = os.platform();
@@ -34,11 +45,16 @@ else {
 async function run() {
     try {
         // Default technologies to analyze
-        let technologies = 'abap,actionscript,aspnet,c,cobol,cpp,csharp,html,java,javascript,jcl,jsp,natural,objectivec,oracleforms,perl,php,powerscript,python,rpg4,ruby,swift,vb6,vbnet,xml';
+        let technologies = 'abap,actionscript,aspnet,c,cobol,cpp,csharp,go,groovy,html,java,javascript,jcl,jsp,kotlin,natural,objectivec,oracleforms,other,perl,php,powerscript,python,rpg4,ruby,scala,sqlscript,swift,vb6,vbnet,xml';
+
+        //NOTE (Luis Sanchez):
+        // value == null is preferred to check if value is null or undefined, so I have changed
+        // that expresion in the places where (value===null || value===undefined) was checked due
+        // to some error I found in execution time.
 
         // Get the values from the task's inputs by the user
         let changeRequest = tl.getInput('changerequest');
-        if (changeRequest === null) {
+        if (changeRequest == null) {
             changeRequest = "";
         }
 
@@ -46,42 +62,51 @@ async function run() {
 
         let failOnNoFiles = tl.getBoolInput('failonnofiles');
 
+        //Luis Sanchez: This block was totally wrong, and I ammended it. 
+        // the difference with the baseline is that we skip architecture always
+        let includeinsight = tl.getBoolInput('includeinsight');
         let skipclones = tl.getBoolInput('skipclones');
+        let ignoreclause = "ignoreOnDelivery=architecture";
 
-        let ignoreclause: string = "";
-        if (skipclones) {
-            ignoreclause = "ignore=clones,architecture,insights";
+        if (skipclones) { 
+            if (!includeinsight){
+                ignoreclause = "ignoreOnDelivery=clones,insights,architecture"
+            }else{ //include insights
+                ignoreclause = "ignoreOnDelivery=clones,architecture";
+            }      
+        }else{ //skipclones = false
+            if (!includeinsight){
+                ignoreclause="ignoreOnDelivery=insights,architecture"
+            }
         }
-        else {
-            ignoreclause = "ignore=architecture,insights";
-        }
+        //in any other case, the ignoreclause will be empty (no insights and skipclones false)
 
         let analysisScope = tl.getInput('analysisscope');
 
         let crStatus = tl.getInput('crstatus');
 
         let encoding = tl.getInput('encoding');
-        if (encoding === null) {
+        if (encoding == null) {
             encoding = "UTF-8";
         }
 
         let includePatterns = tl.getInput('includepatterns');
-        if (includePatterns === null) {
+        if (includePatterns == null) {
             includePatterns = "**/*";
         }
 
         let excludePatterns = tl.getInput('excludepatterns');
-        if (excludePatterns === null) {
+        if (excludePatterns == null) {
             excludePatterns = "";
         }
 
         let memory = tl.getInput('memory');
-        if (memory === null) {
+        if (memory == null) {
             memory = "1024";
         }
         memory += 'm';
 
-        let timeout = tl.getInput('timeout') === null ? Number('60') : Number(tl.getInput('timeout'));
+        let timeout = tl.getInput('timeout') == null ? Number('60') : Number(tl.getInput('timeout'));
         timeout = timeout * 60000;
 
         let dbanalysis = tl.getBoolInput('dbanalysis');
@@ -231,6 +256,42 @@ async function run() {
         // Get the appropriate kla command depending on the platform
         kla = await buildKlaCommand(klaInstallPath, osPlat);
 
+        // Get the appropriate kla agent properties file depending on the platform
+        let klaAgentProperties = 'Not installed yet';
+        klaAgentProperties = await getKlaAgentPropertiesPath(klaInstallPath, osPlat);
+
+        //Luis Sanchez: getting the AGENT proxy configuration
+        let agent_proxy_conf = tl.getHttpProxyConfiguration();
+        console.log(`[DT] Agent proxy url: ${agent_proxy_conf?.proxyUrl}`);
+        console.log(`[DT] Agent proxy user: ${agent_proxy_conf?.proxyUsername}`);
+        console.log(`[DT] Agent proxy password: ${agent_proxy_conf?.proxyPassword}`);
+        
+        //Luis Sanchez: process the agent.properties file
+        //get the proxy parameters from the service connection definition (to be deprecated)
+        //let proxyUrl = tl.getEndpointDataParameter(kiuwanConnection, "proxyurl", true);
+        //let proxyUser = tl.getEndpointDataParameter(kiuwanConnection, "proxyuser", true);
+        //let proxyPassword = tl.getEndpointDataParameter(kiuwanConnection, "proxypassword", true);
+
+        //get the proxy parameter from the AGENT configuration
+        let proxyUrl = "";
+        let proxyUser = "";
+        let proxyPassword = "";
+        if (!(agent_proxy_conf?.proxyUrl === undefined)){ //if proxy defined, then get the rest
+            proxyUrl = agent_proxy_conf?.proxyUrl;
+            if (!(agent_proxy_conf?.proxyUsername === undefined)){ //user defined
+                proxyUser = agent_proxy_conf?.proxyUsername;
+            }//end checking user
+            if (!(agent_proxy_conf?.proxyPassword === undefined)){ //password defined
+                proxyPassword = agent_proxy_conf?.proxyPassword;
+            }//end checking pass
+        }//end checking proxy undefined
+
+        //if no proxy/user/password, those values will be empty string and processed in the function below
+        //pass the parameters and the agent path to this function for processing
+        await processAgentProperties(klaAgentProperties, proxyUrl, proxyUser, proxyPassword);
+        //end Luis
+        //End of Luis Sanchez addings
+
         let advancedArgs = "";
         let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');
 
@@ -280,7 +341,7 @@ async function run() {
 
         if (kiuwanRetCode === 0 || auditFailed(kiuwanRetCode)) {
             let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}/deliveries?changeRequest=${changeRequest}&label=${deliveryLabel}`;
-            let kiuwanDeliveryResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint);
+            let kiuwanDeliveryResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint, klaAgentProperties);
 
             tl.debug(`[KW] Result of last delivery for ${projectName}: ${kiuwanDeliveryResult}`);
 

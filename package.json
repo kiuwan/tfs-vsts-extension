@@ -1,25 +1,17 @@
 {
-  "name": "kiuwan-extension",
+  "name": "tfs-extensiont-with-new-libraries",
   "version": "1.0.0",
-  "description": "VSTS extension for Kiuwan written in Node.js",
+  "description": "",
   "main": "index.js",
-  "scripts": {
-    "lint": "tslint --project",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
-  },
-  "author": "Javier Salado",
-  "license": "ISC",
   "dependencies": {
-    "vsts-task-lib": "^2.2.1",
-    "@types/jquery": "^2.0.34",
-    "@types/q": "0.0.32"
+    "tfx-cli": "^0.7.11",
+    "vss-web-extension-sdk": "^5.141.0"
   },
-  "devDependencies": {
-    "typescript": "^2.7.2",
-    "@types/node": "^9.4.6",
-    "@types/q": "^1.0.7",
-    "vss-web-extension-sdk": "^4.125.2",
-    "vsts-task-tool-lib": "^0.4.1"
-  }
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

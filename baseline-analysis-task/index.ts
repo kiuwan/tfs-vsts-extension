@@ -1,13 +1,17 @@
 import os = require('os');
 import url = require('url');
-import tl = require('vsts-task-lib/task');
+//LS: change old deprecated libraries from the new one
+//import tl = require('vsts-task-lib/task');
+import tl = require('azure-pipelines-task-lib/task');
 import {
     buildKlaCommand, setAgentTempDir, setAgentToolsDir,
     downloadInstallKla, runKiuwanLocalAnalyzer, getKiuwanRetMsg,
     getLastAnalysisResults, saveKiuwanResults, uploadKiuwanResults,
-    isBuild
+    isBuild, getKlaAgentPropertiesPath, processAgentProperties
 } from 'kiuwan-common/utils';
-import { debug } from 'vsts-task-tool-lib';
+//LS: change old library
+//import { debug } from 'vsts-task-tool-lib';
+import { debug } from 'azure-pipelines-task-lib/task';
 
 var osPlat: string = os.platform();
 var agentHomeDir = tl.getVariable('Agent.HomeDirectory');
@@ -35,54 +39,63 @@ function getPathSeparator(os: string) {
 async function run() {
     try {
         // Default technologies to analyze
-        let technologies = 'abap,actionscript,aspnet,c,cobol,cpp,csharp,html,java,javascript,jcl,jsp,natural,objectivec,oracleforms,perl,php,powerscript,python,rpg4,ruby,swift,vb6,vbnet,xml';
+        let technologies = 'abap,actionscript,aspnet,c,cobol,cpp,csharp,go,groovy,html,java,javascript,jcl,jsp,kotlin,natural,objectivec,oracleforms,other,perl,php,powerscript,python,rpg4,ruby,scala,sqlscript,swift,vb6,vbnet,xml';
+
+        //NOTE (Luis Sanchez):
+        // value == null is preferred to check if value is null or undefined, so I have changed
+        // that expresion in the places where (value===null || value===undefined) was checked due
+        // to some error I found in execution time.
 
         // Get the values from the task's inputs bythe user
         let analysisLabel = tl.getInput('analysislabel');
-        if (analysisLabel === null || analysisLabel === undefined) {
+        if (analysisLabel == null) {
             analysisLabel = "";
         }
 
+        //Luis Sanchez: This block was totally wrong, and I ammended it. 
         let includeinsight = tl.getBoolInput('includeinsight');
-
         let skipclones = tl.getBoolInput('skipclones');
+        let ignoreclause = "";
 
-        let ignoreclause: string = "";
-        if (skipclones) {
-            ignoreclause = "ignore=clones";
+        if (skipclones) { 
+            if (!includeinsight){
+                ignoreclause = "ignore=clones,insights"
+            }else{ //include insights
+                ignoreclause = "ignore=clones";
+            }      
+        }else{ //skipclones = false
+            if (!includeinsight){
+                ignoreclause="ignore=insights"
+            }
         }
-        if (!includeinsight) {
-            ignoreclause = "ignore=insights";
-        }
-        if (skipclones && !includeinsight) {
-            ignoreclause = "ignore=clones,insights";
-        }
+        //in any other case, the ignoreclause will be empty (no insights and skipclones false)
+
 
         let uploadsnippets = tl.getBoolInput('uploadsnippets');
         let uploadfiles = tl.getBoolInput('uploadfiles');
 
         let encoding = tl.getInput('encoding');
-        if (encoding === null) {
+        if (encoding == null) {
             encoding = "UTF-8";
         }
 
         let includePatterns = tl.getInput('includepatterns');
-        if (includePatterns === null) {
+        if (includePatterns == null) {
             includePatterns = "**/*";
         }
 
         let excludePatterns = tl.getInput('excludepatterns');
-        if (excludePatterns === null) {
+        if (excludePatterns == null) {
             excludePatterns = "";
         }
 
         let memory = tl.getInput('memory');
-        if (memory === null) {
+        if (memory == null) {
             memory = "1024";
         }
         memory += 'm';
 
-        let timeout = tl.getInput('timeout') === null ? Number('60') : Number(tl.getInput('timeout'));
+        let timeout = tl.getInput('timeout') == null ? Number('60') : Number(tl.getInput('timeout'));
         timeout = timeout * 60000;
 
         let dbanalysis = tl.getBoolInput('dbanalysis');
@@ -172,6 +185,42 @@ async function run() {
         // Get the appropriate kla command depending on the platform
         kla = await buildKlaCommand(klaInstallPath, osPlat);
 
+        // Get the appropriate kla agent properties file depending on the platform
+        let klaAgentProperties = 'Not installed yet';
+        klaAgentProperties = await getKlaAgentPropertiesPath(klaInstallPath, osPlat);
+
+        //Luis Sanchez: getting the AGENT proxy configuration
+        let agent_proxy_conf = tl.getHttpProxyConfiguration();
+        console.log(`[BT] Agent proxy url: ${agent_proxy_conf?.proxyUrl}`);
+        console.log(`[BT] Agent proxy user: ${agent_proxy_conf?.proxyUsername}`);
+        console.log(`[BT] Agent proxy password: ${agent_proxy_conf?.proxyPassword}`);
+    
+        //Luis Sanchez: process the agent.properties file
+        //get the proxy parameters from the service connection definition (to be deprecated)
+        //let proxyUrl = tl.getEndpointDataParameter(kiuwanConnection, "proxyurl", true);
+        //let proxyUser = tl.getEndpointDataParameter(kiuwanConnection, "proxyuser", true);
+        //let proxyPassword = tl.getEndpointDataParameter(kiuwanConnection, "proxypassword", true);
+
+        //get the proxy parameter from the AGENT configuration
+        let proxyUrl = "";
+        let proxyUser = "";
+        let proxyPassword = "";
+        if (!(agent_proxy_conf?.proxyUrl === undefined)){ //if proxy defined, then get the rest
+            proxyUrl = agent_proxy_conf?.proxyUrl;
+            if (!(agent_proxy_conf?.proxyUsername === undefined)){ //user defined
+                proxyUser = agent_proxy_conf?.proxyUsername;
+            }//end checking user
+            if (!(agent_proxy_conf?.proxyPassword === undefined)){ //password defined
+                proxyPassword = agent_proxy_conf?.proxyPassword;
+            }//end checking pass
+        }//end checking proxy undefined
+
+        //In any other cases, proxy, user and pass are going to be empty string, processed in the function below
+        //Pass the parameters and the agent path to this function for processing
+        await processAgentProperties(klaAgentProperties, proxyUrl, proxyUser, proxyPassword);
+        //end Luis
+        //End of Luis Sanchez addings
+
         let advancedArgs = "";
         let overrideDotKiuwan: boolean = tl.getBoolInput('overridedotkiuwan');
 
@@ -237,7 +286,7 @@ async function run() {
             }
             else {
                 let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}`;
-                let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint);
+                let kiuwanAnalysisResult = await getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint, klaAgentProperties);
 
                 tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
 
