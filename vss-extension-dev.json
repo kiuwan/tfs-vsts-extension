@@ -1,9 +1,14 @@
 {
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension-dev",
-    "name": "Kiuwan Dev",
-    "version": "2.3.126",
     "publisher": "kiuwan-publisher",
+    "version": "2.5.2",
+    "name": "Kiuwan TFS for Devs",
+    "description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
+    "public": false,
+    "categories": [
+        "Azure Pipelines"
+    ],
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services.Cloud"
@@ -13,12 +18,14 @@
             "version": "[14.2,)"
         }
     ],
-    "public": false,
-    "description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
     "content": {
         "details": {
             "path": "overview.md"
         }
+    },
+    "CustomerQnASupport": {
+        "enableqna": "true",
+        "url": "https://www.kiuwan.com/docs/display/K5/FAQs+-+Frequently+Asked+Questions"
     },
     "links": {
         "getstarted": {
@@ -44,9 +51,6 @@
             "path": "screenshots/tfs-build-progress.png"
         }
     ],
-    "categories": [
-        "Build and release"
-    ],
     "icons": {
         "default": "images/kiuwan-extension.png"
     },
@@ -55,11 +59,13 @@
         "Code Analysis",
         "DevOps",
         "DevSecOps",
-        "Applcation security",
+        "Application security",
         "Security vulnerabilities",
         "OWASP Top 10",
         "Build Task",
-        "SCA"
+        "SCA",
+        "Security",
+        "Quality"
     ],
     "scopes": [
         "vso.code",
@@ -120,8 +126,10 @@
             ],
             "properties": {
                 "name": "Kiuwan",
-                 "uri": "kiuwanTab.html",
-                 "supportsTasks": ["f345ac07-f8a0-4859-bcaf-d71fd62bcf37"]
+                "uri": "kiuwanTab.html",
+                "supportsTasks": [
+                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37"
+                ]
             }
         },
         {
@@ -132,14 +140,14 @@
                 "ms.vss-build-web.build-results-summary-tab"
             ],
             "properties": {
-                 "name": "Kiuwan Summary",
-                 "uri": "kiuwanSummary.html",
-                 "supportsTasks": [
-                     "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
-                     "4e6e25e3-c0b5-4986-8714-5c751945c15f"
-                    ],
-                 "order": 20,
-                 "height": 300
+                "name": "Kiuwan Summary",
+                "uri": "kiuwanSummary.html",
+                "supportsTasks": [
+                    "f345ac07-f8a0-4859-bcaf-d71fd62bcf37",
+                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
+                ],
+                "order": 20,
+                "height": 300
             }
         },
         {
@@ -151,8 +159,10 @@
             ],
             "properties": {
                 "name": "Kiuwan Audit",
-                 "uri": "kiuwanAuditTab.html",
-                 "supportsTasks": ["4e6e25e3-c0b5-4986-8714-5c751945c15f"]
+                "uri": "kiuwanAuditTab.html",
+                "supportsTasks": [
+                    "4e6e25e3-c0b5-4986-8714-5c751945c15f"
+                ]
             }
         },
         {

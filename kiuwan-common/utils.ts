@@ -1,27 +1,50 @@
-//LS: new libraries
-//import tl = require('vsts-task-lib/task'); 
-import tl = require('azure-pipelines-task-lib/task');
-//import ttl = require('vsts-task-tool-lib/tool')
-//import trm = require('vsts-task-lib/toolrunner');
-import ttl = require('azure-pipelines-tool-lib/tool')
-import trm = require('azure-pipelines-task-lib/toolrunner');
-import path = require('path');
-import fs = require('fs');
-import https = require('https');
-import http = require('http');
-import { Url, domainToUnicode, resolve } from 'url';
-//LS: change old libraries for new ones
-//import { _exist } from 'vsts-task-lib/internal';
+
+// ***
+// *** DEPENDENCIES
+// ***
+
+import * as fs from 'fs';
+import * as http from 'http';
+import * as https from 'https';
+import * as net from 'net';
+import * as path from 'path';
+import * as url from 'url';
+import * as azuretasklib from 'azure-pipelines-task-lib/task';
+import * as azuretoollib from 'azure-pipelines-tool-lib/tool';
+import { IExecOptions } from 'azure-pipelines-task-lib/toolrunner';
 import { _exist } from 'azure-pipelines-task-lib/internal';
-import { reject, timeout, async } from 'q';
-import { userInfo, type } from 'os';
 
-//This is used to read the properties file to get some kiuwan information
-var PropertiesReader = require('properties-reader');
 
+// ***
+// *** GLOBAL VARIABLES AND CONSTANTS
+// ***
+
+/** This is used to read the properties file to get some kiuwan information */
+let PropertiesReader = require('properties-reader');
+
+
+// ***
+// *** METHODS IMPLEMENTATION
+// ***
+
+export function getPathSeparator(os: string): string {
+    let sep: string = "\\";
+    if (!os.startsWith("win")) {
+        sep = "/";
+    }
+    return sep;
+}
+
+export function getKiuwanTechnologies(): string {
+    let techs: string =
+        'abap,actionscript,aspnet,c,cobol,cpp,csharp,go,groovy,html,informix,' +
+        'java,javascript,jcl,jsp,kotlin,natural,objectivec,oracleforms,other,' +
+        'perl,php,plsql,powerscript,python,rpg4,ruby,scala,sqlscript,swift,transactsql,vb6,vbnet,xml';
+    return techs;
+}
 
 export function isBuild(): boolean {
-    let s = tl.getVariable("System.HostType");
+    let s = azuretasklib.getVariable("System.HostType");
     if (s === "build") {
         return true;
     }
@@ -30,75 +53,61 @@ export function isBuild(): boolean {
     }
 }
 
-export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, domainId: string, kiuwanEndpoint: string, klaAgentProperties: String) {
+export async function getLastAnalysisResults(kiuwanUrl: url.Url, kiuwanUser: string | undefined, kiuwanPassword: string | undefined, domainId: string, kiuwanEndpoint: string, klaAgentProperties: String) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
 
     const encodedPath = encodeURI(kiuwanEndpoint);
 
-    //Luis Sanchez: get the proxy data from the properties file
-    //let agent_properties_file = klaAgentProperties;
-    //tl.debug(`[KW_LGV] kiuwan_agent_properties_file: ${agent_properties_file}`);
-    //let properties = PropertiesReader(agent_properties_file);
-    //let property_proxy_host = properties.get('proxy.host');
-    //let property_proxy_port = properties.get('proxy.port');
-    //let property_proxy_auth = properties.get('proxy.authentication');
-    //let property_proxy_un = properties.get('proxy.username');
-    //let property_proxy_pw = properties.get('proxy.password');
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_host: [${property_proxy_host}]`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_port: ${property_proxy_port}`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_auth: ${property_proxy_auth}`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_un: ${property_proxy_un}`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_pw: ${property_proxy_pw}`);
-    //end of taking data from the properties file
+    // get the proxy information from the AGENT
+    let property_proxy_host: string = "";
+    let property_proxy_port: string = "";
+    let property_proxy_auth: string = "";
+    let property_proxy_un: string = "";
+    let property_proxy_pw: string = "";
 
-    //Luis Sanchez: get the proxy information from the agent instead
-    //NOTE the names of the variables, kept from previous version reading the properties file.
-    let property_proxy_host = "";
-    let property_proxy_port = "";
-    let property_proxy_auth = "";
-    let property_proxy_un = "";
-    let property_proxy_pw = "";
-    
-    //get the proxy parameter from the AGENT configuration
-    let agent_proxy_conf = tl.getHttpProxyConfiguration();
+    // get the proxy parameter from the AGENT configuration
+    let agent_proxy_conf = azuretasklib.getHttpProxyConfiguration();
     let agentProxyUrl = "";
     let agentProxyUser = "";
     let agentProxyPassword = "";
-    if (!(agent_proxy_conf?.proxyUrl === undefined)){ //if proxy defined, then get the rest
+    if (!(agent_proxy_conf?.proxyUrl === undefined)) {
+        // if proxy defined, then get the other properties
         agentProxyUrl = agent_proxy_conf?.proxyUrl;
-        if (!(agent_proxy_conf?.proxyUsername === undefined)){ //user defined
-         agentProxyUser = agent_proxy_conf?.proxyUsername;
-        }//end checking user
-        if (!(agent_proxy_conf?.proxyPassword === undefined)){ //password defined
+        if (!(agent_proxy_conf?.proxyUsername === undefined)) {
+            // user defined
+            agentProxyUser = agent_proxy_conf?.proxyUsername;
+        }
+        if (!(agent_proxy_conf?.proxyPassword === undefined)) {
+            // password defined
             agentProxyPassword = agent_proxy_conf?.proxyPassword;
-        }//end checking pass
-    }//end checking proxy undefined
+        }
+    }
 
-    //Luis Sanchez: from the proxy url I obtain the protocol, uri and port
-    if (agentProxyUrl.length > 0 && (agentProxyUrl.startsWith("socks") || agentProxyUrl.startsWith("http"))){
-        property_proxy_host =  agentProxyUrl.slice(agentProxyUrl.indexOf("://")+3, agentProxyUrl.lastIndexOf(":"));
-        property_proxy_port =  agentProxyUrl.slice(agentProxyUrl.lastIndexOf(":")+1);
-        if (agentProxyUser != null && agentProxyUser.length > 0){ //if there is user, then auth is basic and we need to put all in the file
+    // obtain the protocol, uri and port from the proxy URL
+    if (agentProxyUrl.length > 0 && (agentProxyUrl.startsWith("socks") || agentProxyUrl.startsWith("http"))) {
+        property_proxy_host = agentProxyUrl.slice(agentProxyUrl.indexOf("://") + 3, agentProxyUrl.lastIndexOf(":"));
+        property_proxy_port = agentProxyUrl.slice(agentProxyUrl.lastIndexOf(":") + 1);
+        if (agentProxyUser != null && agentProxyUser.length > 0) { //if there is user, then auth is basic and we need to put all in the file
             property_proxy_auth = "Basic";
             //set the rest of the properties properties parameters to the new ones:
             property_proxy_un = agentProxyUser;
             property_proxy_pw = agentProxyPassword;
-        }else{//if user.length=0 then no username, no authentication, so auth is going to be None
+        } else {//if user.length=0 then no username, no authentication, so auth is going to be None
             property_proxy_auth = "None";
         }
-    }//end if
-    
+    }
+
     //Luis Sanchez: debug parameters:
-    tl.debug(`[LS] [getLastAnalysisResult] proxy sever taken from agent: ${property_proxy_host}`);
-    tl.debug(`[LS] [getLastAnalysisResult] port taken from agent: ${property_proxy_port}`);
-    //tl.debug(`[LS] [getLastAnalysisResult] protocol taken from agent: ${property_proxy_protocol}`);
-    tl.debug(`[LS] [getLastAnalysisResult] proxy username from agent: ${property_proxy_un}`);
-    tl.debug(`[LS] [getLastAnalysisResult] password password from agent: ${property_proxy_pw}`);
+    azuretasklib.debug(`[KW] [getLastAnalysisResult] proxy sever taken from agent: ${property_proxy_host}`);
+    azuretasklib.debug(`[KW] [getLastAnalysisResult] port taken from agent: ${property_proxy_port}`);
+    //azuretasklib.debug(`[KW] [getLastAnalysisResult] protocol taken from agent: ${property_proxy_protocol}`);
+    azuretasklib.debug(`[KW] [getLastAnalysisResult] proxy username from agent: ${property_proxy_un}`);
+    azuretasklib.debug(`[KW] [getLastAnalysisResult] password password from agent: ${property_proxy_pw}`);
     //end getting proxy data from agent.
 
     let use_proxy = false;
-    let proxy_auth= false;
+    let proxy_auth = false;
 
     if (property_proxy_host != "null" && property_proxy_host != "") {
         use_proxy = true;
@@ -107,22 +116,22 @@ export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string,
         } else if (property_proxy_auth == "Basic") {
             proxy_auth = true;
         } else {
-            tl.debug(`[KW] Proxy auth protocol not supported: ${property_proxy_auth}`);
+            azuretasklib.debug(`[KW] Proxy auth protocol not supported: ${property_proxy_auth}`);
         }
     }
 
-    tl.debug(`[KW_LGV] use_proxy: ${use_proxy}`);
-    tl.debug(`[KW_LGV] proxy_auth: ${proxy_auth}`);
+    azuretasklib.debug(`[KW] use_proxy: ${use_proxy}`);
+    azuretasklib.debug(`[KW] proxy_auth: ${proxy_auth}`);
 
     var options: https.RequestOptions | http.RequestOptions;
     var host = (kiuwanUrl.host.indexOf(':') == -1) ? kiuwanUrl.host : kiuwanUrl.host.substring(0, kiuwanUrl.host.indexOf(':'));
-    tl.debug(`[KW] Host: ${host}`);
-    tl.debug(`[KW] port: ${kiuwanUrl.port}`);
-    tl.debug(`[KW] path: ${encodedPath}`);
-    tl.debug(`[KW] method: ${method}`);
-    tl.debug(`[KW] auth: ${auth}`);
-    tl.debug(`[KW_LGV] kiuwanEndpoint: ${kiuwanEndpoint}`);
-    tl.debug(`[KW_LGV] protocol: ${kiuwanUrl.protocol}`);
+    azuretasklib.debug(`[KW] Host: ${host}`);
+    azuretasklib.debug(`[KW] port: ${kiuwanUrl.port}`);
+    azuretasklib.debug(`[KW] path: ${encodedPath}`);
+    azuretasklib.debug(`[KW] method: ${method}`);
+    azuretasklib.debug(`[KW] auth: ${auth}`);
+    azuretasklib.debug(`[KW] kiuwanEndpoint: ${kiuwanEndpoint}`);
+    azuretasklib.debug(`[KW] protocol: ${kiuwanUrl.protocol}`);
 
     options = {
         protocol: kiuwanUrl.protocol,
@@ -138,23 +147,23 @@ export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string,
         options.headers = { 'X-KW-CORPORATE-DOMAIN-ID': domainId };
     }
 
-    tl.debug(`[KW] Kiuwan API call: ${kiuwanUrl.protocol}//${kiuwanUrl.host}${encodedPath}`);
+    azuretasklib.debug(`[KW] Kiuwan API call: ${kiuwanUrl.protocol}//${kiuwanUrl.host}${encodedPath}`);
 
     if (kiuwanUrl.protocol === 'http:') { //to be deprecated as kiuwan is not http anymore
         return callKiuwanApiHttp(options);
     }
     if (kiuwanUrl.protocol === 'https:') {
-        tl.debug(`[KW] [getLastAnalysisResults] useproxy: ${use_proxy}`);
-        if ( use_proxy ) {
-            if ( proxy_auth ){ //we have user and pw for the proxy
-                const auth_p = 'Basic ' + Buffer.from(property_proxy_un + ':' + property_proxy_pw).toString('base64');
-                tl.debug(`[LS] [getLastAnalysisResults] calling httpApiHttpsProxy with auth: ${auth_p}`);
+        azuretasklib.debug(`[KW] [getLastAnalysisResults] useproxy: ${use_proxy}`);
+        if (use_proxy) {
+            if (proxy_auth) { //we have user and pw for the proxy
+                const auth_p: string = 'Basic ' + Buffer.from(property_proxy_un + ':' + property_proxy_pw).toString('base64');
+                azuretasklib.debug(`[KW] [getLastAnalysisResults] calling httpApiHttpsProxy with auth: ${auth_p}`);
                 return callKiuwanApiHttpsProxy(options, property_proxy_host, property_proxy_port, auth_p);
             } else {
-                tl.debug(`[LS] [getLastAnalysisResults] calling httpApiHttpsProxy with NO auth`);
+                azuretasklib.debug(`[KW] [getLastAnalysisResults] calling httpApiHttpsProxy with NO auth`);
                 return callKiuwanApiHttpsProxyNoAuth(options, property_proxy_host, property_proxy_port);
             }
-            
+
         } else {
             return callKiuwanApiHttps(options);
         }
@@ -174,7 +183,7 @@ export function saveKiuwanResults(result: string, type: string): string {
         default:
     }
 
-    const resultsDirPath = path.join(tl.getVariable('build.artifactStagingDirectory'), '.kiuwanResults');
+    const resultsDirPath = path.join(azuretasklib.getVariable('build.artifactStagingDirectory'), '.kiuwanResults');
     const resultsFilePath = path.join(resultsDirPath, fileName);
 
     if (!_exist(resultsDirPath)) {
@@ -186,7 +195,7 @@ export function saveKiuwanResults(result: string, type: string): string {
 }
 
 export function uploadKiuwanResults(resultsPath: string, title: string, type: string) {
-    tl.debug(`[KW] Uploading Kiuwan results from ${resultsPath}`);
+    azuretasklib.debug(`[KW] Uploading Kiuwan results from ${resultsPath}`);
 
     let attachmentType = "";
     switch (type) {
@@ -199,7 +208,7 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
         default:
     }
 
-    tl.command(
+    azuretasklib.command(
         'task.addattachment',
         {
             type: attachmentType,
@@ -208,30 +217,24 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
         resultsPath
     );
 
-    tl.debug('[KW] Results uploaded successfully')
+    azuretasklib.debug('[KW] Results uploaded successfully')
 }
 
-//This function calls the API from kiuwan using a authenticated proxy
-async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host, proxy_port, proxy_auth ) {
-    
-    tl.debug("[KW] Calling Kiuwan https API with proxy");
+/** Calls the API from kiuwan using a authenticated proxy */
+async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host: string, proxy_port: string, proxy_auth: string) {
 
-    let k_host = options.host;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.host: ${k_host}`);
-    let k_path = options.path;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.path: ${k_path}`);
+    azuretasklib.debug("[KW] Calling Kiuwan https API with proxy");
+
+    let k_host: string = options.host; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - kiuwan.host: ${k_host}`);
+    let k_path: string = options.path; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - kiuwan.path: ${k_path}`);
     //Luis Sanchez: added port as this is always https
-    let k_hostandport = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
-    let k_auth = options.auth;  
-    let p_host = proxy_host;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.host: ${p_host}`);
-    let p_port = proxy_port;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.port: ${p_port}`);
-    let p_auth = proxy_auth;
-
+    let k_hostandport: string = k_host + ":443"; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - kiuwan.hostandport: ${k_hostandport}`);
+    let k_auth: string = options.auth;
+    let p_host: string = proxy_host; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - proxy.host: ${p_host}`);
+    let p_port: string = proxy_port; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - proxy.port: ${p_port}`);
+    let p_auth: string = proxy_auth;
 
     return new Promise((resolve, reject) => {
-
-        //Luis sanchez comment: why these new instances-->commenting them
-        //const http = require('http')
-        //const https = require('https')
-
         http.request({
             host: p_host, // IP address of proxy server
             port: p_port, // port of proxy server
@@ -240,23 +243,24 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
             headers: {
                 'Proxy-Authorization': p_auth
             },
-        }).on('connect', (res, socket) => {
-            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ http.toString());
-            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ http.request.path);
-
+        }).on('connect', (res: http.IncomingMessage, socket: net.Socket) => {
             if (res.statusCode === 200) { // connected to proxy server
-                tl.debug ('[LS] [callKiuwanApiHttpsProxy] Connected to proxy server, doing the https call...');
-                https.get({
-                    host: k_host, 
-                    path: k_path, 
+                azuretasklib.debug('[KW] Call API via HTTPS and Proxy - Connected to proxy server, doing the https call...');
+                let reqOpts: https.RequestOptions = {
+                    host: k_host,
+                    path: k_path,
                     auth: k_auth,
-                    socket: socket, // using a tunnel
+
+                    /* Socket not allowed as part of request options, has this ever worked? */
+                    //socket: socket, // using a tunnel
+
                     agent: false    // cannot use a default agent
-                }, (res) => {
-                    tl.debug ('[LS] [callKiuwanApiHttpsProxy] ...reading response ...');
+                };
+                https.get(reqOpts, (res) => {
+                    azuretasklib.debug('[KW] Call API via HTTPS and Proxy - reading response...');
                     let chunks = []
                     if (res.statusCode != 200) {
-                        tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
+                        azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
                         console.error('error', `Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
                         reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
                     }
@@ -265,14 +269,14 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
                         console.log('DONE', Buffer.concat(chunks).toString('utf8'))
                         resolve(Buffer.concat(chunks).toString('utf8'))
                     })
-                })
+                });
             } else {
-                tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error connecting to proxy server (${res.statusCode}): ${res.statusMessage}`)
+                azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - Kiuwan call error connecting to proxy server (${res.statusCode}): ${res.statusMessage}`)
                 console.error('error', `Kiuwan call error connecting with proxy server (${res.statusCode}): ${res.statusMessage}`)
                 reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
             }
         }).on('error', (err) => {
-            tl.debug(`[KW] [callKiuwanApiHttpsProxy] Response error: ${err}`)
+            azuretasklib.debug(`[KW] Call API via HTTPS and Proxy - Response error: ${err}`)
             console.error('error', err)
             reject(new Error(`Response error: ${err}`))
         }).end()
@@ -281,26 +285,20 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
 
 }
 
-//Luis Sanchez: this function calls to the Kiuwan API using
-//a proxy server with no auth, the only difference with previous function is the
-//headers part
+/** Calls to the Kiuwan API using a proxy server with no auth, the only difference with previous function is the headers part */
 async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, proxy_host, proxy_port) {
-    
-    tl.debug("[KW] Calling Kiuwan https API with proxy with no auth");
 
-    let k_host = options.host;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.host: ${k_host}`);
-    let k_path = options.path;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.path: ${k_path}`);
+    azuretasklib.debug("[KW] Calling Kiuwan https API with proxy with no auth");
+
+    let k_host: string = options.host; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - kiuwan.host: ${k_host}`);
+    let k_path: string = options.path; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - kiuwan.path: ${k_path}`);
     //Luis Sanchez: added port as this is always https
-    let k_hostandport = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
-    let k_auth = options.auth;  
-    let p_host = proxy_host;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.host: ${p_host}`);
-    let p_port = proxy_port;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.port: ${p_port}`);
-    
-    return new Promise((resolve, reject) => {
-        //Luis sanchez comment: why these new instances¿?
-        //const http = require('http')
-        //const https = require('https')
+    let k_hostandport: string = k_host + ":443"; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - kiuwan.hostandport: ${k_hostandport}`);
+    let k_auth: string = options.auth;
+    let p_host: string = proxy_host; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - proxy.host: ${p_host}`);
+    let p_port: string = proxy_port; azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - proxy.port: ${p_port}`);
 
+    return new Promise((resolve, reject) => {
         http.request({
             host: p_host, // IP address of proxy server
             port: p_port, // port of proxy server
@@ -308,18 +306,22 @@ async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, prox
             path: k_hostandport, //added 443 port for https!
         }).on('connect', (res, socket) => {
             if (res.statusCode === 200) { // connected to proxy server
-                tl.debug ('[KW_LS] Connected to proxy server, doing the https call...');
-                https.get({
-                    host: k_host, 
-                    path: k_path, 
+                azuretasklib.debug('[KW] Connected to proxy server, doing the https call...');
+                let reqOpts: https.RequestOptions = {
+                    host: k_host,
+                    path: k_path,
                     auth: k_auth,
-                    socket: socket, // using a tunnel
+
+                    /* Socket not allowed as part of request options, has this ever worked? */
+                    //socket: socket, // using a tunnel
+
                     agent: false    // cannot use a default agent
-                }, (res) => {
-                    tl.debug ('[KW_LS] ...reading response ...');
+                };
+                https.get(reqOpts, (res) => {
+                    azuretasklib.debug('[KW] ...reading response ...');
                     let chunks = []
                     if (res.statusCode != 200) {
-                        tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
+                        azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
                         console.error('error', `Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
                         reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
                     }
@@ -330,12 +332,12 @@ async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, prox
                     })
                 })
             } else {
-                tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Kiuwan call error connecting to proxy server (${res.statusCode}): ${res.statusMessage}`)
+                azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - Kiuwan call error connecting to proxy server (${res.statusCode}): ${res.statusMessage}`)
                 console.error('error', `Kiuwan call error connecting with proxy server (${res.statusCode}): ${res.statusMessage}`)
                 reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
             }
         }).on('error', (err) => {
-            tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Response error: ${err}`)
+            azuretasklib.debug(`[KW] Call API via HTTPS and Proxy NoAuth - Response error: ${err}`)
             console.error('error', err)
             reject(new Error(`Response error: ${err}`))
         }).end()
@@ -345,7 +347,7 @@ async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, prox
 }
 
 async function callKiuwanApiHttps(options: https.RequestOptions) {
-    tl.debug("[KW] Calling Kiuwan https API");
+    azuretasklib.debug("[KW] Calling Kiuwan https API");
 
     let responseString = '';
 
@@ -379,7 +381,7 @@ async function callKiuwanApiHttps(options: https.RequestOptions) {
 }
 
 async function callKiuwanApiHttp(options: http.RequestOptions) {
-    tl.debug("[KW] Calling Kiuwan http API (to be deprecated)");
+    azuretasklib.debug("[KW] Calling Kiuwan http API (to be deprecated)");
 
     let responseString = '';
 
@@ -412,7 +414,7 @@ async function callKiuwanApiHttp(options: http.RequestOptions) {
     });
 }
 
-export async function getKlaAgentPropertiesPath( klaPath: string, platform: string) {
+export async function getKlaAgentPropertiesPath(klaPath: string, platform: string) {
     let agentprops: string;
     let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
     let dirExist: boolean;
@@ -453,21 +455,21 @@ export async function buildKlaCommand(klaPath: string, platform: string) {
 export async function downloadInstallKla(endpointConnectionName: string, toolName: string, toolVersion: string, platform: string) {
     let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
 
-    let toolPath = ttl.findLocalTool(toolName, toolVersion);
+    let toolPath = azuretoollib.findLocalTool(toolName, toolVersion);
 
     if (!toolPath) {
-        let downloadUrl: string = tl.getEndpointUrl(endpointConnectionName, false) + '/pub/analyzer/KiuwanLocalAnalyzer.zip';
+        let downloadUrl: string = azuretasklib.getEndpointUrl(endpointConnectionName, false) + '/pub/analyzer/KiuwanLocalAnalyzer.zip';
         console.log(`[KW] Downloading KLA from ${downloadUrl}`);
 
-        let downloadPath: string = await ttl.downloadTool(downloadUrl, 'KiuwanLocalAnalyzer.zip');
+        let downloadPath: string = await azuretoollib.downloadTool(downloadUrl, 'KiuwanLocalAnalyzer.zip');
 
-        let extPath: string = await ttl.extractZip(downloadPath);
+        let extPath: string = await azuretoollib.extractZip(downloadPath);
 
-        toolPath = await ttl.cacheDir(extPath, toolName, toolVersion);
+        toolPath = await azuretoollib.cacheDir(extPath, toolName, toolVersion);
         // Setting +x permision to the kla shell script in unix based platforms
         if (platform === 'linux' || platform === 'darwin') {
-            let ret = await tl.exec('chmod', `+x ${toolPath}/${defaultKiuwanDir}/bin/agent.sh`);
-            tl.debug(`[KW] chmod retuned: ${ret}`);
+            let ret = await azuretasklib.exec('chmod', `+x ${toolPath}/${defaultKiuwanDir}/bin/agent.sh`);
+            azuretasklib.debug(`[KW] chmod retuned: ${ret}`);
         }
         console.log(`[KW] KLA downloaded and  installed in ${toolPath}`)
     }
@@ -479,9 +481,9 @@ export async function runKiuwanLocalAnalyzer(command: string, args: string) {
     let exitCode: Number = 0;
 
     // Run KLA with ToolRunner
-    let kiuwan = tl.tool(command).line(args);
+    let kiuwan = azuretasklib.tool(command).line(args);
 
-    let options = <trm.IExecOptions>{
+    let options = <IExecOptions>{
         cwd: '.',
         env: process.env,
         silent: false,
@@ -494,7 +496,7 @@ export async function runKiuwanLocalAnalyzer(command: string, args: string) {
 
     kiuwan.on('stdout', (data) => {
         let output = data.toString().trim();
-        tl.debug(output);
+        azuretasklib.debug(output);
     })
 
     exitCode = await kiuwan.exec(options);
@@ -502,7 +504,7 @@ export async function runKiuwanLocalAnalyzer(command: string, args: string) {
     return exitCode;
 }
 
-export function setAgentTempDir(agentHomeDir: string, platform: string) {
+export function setAgentTempDir(agentHomeDir: string | undefined, platform: string) {
     let tempDir: string;
     if (platform === 'linux' || platform === 'darwin') {
         tempDir = `${agentHomeDir}/_temp`
@@ -516,12 +518,12 @@ export function setAgentTempDir(agentHomeDir: string, platform: string) {
         fs.mkdirSync(tempDir);
     }
 
-    tl.setVariable('Agent.TempDirectory', tempDir);
+    azuretasklib.setVariable('Agent.TempDirectory', tempDir);
 
     return tempDir;
 }
 
-export function setAgentToolsDir(agentHomeDir: string, platform: string) {
+export function setAgentToolsDir(agentHomeDir: string | undefined, platform: string) {
     let toolsDir: string;
     if (platform === 'linux' || platform === 'darwin') {
         toolsDir = `${agentHomeDir}/_tools`
@@ -530,7 +532,7 @@ export function setAgentToolsDir(agentHomeDir: string, platform: string) {
         toolsDir = `${agentHomeDir}\\_tools`
     }
 
-    tl.setVariable('Agent.ToolsDirectory', toolsDir);
+    azuretasklib.setVariable('Agent.ToolsDirectory', toolsDir);
 
     return toolsDir;
 }
@@ -647,15 +649,15 @@ export function noFilesToAnalyze(retCode: Number): boolean {
     return (retCode === 18);
 }
 
-//Luis Sanchez adding: function to change the agent.properties file with values taken from the
-//service connection of the plugion. Needed because the plugin calls a shell that call the kiuwan
-//agent and this agent will use the proxy configuration to do the analysis.
-//The plugin then will take those values from the agent.properties file and use them in the ulter
-//connections to the kiuwan api
-export async function processAgentProperties(agent_properties_file: string, proxyUrl: string, proxyUser: string, proxyPassword: string){
+/**
+ * Change the agent.properties file with values taken from the service connection of the plugion.
+ * Needed because the plugin calls a shell that call the kiuwan agent and this agent will use the proxy configuration to do the analysis.
+ * The plugin then will take those values from the agent.properties file and use them in the ulter connections to the kiuwan API.
+ */
+export async function processAgentProperties(agent_properties_file: string, proxyUrl: string, proxyUser: string, proxyPassword: string) {
 
-    //Debug, showing the existing properties in the agent.properties file
-    tl.debug(`[LS] Proxy values from agent_properties_file: ${agent_properties_file}`);
+    // Debug, showing the existing properties in the agent.properties file
+    azuretasklib.debug(`[KW] Proxy values from agent_properties_file: ${agent_properties_file}`);
     let properties = PropertiesReader(agent_properties_file);
     let property_proxy_host = properties.get('proxy.host');
     let property_proxy_port = properties.get('proxy.port');
@@ -663,44 +665,46 @@ export async function processAgentProperties(agent_properties_file: string, prox
     let property_proxy_un = properties.get('proxy.username');
     let property_proxy_pw = properties.get('proxy.password');
     let property_proxy_protocol = properties.get('proxy.protocol');
-    tl.debug(`[LS] property_proxy_host: [${property_proxy_host}]`);
-    tl.debug(`[LS] property_proxy_port: ${property_proxy_port}`);
-    tl.debug(`[LS] property_proxy_auth: ${property_proxy_auth}`);
-    tl.debug(`[LS] property_proxy_un: ${property_proxy_un}`);
-    tl.debug(`[LS] property_proxy_pw: ${property_proxy_pw}`);
-    tl.debug(`[LS] property_proxy_protocol: ${property_proxy_protocol}`);
+    azuretasklib.debug(`[KW] property_proxy_host: [${property_proxy_host}]`);
+    azuretasklib.debug(`[KW] property_proxy_port: ${property_proxy_port}`);
+    azuretasklib.debug(`[KW] property_proxy_auth: ${property_proxy_auth}`);
+    azuretasklib.debug(`[KW] property_proxy_un: ${property_proxy_un}`);
+    azuretasklib.debug(`[KW] property_proxy_pw: ${property_proxy_pw}`);
+    azuretasklib.debug(`[KW] property_proxy_protocol: ${property_proxy_protocol}`);
 
-    //Debug, to show the proxy data comming from the Service connection
-    tl.debug(`[LS] Proxy information get from the plugin agent (if any):`);
-    tl.debug(`[LS] Proxy URL: ${proxyUrl}`);
-    tl.debug(`[LS] Proxy User: ${proxyUser}`);
-    tl.debug(`[LS] Proxy Password: ${proxyPassword}`);
-    
-    
-    //Step1: see if proxy host is okey. The proxy value has to be in a good format to continue
-    // taking this information into consideration
-    if (proxyUrl.length > 0 && (proxyUrl.startsWith("socks") || proxyUrl.startsWith("http"))){
-        property_proxy_host =  proxyUrl.slice(proxyUrl.indexOf("://")+3, proxyUrl.lastIndexOf(":"));
-        property_proxy_port =  proxyUrl.slice(proxyUrl.lastIndexOf(":")+1);
-        property_proxy_protocol = proxyUrl.slice(0,proxyUrl.indexOf("://"));
-        tl.debug(`[LS] sever taken from agent: ${property_proxy_host}`);
-        tl.debug(`[LS] port taken from agent: ${property_proxy_port}`);
-        tl.debug(`[LS] protocol taken from agent: ${property_proxy_protocol}`);
-        tl.debug(`[LS] username from agent: ${proxyUser}`);
-        tl.debug(`[LS] password from agent: ${proxyPassword}`);
-      //step 2: take user and password
-        if (proxyUser != null && proxyUser.length > 0){ //if there is user, then auth is basic and we need to put all in the file
+    // Debug, to show the proxy data comming from the Service connection
+    azuretasklib.debug(`[KW] Proxy information get from the plugin agent (if any):`);
+    azuretasklib.debug(`[KW] Proxy URL: ${proxyUrl}`);
+    azuretasklib.debug(`[KW] Proxy User: ${proxyUser}`);
+    azuretasklib.debug(`[KW] Proxy Password: ${proxyPassword}`);
+
+
+    // Step 1: see if proxy host is okey.
+    // The proxy value has to be in a good format to continue taking this information into consideration
+    if (proxyUrl.length > 0 && (proxyUrl.startsWith("socks") || proxyUrl.startsWith("http"))) {
+        property_proxy_host = proxyUrl.slice(proxyUrl.indexOf("://") + 3, proxyUrl.lastIndexOf(":"));
+        property_proxy_port = proxyUrl.slice(proxyUrl.lastIndexOf(":") + 1);
+        property_proxy_protocol = proxyUrl.slice(0, proxyUrl.indexOf("://"));
+        azuretasklib.debug(`[KW] server taken from agent: ${property_proxy_host}`);
+        azuretasklib.debug(`[KW] port taken from agent: ${property_proxy_port}`);
+        azuretasklib.debug(`[KW] protocol taken from agent: ${property_proxy_protocol}`);
+        azuretasklib.debug(`[KW] username from agent: ${proxyUser}`);
+        azuretasklib.debug(`[KW] password from agent: ${proxyPassword}`);
+        // Step 2: take user and password
+        if (proxyUser != null && proxyUser.length > 0) {
+            // if there is user, then auth is basic and we need to put all in the file
             property_proxy_auth = "Basic";
-            //set the rest of the properties properties parameters to the new ones:
+            // set the rest of the properties properties parameters to the new ones
             property_proxy_un = proxyUser;
             property_proxy_pw = proxyPassword;
-        }else{//if user.length=0 then no username, no authentication, so auth is going to be None
+        } else {
+            // if user.length=0 then no username, no authentication, so auth is going to be None
             property_proxy_auth = "None";
         }
-    }else{//If the proxy is not ok, or is empty, the user does not want to use a proxy server, so 
-          // the default values are used.
-          //Useful when the user change his mind and modifies the service connection.
-        tl.debug(`[LS] proxy info not good or empty. Resetting the values to default...`);
+    } else {
+        // If the proxy is not ok, or is empty, the user does not want to use a proxy server, so the default values are used.
+        // Useful when the user change his mind and modifies the service connection.
+        azuretasklib.debug(`[KW] Proxy info not good or empty. Resetting the values to default...`);
         property_proxy_host = "";
         property_proxy_port = "3128";
         property_proxy_un = "";
@@ -709,29 +713,33 @@ export async function processAgentProperties(agent_properties_file: string, prox
         property_proxy_auth = "None";
     }
 
-    //Read the agent.properties file, replace values and write it again
-    //NOTE: I do not use PropertiesReader(prop.file) because this library uses the "ini" format and when
+    // Read the agent.properties file, replace values and write it again
+    // NOTE: I do not use PropertiesReader(prop.file) because this library uses the "ini" format and when
     // I write the file back to disk everything is messed up. But if the properties file follows the "ini"
     // format, the correct way of processing the file is by using the properties-reader library
-    tl.debug(`[LS] Replacing values in file ` + agent_properties_file);
-    let propString = fs.readFileSync(agent_properties_file);
+    azuretasklib.debug(`[KW] Replacing values in file ` + agent_properties_file);
+    let propBuffer: Buffer = fs.readFileSync(agent_properties_file);
+    let propString: string = propBuffer.toString('utf8');
     propString = replaceProperty(propString, "proxy.host", property_proxy_host);
     propString = replaceProperty(propString, "proxy.port", property_proxy_port);
     propString = replaceProperty(propString, "proxy.authentication", property_proxy_auth);
     propString = replacePropertyWithHack(propString, "proxy.username", property_proxy_un);
     propString = replaceProperty(propString, "proxy.password", property_proxy_pw);
     propString = replaceProperty(propString, "proxy.protocol", property_proxy_protocol);
-    fs.writeFileSync(agent_properties_file,propString);
-    tl.debug(`[LS] New proxy values written in file `+agent_properties_file);
+    fs.writeFileSync(agent_properties_file, propString);
+    azuretasklib.debug(`[KW] New proxy values written in file ` + agent_properties_file);
 
     return;
-} 
+}
 
-//This is a helper function to look for a property name in string "inString". The property comes from
-// a properties file, so it takes the line break into consideration.
-// input: string taken from file with <property>=<value> or <property>= lines
-// output: new string with the same lines but the one with the replacement of <property>=<value> 
-function replaceProperty (inString: string, propertyName: string, propertyNewValue: string) : string {
+/**
+ * Helper function to look for a property name in string "inString". The property comes from a properties file,
+ * so it takes the line break into consideration.
+ * 
+ * input: string taken from file with <property>=<value> or <property>= lines
+ * output: new string with the same lines but the one with the replacement of <property>=<value>
+ */
+function replaceProperty(inString: string, propertyName: string, propertyNewValue: string): string {
     let out = "";
     let firstPositon = 0;
     let lastPosition = 0;
@@ -739,17 +747,19 @@ function replaceProperty (inString: string, propertyName: string, propertyNewVal
     firstPositon = inString.indexOf(propertyName);
     lastPosition = inString.indexOf("\n", firstPositon);
 
-    out = inString.slice(0,firstPositon) + propertyName + "=" 
-    + propertyNewValue +  inString.slice(lastPosition, inString.length);
+    out = inString.slice(0, firstPositon) + propertyName + "="
+        + propertyNewValue + inString.slice(lastPosition, inString.length);
 
     return out;
 }
 
-//This is a helper function to look for a property name in string "inString". The property comes from
-// a properties file, so it takes the line break into consideration.
-// input: string taken from file with <property>=<value> or <property>= lines
-// output: new string with the same lines but the one with the replacement of <property>=<value> 
-function replacePropertyWithHack (inString: string, propertyName: string, propertyNewValue: string) : string {
+/** Helper function to look for a property name in string "inString". The property comes from a properties file,
+ * so it takes the line break into consideration.
+ * 
+ * input: string taken from file with <property>=<value> or <property>= lines
+ * output: new string with the same lines but the one with the replacement of <property>=<value>
+ */
+function replacePropertyWithHack(inString: string, propertyName: string, propertyNewValue: string): string {
     let out = "";
     let firstPositon = 0;
     let lastPosition = 0;
@@ -759,40 +769,37 @@ function replacePropertyWithHack (inString: string, propertyName: string, proper
 
     //LS: this is NOT a solution at all, but to avoid problems when the user has scape characters inside
     //just removing some escape secuences... maybe throwing the problem to another part
-    tl.debug ("[LS][replacePropertyWithHack]->propertyvalue before hacking: " + propertyNewValue);
+    azuretasklib.debug("[KW][replacePropertyWithHack]->propertyvalue before hacking: " + propertyNewValue);
     //check all possible escape characters...
-    if (propertyNewValue.indexOf("\\t") >= 0){
-       propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\t") ) + "\\\\t" + 
-           propertyNewValue.substring(propertyNewValue.indexOf("\\t") + 2, propertyNewValue.length); 
+    if (propertyNewValue.indexOf("\\t") >= 0) {
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\t")) + "\\\\t" +
+            propertyNewValue.substring(propertyNewValue.indexOf("\\t") + 2, propertyNewValue.length);
     }
-    if (propertyNewValue.indexOf("\\v") >= 0){
-        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\v") ) + "\\\\v" + 
-            propertyNewValue.substring(propertyNewValue.indexOf("\\v") + 2, propertyNewValue.length); 
+    if (propertyNewValue.indexOf("\\v") >= 0) {
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\v")) + "\\\\v" +
+            propertyNewValue.substring(propertyNewValue.indexOf("\\v") + 2, propertyNewValue.length);
     }
-    if (propertyNewValue.indexOf("\\0") >= 0){
-        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\0") ) + "\\\\0" + 
-            propertyNewValue.substring(propertyNewValue.indexOf("\\0") + 2, propertyNewValue.length); 
+    if (propertyNewValue.indexOf("\\0") >= 0) {
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\0")) + "\\\\0" +
+            propertyNewValue.substring(propertyNewValue.indexOf("\\0") + 2, propertyNewValue.length);
     }
-    if (propertyNewValue.indexOf("\\b") >= 0){
-        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\b") ) + "\\\\b" + 
-            propertyNewValue.substring(propertyNewValue.indexOf("\\b") + 2, propertyNewValue.length); 
+    if (propertyNewValue.indexOf("\\b") >= 0) {
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\b")) + "\\\\b" +
+            propertyNewValue.substring(propertyNewValue.indexOf("\\b") + 2, propertyNewValue.length);
     }
-    if (propertyNewValue.indexOf("\\f") >= 0){
-        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\f") ) + "\\\\f" + 
-            propertyNewValue.substring(propertyNewValue.indexOf("\\f") + 2, propertyNewValue.length); 
+    if (propertyNewValue.indexOf("\\f") >= 0) {
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\f")) + "\\\\f" +
+            propertyNewValue.substring(propertyNewValue.indexOf("\\f") + 2, propertyNewValue.length);
     }
-    if (propertyNewValue.indexOf("\\n") >= 0){
-        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\n") ) + "\\\\n" + 
-            propertyNewValue.substring(propertyNewValue.indexOf("\\n") + 2, propertyNewValue.length); 
+    if (propertyNewValue.indexOf("\\n") >= 0) {
+        propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\n")) + "\\\\n" +
+            propertyNewValue.substring(propertyNewValue.indexOf("\\n") + 2, propertyNewValue.length);
     }
-    
-    tl.debug ("[LS][replacePropertyWithHack]->propertyvalue after hacking: " + propertyNewValue);
 
-    out = inString.slice(0,firstPositon) + propertyName + "=" 
-    + propertyNewValue +  inString.slice(lastPosition, inString.length);
+    azuretasklib.debug("[KW][replacePropertyWithHack]->propertyvalue after hacking: " + propertyNewValue);
+
+    out = inString.slice(0, firstPositon) + propertyName + "="
+        + propertyNewValue + inString.slice(lastPosition, inString.length);
 
     return out;
 }
-
-
-//--- end changes Luis Sanchez ----

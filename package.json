@@ -1,17 +1,27 @@
 {
-  "name": "tfs-extensiont-with-new-libraries",
-  "version": "1.0.0",
-  "description": "",
+  "name": "kiuwan-analysis-extension",
+  "version": "2.5.2",
+  "description": "Kiuwan TFS Extension",
   "main": "index.js",
   "dependencies": {
     "tfx-cli": "^0.7.11",
-    "vss-web-extension-sdk": "^5.141.0"
+    "vss-web-extension-sdk": "^5.141.0",
+    "azure-pipelines-task-lib": "^2.9.3",
+    "azure-pipelines-tool-lib": "^0.12.0",
+    "properties-reader": "^2.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^13.13.4",
+    "@types/q": "^1.5.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "kiuwan-publisher",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kiuwan/tfs-vsts-extension"
+  }
 }

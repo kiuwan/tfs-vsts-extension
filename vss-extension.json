@@ -1,14 +1,15 @@
 {
- 	"manifestVersion": 1,
-	"id": "kiuwan-analysis-extension",
- 	"publisher": "kiuwan-publisher",
- 	"version": "2.5.2",
- 	"version": "2.5.2",
- 	"name": "Kiuwan TFS Extension",
- 	"description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
- 	"public": true,
- 	"categories": ["Azure Pipelines"],
- 	"targets": [
+    "manifestVersion": 1,
+    "id": "kiuwan-analysis-extension",
+    "publisher": "kiuwan-publisher",
+    "version": "2.5.2",
+    "name": "Kiuwan TFS Extension",
+    "description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
+    "public": true,
+    "categories": [
+        "Azure Pipelines"
+    ],
+    "targets": [
         {
             "id": "Microsoft.VisualStudio.Services.Cloud"
         },
@@ -16,8 +17,8 @@
             "id": "Microsoft.TeamFoundation.Server",
             "version": "[14.2,)"
         }
-	],
-	"content": {
+    ],
+    "content": {
         "details": {
             "path": "overview.md"
         }
@@ -26,7 +27,7 @@
         "enableqna": "true",
         "url": "https://www.kiuwan.com/docs/display/K5/FAQs+-+Frequently+Asked+Questions"
     },
-	"links": {
+    "links": {
         "getstarted": {
             "uri": "https://www.kiuwan.com/docs/display/K5/Microsoft+TFS-Azure+DevOps+Extension"
         },
@@ -49,8 +50,8 @@
         {
             "path": "screenshots/tfs-build-progress.png"
         }
-	],
-	"icons": {
+    ],
+    "icons": {
         "default": "images/kiuwan-extension.png"
     },
     "tags": [
@@ -58,20 +59,20 @@
         "Code Analysis",
         "DevOps",
         "DevSecOps",
-        "Applcation security",
+        "Application security",
         "Security vulnerabilities",
         "OWASP Top 10",
         "Build Task",
-		"SCA",
-		"Security",
-		"Quality"
+        "SCA",
+        "Security",
+        "Quality"
     ],
     "scopes": [
         "vso.code",
         "vso.build",
         "vso.test"
     ],
- 	"files": [
+    "files": [
         {
             "path": "images",
             "addressable": true
@@ -96,6 +97,9 @@
             "addressable": true
         },
         {
+            "path": "kiuwan-common"
+        },
+        {
             "path": "baseline-analysis-task"
         },
         {
@@ -111,8 +115,8 @@
             "addressable": true,
             "packagePath": "lib"
         }
-	],
-	"contributions": [
+    ],
+    "contributions": [
         {
             "id": "kiuwan-info-tab",
             "type": "ms.vss-build-web.build-results-tab",
@@ -266,5 +270,4 @@
             }
         }
     ]
-	
- }
+}
