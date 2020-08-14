@@ -36,10 +36,10 @@ export function getPathSeparator(os: string): string {
 }
 
 export function getKiuwanTechnologies(): string {
+    // techs 'informix', 'plsql' and 'transactsql' are treated differently because user has to choose only one of them
     let techs: string =
-        'abap,actionscript,aspnet,c,cobol,cpp,csharp,go,groovy,html,informix,' +
-        'java,javascript,jcl,jsp,kotlin,natural,objectivec,oracleforms,other,' +
-        'perl,php,plsql,powerscript,python,rpg4,ruby,scala,sqlscript,swift,transactsql,vb6,vbnet,xml';
+        'abap,actionscript,aspnet,c,cobol,cpp,csharp,go,groovy,html,java,javascript,jcl,jsp,kotlin,natural,' +
+        'objectivec,oracleforms,other,perl,php,powerscript,python,rpg4,ruby,scala,sqlscript,swift,vb6,vbnet,xml';
     return techs;
 }
 

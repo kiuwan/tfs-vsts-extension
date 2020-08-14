@@ -4,7 +4,6 @@
   "description": "Kiuwan TFS Extension",
   "main": "index.js",
   "dependencies": {
-    "tfx-cli": "^0.7.11",
     "vss-web-extension-sdk": "^5.141.0",
     "azure-pipelines-task-lib": "^2.9.3",
     "azure-pipelines-tool-lib": "^0.12.0",

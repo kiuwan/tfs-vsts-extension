@@ -53,14 +53,9 @@
     /* Experimental Options */
     // "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
-    "types": [
-            "vss-web-extension-sdk",
-            "jquery",
-            "node"
-        ]
+    "skipLibCheck": true                      /* Workaround for https://github.com/microsoft/vss-web-extension-sdk/issues/112 */
   },
   "exclude": [
-    "node_modules",
     "enhancer/kiuwanAuditTab.ts",
     "enhancer/kiuwanTab.ts",
     "enhancer/kiuwanSummary.ts"
