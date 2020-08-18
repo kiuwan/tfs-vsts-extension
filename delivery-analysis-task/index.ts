@@ -6,7 +6,7 @@
 import * as os from 'os';
 import * as url from 'url';
 import * as azuretasklib from 'azure-pipelines-task-lib/task';
-import * as kwutils from '../kiuwan-common/utils';
+import * as kwutils from 'kiuwan-common/utils';
 
 
 // ***

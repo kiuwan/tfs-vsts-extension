@@ -1,0 +1,17 @@
+{
+  "name": "kiuwan-common",
+  "version": "2.5.2",
+  "description": "Utility methods work with Kiuwan API + TFS / Azure",
+  "main": "./utils.js",
+  "types": "./utils.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "install": "tsc",
+    "prepublish": "tsc"
+  },
+  "author": "Victor Tamames",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^2.7.2"
+  }
+}

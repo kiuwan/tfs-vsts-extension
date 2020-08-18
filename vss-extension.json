@@ -97,9 +97,6 @@
             "addressable": true
         },
         {
-            "path": "kiuwan-common"
-        },
-        {
             "path": "baseline-analysis-task"
         },
         {

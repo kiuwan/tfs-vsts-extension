@@ -7,7 +7,7 @@
     "description": "Analyze your applications with Kiuwan in your build definitions. Find relevant security vulnerabilities in your code. Run automatic code security audits. Build secure applications from the start.",
     "public": false,
     "categories": [
-        "Build and release"
+        "Azure Pipelines"
     ],
     "targets": [
         {
@@ -95,9 +95,6 @@
         {
             "path": "kiuwanAuditTab.html",
             "addressable": true
-        },
-        {
-            "path": "kiuwan-common"
         },
         {
             "path": "baseline-analysis-task"

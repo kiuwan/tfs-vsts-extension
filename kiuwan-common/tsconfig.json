@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": ["es2017", "es7", "es6", "dom"],
+    "declaration": true,
+    "outDir": ".",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true                      /* Workaround for https://github.com/microsoft/vss-web-extension-sdk/issues/112 */
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
