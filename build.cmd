@@ -33,7 +33,8 @@ call xcopy /E /Q /Y node_modules delivery-analysis-task\node_modules\
 echo --- 
 echo --- Transpiling TypeScript sources...
 echo --- 
-call tsc
+call tsc -p tsconfig.json
+call tsc -p tsconfig-ext.json
 
 echo --- 
 echo --- Packaging extension with TFX-CLI tool and default configuration (vss-extension.json)...

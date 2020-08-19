@@ -58,6 +58,7 @@
             "jquery",
             "node"
     ],
+    "skipLibCheck": true                      /* Workaround for https://github.com/microsoft/vss-web-extension-sdk/issues/112 */
   },
   "include": [
     "enhancer/kiuwanAuditTab.ts",
