@@ -6,7 +6,7 @@ You can also define a Kiuwan service endpoint. This will allow you to store your
 
 Because this extension works with the Kiuwan Application Security platform, you need a Kiuwan account in our cloud service or an on-premise installation of the Kiuwan platform to use it.
 
-Read more detailed information in our tech doc page: [Microsoft TFS Azure DevOps Extension](https://www.kiuwan.com/docs/display/K5/Microsoft+TFS-Azure+DevOps+Extension#MicrosoftTFS-AzureDevOpsExtension-Whatyouneedtoknowbeforeinstallingit)
+Read more detailed information in our tech doc page: [Microsoft TFS Azure DevOps Extension](https://kiuwan.zendesk.com/hc/en-us/articles/18098151626396-Microsoft-TFS-Azure-DevOps-Extension)
 
 ## What you get with the extension ##
 
