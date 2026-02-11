@@ -1,0 +1,16 @@
+{
+  "name": "kiuwan-common",
+  "version": "2.5.3",
+  "description": "Utility methods work with Kiuwan API + TFS / Azure",
+  "main": "./utils.js",
+  "types": "./utils.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "install": "npx tsc",
+    "prepublish": "npx tsc"
+  },
+  "author": "Kiuwan",
+  "devDependencies": {
+     "typescript": "^5.9.3"
+  }
+}

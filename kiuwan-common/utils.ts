@@ -1,24 +1,33 @@
-//LS: new libraries
-//import tl = require('vsts-task-lib/task'); 
-import tl = require('azure-pipelines-task-lib/task');
-//import ttl = require('vsts-task-tool-lib/tool')
-//import trm = require('vsts-task-lib/toolrunner');
-import ttl = require('azure-pipelines-tool-lib/tool')
-import trm = require('azure-pipelines-task-lib/toolrunner');
-import path = require('path');
-import fs = require('fs');
-import https = require('https');
-import http = require('http');
-import { Url, domainToUnicode, resolve } from 'url';
-//LS: change old libraries for new ones
-//import { _exist } from 'vsts-task-lib/internal';
+import * as fs from 'fs';
+import * as http from 'http';
+import * as https from 'https';
+import * as net from 'net';
+import * as path from 'path';
+import * as url from 'url';
+import * as tl from 'azure-pipelines-task-lib/task';
+import * as ttl from 'azure-pipelines-tool-lib/tool';
+import * as trm from 'azure-pipelines-task-lib/toolrunner';
 import { _exist } from 'azure-pipelines-task-lib/internal';
-import { reject, timeout, async } from 'q';
-import { userInfo, type } from 'os';
 
-//This is used to read the properties file to get some kiuwan information
-var PropertiesReader = require('properties-reader');
 
+/** This is used to read the properties file to get some kiuwan information */
+let PropertiesReader = require('properties-reader');
+
+export function getPathSeparator(os: string): string {
+    let sep: string = "\\";
+    if (!os.startsWith("win")) {
+        sep = "/";
+    }
+    return sep;
+}
+
+export function getKiuwanTechnologies(): string {
+    // techs 'informix', 'plsql' and 'transactsql' are treated differently because user has to choose only one of them
+    let techs: string =
+        'abap,actionscript,aspnet,c,cobol,cpp,csharp,go,groovy,html,java,javascript,jcl,jsp,kotlin,natural,' +
+        'objectivec,oracleforms,other,perl,php,powerscript,python,rpg4,ruby,scala,sqlscript,swift,vb6,vbnet,xml';
+    return techs;
+}
 
 export function isBuild(): boolean {
     let s = tl.getVariable("System.HostType");
@@ -30,35 +39,19 @@ export function isBuild(): boolean {
     }
 }
 
-export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string, kiuwanPassword: string, domainId: string, kiuwanEndpoint: string, klaAgentProperties: String) {
+export async function getLastAnalysisResults(kiuwanUrl: url.Url, kiuwanUser: string | undefined, kiuwanPassword: string | undefined, domainId: string, kiuwanEndpoint: string, klaAgentProperties: String) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
 
     const encodedPath = encodeURI(kiuwanEndpoint);
 
-    //Luis Sanchez: get the proxy data from the properties file
-    //let agent_properties_file = klaAgentProperties;
-    //tl.debug(`[KW_LGV] kiuwan_agent_properties_file: ${agent_properties_file}`);
-    //let properties = PropertiesReader(agent_properties_file);
-    //let property_proxy_host = properties.get('proxy.host');
-    //let property_proxy_port = properties.get('proxy.port');
-    //let property_proxy_auth = properties.get('proxy.authentication');
-    //let property_proxy_un = properties.get('proxy.username');
-    //let property_proxy_pw = properties.get('proxy.password');
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_host: [${property_proxy_host}]`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_port: ${property_proxy_port}`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_auth: ${property_proxy_auth}`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_un: ${property_proxy_un}`);
-    //tl.debug(`[KW_LGV] kiuwan_agent_property_proxy_pw: ${property_proxy_pw}`);
-    //end of taking data from the properties file
-
     //Luis Sanchez: get the proxy information from the agent instead
     //NOTE the names of the variables, kept from previous version reading the properties file.
-    let property_proxy_host = "";
-    let property_proxy_port = "";
-    let property_proxy_auth = "";
-    let property_proxy_un = "";
-    let property_proxy_pw = "";
+    let property_proxy_host: string = "";
+    let property_proxy_port: string = "";
+    let property_proxy_auth: string = "";
+    let property_proxy_un: string = "";
+    let property_proxy_pw: string = "";
     
     //get the proxy parameter from the AGENT configuration
     let agent_proxy_conf = tl.getHttpProxyConfiguration();
@@ -147,7 +140,7 @@ export async function getLastAnalysisResults(kiuwanUrl: Url, kiuwanUser: string,
         tl.debug(`[KW] [getLastAnalysisResults] useproxy: ${use_proxy}`);
         if ( use_proxy ) {
             if ( proxy_auth ){ //we have user and pw for the proxy
-                const auth_p = 'Basic ' + Buffer.from(property_proxy_un + ':' + property_proxy_pw).toString('base64');
+                const auth_p: string = 'Basic ' + Buffer.from(property_proxy_un + ':' + property_proxy_pw).toString('base64');
                 tl.debug(`[LS] [getLastAnalysisResults] calling httpApiHttpsProxy with auth: ${auth_p}`);
                 return callKiuwanApiHttpsProxy(options, property_proxy_host, property_proxy_port, auth_p);
             } else {
@@ -212,27 +205,24 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
 }
 
 //This function calls the API from kiuwan using a authenticated proxy
-async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host, proxy_port, proxy_auth ) {
+async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host: string, proxy_port: string, proxy_auth: string) {
     
     tl.debug("[KW] Calling Kiuwan https API with proxy");
 
-    let k_host = options.host;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.host: ${k_host}`);
-    let k_path = options.path;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.path: ${k_path}`);
+    let k_host: string = options.host;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.host: ${k_host}`);
+    let k_path: string = options.path;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.path: ${k_path}`);
     //Luis Sanchez: added port as this is always https
-    let k_hostandport = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
-    let k_auth = options.auth;  
-    let p_host = proxy_host;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.host: ${p_host}`);
-    let p_port = proxy_port;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.port: ${p_port}`);
-    let p_auth = proxy_auth;
+    let k_hostandport: string = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
+    let k_auth: string = options.auth;  
+    let p_host: string = proxy_host;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.host: ${p_host}`);
+    let p_port: string = proxy_port;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.port: ${p_port}`);
+    let p_auth: string = proxy_auth;
 
 
     return new Promise((resolve, reject) => {
 
         //Luis sanchez comment: why these new instances-->commenting them
-        //const http = require('http')
-        //const https = require('https')
-
-        http.request({
+        let httpOpts: http.RequestOptions = {
             host: p_host, // IP address of proxy server
             port: p_port, // port of proxy server
             method: 'CONNECT',
@@ -240,19 +230,20 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
             headers: {
                 'Proxy-Authorization': p_auth
             },
-        }).on('connect', (res, socket) => {
-            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ http.toString());
-            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ http.request.path);
+        }; 
+        http.request(httpOpts).on('connect', (res: http.IncomingMessage, socket: net.Socket) => {
+            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ httpOpts.toString());
+            tl.debug ('[LS] [callKiuwanApiHttpsProxy] request info: '+ httpOpts.path);
 
             if (res.statusCode === 200) { // connected to proxy server
                 tl.debug ('[LS] [callKiuwanApiHttpsProxy] Connected to proxy server, doing the https call...');
-                https.get({
+                let reqOpts: https.RequestOptions = {
                     host: k_host, 
                     path: k_path, 
                     auth: k_auth,
-                    socket: socket, // using a tunnel
                     agent: false    // cannot use a default agent
-                }, (res) => {
+                };                
+                https.get(reqOpts, (res: any) => {
                     tl.debug ('[LS] [callKiuwanApiHttpsProxy] ...reading response ...');
                     let chunks = []
                     if (res.statusCode != 200) {
@@ -265,7 +256,7 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
                         console.log('DONE', Buffer.concat(chunks).toString('utf8'))
                         resolve(Buffer.concat(chunks).toString('utf8'))
                     })
-                })
+                });
             } else {
                 tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error connecting to proxy server (${res.statusCode}): ${res.statusMessage}`)
                 console.error('error', `Kiuwan call error connecting with proxy server (${res.statusCode}): ${res.statusMessage}`)
@@ -288,19 +279,15 @@ async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, prox
     
     tl.debug("[KW] Calling Kiuwan https API with proxy with no auth");
 
-    let k_host = options.host;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.host: ${k_host}`);
-    let k_path = options.path;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.path: ${k_path}`);
+    let k_host: string = options.host;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.host: ${k_host}`);
+    let k_path: string = options.path;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.path: ${k_path}`);
     //Luis Sanchez: added port as this is always https
-    let k_hostandport = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
-    let k_auth = options.auth;  
-    let p_host = proxy_host;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.host: ${p_host}`);
-    let p_port = proxy_port;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.port: ${p_port}`);
-    
-    return new Promise((resolve, reject) => {
-        //Luis sanchez comment: why these new instances¿?
-        //const http = require('http')
-        //const https = require('https')
+    let k_hostandport: string = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
+    let k_auth: string = options.auth;
+    let p_host: string = proxy_host;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.host: ${p_host}`);
+    let p_port: string = proxy_port;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.port: ${p_port}`);
 
+    return new Promise((resolve, reject) => {
         http.request({
             host: p_host, // IP address of proxy server
             port: p_port, // port of proxy server
@@ -309,13 +296,13 @@ async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, prox
         }).on('connect', (res, socket) => {
             if (res.statusCode === 200) { // connected to proxy server
                 tl.debug ('[KW_LS] Connected to proxy server, doing the https call...');
-                https.get({
+                let reqOpts: https.RequestOptions = {
                     host: k_host, 
                     path: k_path, 
                     auth: k_auth,
-                    socket: socket, // using a tunnel
                     agent: false    // cannot use a default agent
-                }, (res) => {
+                };
+                https.get(reqOpts, (res: any) => {
                     tl.debug ('[KW_LS] ...reading response ...');
                     let chunks = []
                     if (res.statusCode != 200) {
@@ -502,7 +489,7 @@ export async function runKiuwanLocalAnalyzer(command: string, args: string) {
     return exitCode;
 }
 
-export function setAgentTempDir(agentHomeDir: string, platform: string) {
+export function setAgentTempDir(agentHomeDir: string | undefined, platform: string) {
     let tempDir: string;
     if (platform === 'linux' || platform === 'darwin') {
         tempDir = `${agentHomeDir}/_temp`
@@ -521,7 +508,7 @@ export function setAgentTempDir(agentHomeDir: string, platform: string) {
     return tempDir;
 }
 
-export function setAgentToolsDir(agentHomeDir: string, platform: string) {
+export function setAgentToolsDir(agentHomeDir: string | undefined, platform: string) {
     let toolsDir: string;
     if (platform === 'linux' || platform === 'darwin') {
         toolsDir = `${agentHomeDir}/_tools`
@@ -714,7 +701,8 @@ export async function processAgentProperties(agent_properties_file: string, prox
     // I write the file back to disk everything is messed up. But if the properties file follows the "ini"
     // format, the correct way of processing the file is by using the properties-reader library
     tl.debug(`[LS] Replacing values in file ` + agent_properties_file);
-    let propString = fs.readFileSync(agent_properties_file);
+    let propBuffer: Buffer = fs.readFileSync(agent_properties_file);
+    let propString: string = propBuffer.toString('utf8');
     propString = replaceProperty(propString, "proxy.host", property_proxy_host);
     propString = replaceProperty(propString, "proxy.port", property_proxy_port);
     propString = replaceProperty(propString, "proxy.authentication", property_proxy_auth);

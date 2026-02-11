@@ -59,6 +59,7 @@
             "node"
     ],
   },
+  "skipLibCheck": true,
   "include": [
     "enhancer/kiuwanAuditTab.ts",
     "enhancer/kiuwanSummary.ts",

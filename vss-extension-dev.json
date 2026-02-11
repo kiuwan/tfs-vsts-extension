@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "kiuwan-analysis-extension-dev",
     "name": "Kiuwan Dev",
-    "version": "2.3.126",
+    "version": "2.5.3",
     "publisher": "kiuwan-publisher",
     "targets": [
         {
@@ -55,11 +55,13 @@
         "Code Analysis",
         "DevOps",
         "DevSecOps",
-        "Applcation security",
+        "Application security",
         "Security vulnerabilities",
         "OWASP Top 10",
         "Build Task",
-        "SCA"
+        "SCA",
+        "Security",
+        "Quality"
     ],
     "scopes": [
         "vso.code",

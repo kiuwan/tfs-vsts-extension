@@ -9,7 +9,7 @@
     "version": {
         "Major": 2,
         "Minor": 5,
-        "Patch": 2
+        "Patch": 3
     },
     "visibility": [
         "Build",
@@ -230,7 +230,13 @@
         "PowerShell3": {
             "target": "run-kla-baseline.ps1"
         },
-        "Node": {
+        "Node10": {
+            "target": "index.js"
+        },
+        "Node16": {
+            "target": "index.js"
+        },
+        "Node20": {
             "target": "index.js"
         }
     }
