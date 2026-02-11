@@ -1,9 +1,9 @@
 #!/bin/bash +x
 
 echo "---"
-echo "--- STARTING BUILD
+echo "--- STARTING BUILD"
 echo "---"
-echo "--- Cleaning NPM node modules
+echo "--- Cleaning NPM node modules"
 echo "---"
 rm -rf node_modules/
 rm -rf baseline-analysis-task/node_modules/
