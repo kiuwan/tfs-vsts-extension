@@ -9,7 +9,6 @@ import * as ttl from 'azure-pipelines-tool-lib/tool';
 import * as trm from 'azure-pipelines-task-lib/toolrunner';
 import { _exist } from 'azure-pipelines-task-lib/internal';
 
-
 /** This is used to read the properties file to get some kiuwan information */
 let PropertiesReader = require('properties-reader');
 
@@ -39,12 +38,12 @@ export function isBuild(): boolean {
     }
 }
 
-export async function getLastAnalysisResults(kiuwanUrl: url.Url, kiuwanUser: string | undefined, kiuwanPassword: string | undefined, domainId: string, kiuwanEndpoint: string, klaAgentProperties: String) {
+export async function getLastAnalysisResults(kiuwanUrl: url.Url, kiuwanUser: string | undefined, 
+                                             kiuwanPassword: string | undefined, domainId: string,
+                                             kiuwanEndpoint: string, klaAgentProperties: String) {
     const method = 'GET';
     const auth = `${kiuwanUser}:${kiuwanPassword}`;
-
     const encodedPath = encodeURI(kiuwanEndpoint);
-
     //Luis Sanchez: get the proxy information from the agent instead
     //NOTE the names of the variables, kept from previous version reading the properties file.
     let property_proxy_host: string = "";
@@ -85,7 +84,6 @@ export async function getLastAnalysisResults(kiuwanUrl: url.Url, kiuwanUser: str
     //Luis Sanchez: debug parameters:
     tl.debug(`[LS] [getLastAnalysisResult] proxy sever taken from agent: ${property_proxy_host}`);
     tl.debug(`[LS] [getLastAnalysisResult] port taken from agent: ${property_proxy_port}`);
-    //tl.debug(`[LS] [getLastAnalysisResult] protocol taken from agent: ${property_proxy_protocol}`);
     tl.debug(`[LS] [getLastAnalysisResult] proxy username from agent: ${property_proxy_un}`);
     tl.debug(`[LS] [getLastAnalysisResult] password password from agent: ${property_proxy_pw}`);
     //end getting proxy data from agent.
@@ -107,8 +105,9 @@ export async function getLastAnalysisResults(kiuwanUrl: url.Url, kiuwanUser: str
     tl.debug(`[KW_LGV] use_proxy: ${use_proxy}`);
     tl.debug(`[KW_LGV] proxy_auth: ${proxy_auth}`);
 
-    var options: https.RequestOptions | http.RequestOptions;
-    var host = (kiuwanUrl.host.indexOf(':') == -1) ? kiuwanUrl.host : kiuwanUrl.host.substring(0, kiuwanUrl.host.indexOf(':'));
+    let options: https.RequestOptions | http.RequestOptions;
+    let host = (kiuwanUrl.host.indexOf(':') == -1) ?
+        kiuwanUrl.host : kiuwanUrl.host.substring(0, kiuwanUrl.host.indexOf(':'));
     tl.debug(`[KW] Host: ${host}`);
     tl.debug(`[KW] port: ${kiuwanUrl.port}`);
     tl.debug(`[KW] path: ${encodedPath}`);
@@ -147,7 +146,6 @@ export async function getLastAnalysisResults(kiuwanUrl: url.Url, kiuwanUser: str
                 tl.debug(`[LS] [getLastAnalysisResults] calling httpApiHttpsProxy with NO auth`);
                 return callKiuwanApiHttpsProxyNoAuth(options, property_proxy_host, property_proxy_port);
             }
-            
         } else {
             return callKiuwanApiHttps(options);
         }
@@ -166,21 +164,17 @@ export function saveKiuwanResults(result: string, type: string): string {
             break;
         default:
     }
-
     const resultsDirPath = path.join(tl.getVariable('build.artifactStagingDirectory'), '.kiuwanResults');
     const resultsFilePath = path.join(resultsDirPath, fileName);
-
     if (!_exist(resultsDirPath)) {
         fs.mkdirSync(resultsDirPath);
     }
     fs.writeFileSync(resultsFilePath, result);
-
     return resultsFilePath;
 }
 
 export function uploadKiuwanResults(resultsPath: string, title: string, type: string) {
     tl.debug(`[KW] Uploading Kiuwan results from ${resultsPath}`);
-
     let attachmentType = "";
     switch (type) {
         case "baseline":
@@ -200,15 +194,15 @@ export function uploadKiuwanResults(resultsPath: string, title: string, type: st
         },
         resultsPath
     );
-
     tl.debug('[KW] Results uploaded successfully')
 }
 
 //This function calls the API from kiuwan using a authenticated proxy
-async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host: string, proxy_port: string, proxy_auth: string) {
-    
+async function callKiuwanApiHttpsProxy(options: https.RequestOptions,
+                                       proxy_host: string,
+                                       proxy_port: string,
+                                       proxy_auth: string) {
     tl.debug("[KW] Calling Kiuwan https API with proxy");
-
     let k_host: string = options.host;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.host: ${k_host}`);
     let k_path: string = options.path;  tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.path: ${k_path}`);
     //Luis Sanchez: added port as this is always https
@@ -217,10 +211,7 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
     let p_host: string = proxy_host;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.host: ${p_host}`);
     let p_port: string = proxy_port;    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] proxy.port: ${p_port}`);
     let p_auth: string = proxy_auth;
-
-
     return new Promise((resolve, reject) => {
-
         //Luis sanchez comment: why these new instances-->commenting them
         let httpOpts: http.RequestOptions = {
             host: p_host, // IP address of proxy server
@@ -242,50 +233,54 @@ async function callKiuwanApiHttpsProxy(options: https.RequestOptions, proxy_host
                     path: k_path, 
                     auth: k_auth,
                     agent: false    // cannot use a default agent
-                };                
+                };
                 https.get(reqOpts, (res: any) => {
                     tl.debug ('[LS] [callKiuwanApiHttpsProxy] ...reading response ...');
                     let chunks = []
+                    console.log("status code is "+res.statusCode)
                     if (res.statusCode != 200) {
-                        tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
-                        console.error('error', `Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
+                        tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error reading response 
+                        (${res.statusCode}): ${res.statusMessage}`)
+                        tl.error(`Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
                         reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
                     }
                     res.on('data', chunk => chunks.push(chunk))
                     res.on('end', () => {
-                        console.log('DONE', Buffer.concat(chunks).toString('utf8'))
+                        tl.debug(Buffer.concat(chunks).toString('utf8'))
                         resolve(Buffer.concat(chunks).toString('utf8'))
                     })
                 });
             } else {
-                tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error connecting to proxy server (${res.statusCode}): ${res.statusMessage}`)
-                console.error('error', `Kiuwan call error connecting with proxy server (${res.statusCode}): ${res.statusMessage}`)
+                tl.debug(`[KW] [callKiuwanApiHttpsProxy] Kiuwan call error connecting to proxy server 
+                (${res.statusCode}): ${res.statusMessage}`)
+                tl.error(`Kiuwan call error connecting with proxy server (${res.statusCode}): ${res.statusMessage}`)
                 reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
             }
         }).on('error', (err) => {
             tl.debug(`[KW] [callKiuwanApiHttpsProxy] Response error: ${err}`)
-            console.error('error', err)
+            tl.error( err.message);
             reject(new Error(`Response error: ${err}`))
         }).end()
-
     });
-
 }
 
 //Luis Sanchez: this function calls to the Kiuwan API using
 //a proxy server with no auth, the only difference with previous function is the
 //headers part
 async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, proxy_host, proxy_port) {
-    
     tl.debug("[KW] Calling Kiuwan https API with proxy with no auth");
-
-    let k_host: string = options.host;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.host: ${k_host}`);
-    let k_path: string = options.path;  tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.path: ${k_path}`);
+    let k_host: string = options.host;
+    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.host: ${k_host}`);
+    let k_path: string = options.path;
+    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] kiuwan.path: ${k_path}`);
     //Luis Sanchez: added port as this is always https
-    let k_hostandport: string = k_host+":443"; tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
+    let k_hostandport: string = k_host+":443";
+    tl.debug(`[KW_LGV] [callKiuwanApiHttpsProxy] kiuwan.hostandport: ${k_hostandport}`);
     let k_auth: string = options.auth;
-    let p_host: string = proxy_host;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.host: ${p_host}`);
-    let p_port: string = proxy_port;    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.port: ${p_port}`);
+    let p_host: string = proxy_host;
+    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.host: ${p_host}`);
+    let p_port: string = proxy_port;
+    tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] proxy.port: ${p_port}`);
 
     return new Promise((resolve, reject) => {
         http.request({
@@ -306,95 +301,79 @@ async function callKiuwanApiHttpsProxyNoAuth(options: https.RequestOptions, prox
                     tl.debug ('[KW_LS] ...reading response ...');
                     let chunks = []
                     if (res.statusCode != 200) {
-                        tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
-                        console.error('error', `Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
+                        tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Kiuwan call error reading response
+                         (${res.statusCode}): ${res.statusMessage}`)
+                        tl.error(`Kiuwan call error reading response (${res.statusCode}): ${res.statusMessage}`)
                         reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
                     }
                     res.on('data', chunk => chunks.push(chunk))
                     res.on('end', () => {
-                        console.log('DONE', Buffer.concat(chunks).toString('utf8'))
+                        tl.debug(Buffer.concat(chunks).toString('utf8'))
                         resolve(Buffer.concat(chunks).toString('utf8'))
                     })
                 })
             } else {
-                tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Kiuwan call error connecting to proxy server (${res.statusCode}): ${res.statusMessage}`)
-                console.error('error', `Kiuwan call error connecting with proxy server (${res.statusCode}): ${res.statusMessage}`)
+                tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Kiuwan call error connecting to proxy server 
+                (${res.statusCode}): ${res.statusMessage}`)
+                tl.error(`Kiuwan call error connecting with proxy server (${res.statusCode}): ${res.statusMessage}`)
                 reject(new Error(`Kiuwan call error (${res.statusCode}): ${res.statusMessage}`));
             }
         }).on('error', (err) => {
             tl.debug(`[KW_LS] [callKiuwanApiHttpsProxyNoAuth] Response error: ${err}`)
-            console.error('error', err)
+            tl.error(err.message)
             reject(new Error(`Response error: ${err}`))
         }).end()
-
     });
-
 }
 
 async function callKiuwanApiHttps(options: https.RequestOptions) {
     tl.debug("[KW] Calling Kiuwan https API");
-
     let responseString = '';
-
     return new Promise((resolve, reject) => {
         let req = https.request(options, function (res) {
             res.setEncoding('utf-8');
-
             res.on('data', function (data) {
                 responseString += data;
             });
-
             res.on('end', function () {
                 resolve(responseString);
             });
-
             if (res.statusCode != 200) {
                 reject(new Error(`Kiuwan call error (${res.statusCode}): ' + ${res.statusMessage}`));
             }
-
             res.on('error', function (error) {
                 reject(new Error(`Response error: ${error}`));
             })
         });
-
         req.on('error', (e) => {
             reject(new Error(`Kiuwan API request error: ${e}`));
         });
-
         req.end();
     });
 }
 
 async function callKiuwanApiHttp(options: http.RequestOptions) {
     tl.debug("[KW] Calling Kiuwan http API (to be deprecated)");
-
     let responseString = '';
-
     return new Promise((resolve, reject) => {
         let req = http.request(options, function (res) {
             res.setEncoding('utf-8');
-
             res.on('data', function (data) {
                 responseString += data;
             });
-
             res.on('end', function () {
                 resolve(responseString);
             });
-
             if (res.statusCode != 200) {
                 reject(new Error(`Kiuwan call error (${res.statusCode}): ' + ${res.statusMessage}`));
             }
-
             res.on('error', function (error) {
                 reject(new Error(`Response error: ${error}`));
             })
         });
-
         req.on('error', (e) => {
             reject(new Error(`Kiuwan API request error: ${e}`));
         });
-
         req.end();
     });
 }
@@ -403,18 +382,16 @@ export async function getKlaAgentPropertiesPath( klaPath: string, platform: stri
     let agentprops: string;
     let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
     let dirExist: boolean;
-
     if (platform === 'linux' || platform === 'darwin') {
         // Define the KLA command if install directory exisits
         dirExist = _exist(`${klaPath}/${defaultKiuwanDir}`);
-        console.log(`[KW] ${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
+        tl.debug(`[KW] ${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
         agentprops = dirExist ? `${klaPath}/${defaultKiuwanDir}/conf/agent.properties` : "";
     }
     else {
         dirExist = _exist(`${klaPath}\\${defaultKiuwanDir}`);
         agentprops = dirExist ? `${klaPath}\\${defaultKiuwanDir}\\conf\\agent.properties` : "";
     }
-
     return agentprops;
 }
 
@@ -422,52 +399,42 @@ export async function buildKlaCommand(klaPath: string, platform: string) {
     let command: string;
     let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
     let dirExist: boolean;
-
     if (platform === 'linux' || platform === 'darwin') {
         // Define the KLA command if install directory exisits
         dirExist = _exist(`${klaPath}/${defaultKiuwanDir}`);
-        console.log(`[KW] ${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
+        tl.debug(`[KW] ${klaPath}/${defaultKiuwanDir}: ${dirExist}`);
         command = dirExist ? `${klaPath}/${defaultKiuwanDir}/bin/agent.sh` : "";
     }
     else {
         dirExist = _exist(`${klaPath}\\${defaultKiuwanDir}`);
         command = dirExist ? `${klaPath}\\${defaultKiuwanDir}\\bin\\agent.cmd` : "";
     }
-
     return command;
 }
 
 export async function downloadInstallKla(endpointConnectionName: string, toolName: string, toolVersion: string, platform: string) {
     let defaultKiuwanDir: string = 'KiuwanLocalAnalyzer';
-
     let toolPath = ttl.findLocalTool(toolName, toolVersion);
-
     if (!toolPath) {
         let downloadUrl: string = tl.getEndpointUrl(endpointConnectionName, false) + '/pub/analyzer/KiuwanLocalAnalyzer.zip';
-        console.log(`[KW] Downloading KLA from ${downloadUrl}`);
-
+        tl.debug(`[KW] Downloading KLA from ${downloadUrl}`);
         let downloadPath: string = await ttl.downloadTool(downloadUrl, 'KiuwanLocalAnalyzer.zip');
-
         let extPath: string = await ttl.extractZip(downloadPath);
-
         toolPath = await ttl.cacheDir(extPath, toolName, toolVersion);
         // Setting +x permision to the kla shell script in unix based platforms
         if (platform === 'linux' || platform === 'darwin') {
             let ret = await tl.exec('chmod', `+x ${toolPath}/${defaultKiuwanDir}/bin/agent.sh`);
             tl.debug(`[KW] chmod retuned: ${ret}`);
         }
-        console.log(`[KW] KLA downloaded and  installed in ${toolPath}`)
+        tl.debug(`[KW] KLA downloaded and  installed in ${toolPath}`)
     }
-
     return toolPath;
 }
 
 export async function runKiuwanLocalAnalyzer(command: string, args: string) {
     let exitCode: Number = 0;
-
     // Run KLA with ToolRunner
     let kiuwan = tl.tool(command).line(args);
-
     let options = <trm.IExecOptions>{
         cwd: '.',
         env: process.env,
@@ -478,14 +445,11 @@ export async function runKiuwanLocalAnalyzer(command: string, args: string) {
         outStream: process.stdout,
         ignoreReturnCode: true
     }
-
     kiuwan.on('stdout', (data) => {
         let output = data.toString().trim();
         tl.debug(output);
     })
-
     exitCode = await kiuwan.exec(options);
-
     return exitCode;
 }
 
@@ -497,14 +461,11 @@ export function setAgentTempDir(agentHomeDir: string | undefined, platform: stri
     else {
         tempDir = `${agentHomeDir}\\_temp`
     }
-
     // Creates the temp directory if it doesn't exists
     if (!_exist(tempDir)) {
         fs.mkdirSync(tempDir);
     }
-
     tl.setVariable('Agent.TempDirectory', tempDir);
-
     return tempDir;
 }
 
@@ -516,14 +477,12 @@ export function setAgentToolsDir(agentHomeDir: string | undefined, platform: str
     else {
         toolsDir = `${agentHomeDir}\\_tools`
     }
-
     tl.setVariable('Agent.ToolsDirectory', toolsDir);
-
     return toolsDir;
 }
 
 export function getKiuwanRetMsg(kiuwanRetCode: Number): string {
-    var kiuwanErrorMsg = '';
+    let kiuwanErrorMsg = '';
     switch (kiuwanRetCode) {
         case 1: {
             kiuwanErrorMsg = `KLA Error ${kiuwanRetCode}: Analyzer execution error .Run-time execution error (out of memory, etc.). Review log files to find exact cause.`;
@@ -621,9 +580,7 @@ export function getKiuwanRetMsg(kiuwanRetCode: Number): string {
             kiuwanErrorMsg = `KLA returned ${kiuwanRetCode} Analysis finished successfully!`;
         }
     }
-
     return kiuwanErrorMsg;
-
 }
 
 export function auditFailed(retCode: Number): boolean {
@@ -662,7 +619,6 @@ export async function processAgentProperties(agent_properties_file: string, prox
     tl.debug(`[LS] Proxy URL: ${proxyUrl}`);
     tl.debug(`[LS] Proxy User: ${proxyUser}`);
     tl.debug(`[LS] Proxy Password: ${proxyPassword}`);
-    
     
     //Step1: see if proxy host is okey. The proxy value has to be in a good format to continue
     // taking this information into consideration
@@ -711,7 +667,6 @@ export async function processAgentProperties(agent_properties_file: string, prox
     propString = replaceProperty(propString, "proxy.protocol", property_proxy_protocol);
     fs.writeFileSync(agent_properties_file,propString);
     tl.debug(`[LS] New proxy values written in file `+agent_properties_file);
-
     return;
 } 
 
@@ -723,13 +678,10 @@ function replaceProperty (inString: string, propertyName: string, propertyNewVal
     let out = "";
     let firstPositon = 0;
     let lastPosition = 0;
-
     firstPositon = inString.indexOf(propertyName);
     lastPosition = inString.indexOf("\n", firstPositon);
-
     out = inString.slice(0,firstPositon) + propertyName + "=" 
     + propertyNewValue +  inString.slice(lastPosition, inString.length);
-
     return out;
 }
 
@@ -741,10 +693,8 @@ function replacePropertyWithHack (inString: string, propertyName: string, proper
     let out = "";
     let firstPositon = 0;
     let lastPosition = 0;
-
     firstPositon = inString.indexOf(propertyName);
     lastPosition = inString.indexOf("\n", firstPositon);
-
     //LS: this is NOT a solution at all, but to avoid problems when the user has scape characters inside
     //just removing some escape secuences... maybe throwing the problem to another part
     tl.debug ("[LS][replacePropertyWithHack]->propertyvalue before hacking: " + propertyNewValue);
@@ -773,14 +723,9 @@ function replacePropertyWithHack (inString: string, propertyName: string, proper
         propertyNewValue = propertyNewValue.substring(0, propertyNewValue.indexOf("\\n") ) + "\\\\n" + 
             propertyNewValue.substring(propertyNewValue.indexOf("\\n") + 2, propertyNewValue.length); 
     }
-    
     tl.debug ("[LS][replacePropertyWithHack]->propertyvalue after hacking: " + propertyNewValue);
-
     out = inString.slice(0,firstPositon) + propertyName + "=" 
     + propertyNewValue +  inString.slice(lastPosition, inString.length);
-
     return out;
 }
-
-
 //--- end changes Luis Sanchez ----

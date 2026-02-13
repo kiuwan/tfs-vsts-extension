@@ -34,20 +34,18 @@ async function run() {
         let skipclones = tl.getBoolInput('skipclones');
         let ignoreclause = "";
 
-        if (skipclones) { 
-            if (!includeinsight){
+        if (skipclones) {
+            if (!includeinsight) {
                 ignoreclause = "ignore=clones,insights"
-            }else{ //include insights
+            } else { //include insights
                 ignoreclause = "ignore=clones";
-            }      
-        }else{ //skipclones = false
-            if (!includeinsight){
-                ignoreclause="ignore=insights"
+            }
+        } else { //skipclones = false
+            if (!includeinsight) {
+                ignoreclause = "ignore=insights"
             }
         }
         //in any other case, the ignoreclause will be empty (no insights and skipclones false)
-
-
         let uploadsnippets = tl.getBoolInput('uploadsnippets');
         let uploadfiles = tl.getBoolInput('uploadfiles');
 
@@ -88,10 +86,10 @@ async function run() {
         let kiuwanConnection: string = (kiuwanConnectionInput === undefined) ? "" : kiuwanConnectionInput;
 
         // For DEBUG mode only since we dont have a TFS EndpointUrl object available
-        // let kiuwanUrl: url.UrlWithStringQuery = url.parse("https://www.kiuwan.com/");
         let kiuwanUrl: url.Url = url.parse(tl.getEndpointUrl(kiuwanConnection, false));
 
-        // Get user, password and domain ID from variables defined in the build, otherwise get them from the Kiuwan service endpoint authorization
+        // Get user, password and domain ID from variables defined in the build, otherwise get them from the
+        // Kiuwan service endpoint authorization
         let kiuwanUser = tl.getVariable('KiuwanUser');
         if (kiuwanUser === undefined || kiuwanUser === "") {
             kiuwanUser = tl.getEndpointAuthorizationParameter(kiuwanConnection, "username", false);
@@ -115,34 +113,35 @@ async function run() {
         let projectName: string | undefined = '';
         if (projectSelector === 'default') {
             projectName = tl.getVariable('System.TeamProject');
-            console.log(`[KW] Kiuwan application from System.TeamProject: ${projectName}`);
+            tl.debug(`[KW] Kiuwan application from System.TeamProject: ${projectName}`);
         }
         if (projectSelector === 'kiuwanapp') {
             projectName = tl.getInput('kiuwanappname');
-            console.log(`[KW] Kiuwan application from Kiuwan app list: ${projectName}`);
+            tl.debug(`[KW] Kiuwan application from Kiuwan app list: ${projectName}`);
         }
         if (projectSelector === 'appname') {
             projectName = tl.getInput('customappname');
-            console.log(`[KW] Kiuwan application from user input: ${projectName}`);
+            tl.debug(`[KW] Kiuwan application from user input: ${projectName}`);
         }
 
         let sourceDirectory = tl.getVariable('Build.SourcesDirectory');
         if (!kwutils.isBuild()) {
             // This means the task is running from a release pipeline
-            console.log(`[KW] This is a release.`);
+            tl.debug(`[KW] This is a release.`);
             // We assume that the task is executed in a Release pipeline and construct the sourceDirectory 
             // with the Agent release directory and the Primary Artifact's source alias
             let primaryArtifactSourceAlias = tl.getVariable('Release.PrimaryArtifactSourceAlias');
 
             if (primaryArtifactSourceAlias === undefined) {
-                console.log("[KW] Release.PrimaryArtifactSourceAlias not set... Trying to use the the project name as artifact alias to build the source path");
+                tl.debug("[KW] Release.PrimaryArtifactSourceAlias not set... Trying to use the the project name as" +
+                    " artifact alias to build the source path");
                 primaryArtifactSourceAlias = tl.getVariable('Build.ProjectName');
             }
             sourceDirectory = tl.getVariable('Agent.ReleaseDirectory') +
                 kwutils.getPathSeparator(osPlat) +
                 primaryArtifactSourceAlias;
         }
-        console.log(`[KW] Kiuwan sourcecode directory: ${sourceDirectory}`);
+        tl.debug(`[KW] Kiuwan sourcecode directory: ${sourceDirectory}`);
 
         let kla = 'Not installed yet';
 
@@ -160,26 +159,19 @@ async function run() {
 
         //Luis Sanchez: getting the AGENT proxy configuration
         let agent_proxy_conf = tl.getHttpProxyConfiguration();
-        console.log(`[BT] Agent proxy url: ${agent_proxy_conf?.proxyUrl}`);
-        console.log(`[BT] Agent proxy user: ${agent_proxy_conf?.proxyUsername}`);
-        console.log(`[BT] Agent proxy password: ${agent_proxy_conf?.proxyPassword}`);
-    
-        //Luis Sanchez: process the agent.properties file
-        //get the proxy parameters from the service connection definition (to be deprecated)
-        //let proxyUrl = tl.getEndpointDataParameter(kiuwanConnection, "proxyurl", true);
-        //let proxyUser = tl.getEndpointDataParameter(kiuwanConnection, "proxyuser", true);
-        //let proxyPassword = tl.getEndpointDataParameter(kiuwanConnection, "proxypassword", true);
+        tl.debug(`[BT] Agent proxy url: ${agent_proxy_conf?.proxyUrl}`);
+        tl.debug(`[BT] Agent proxy user: ${agent_proxy_conf?.proxyUsername}`);
 
         //get the proxy parameter from the AGENT configuration
         let proxyUrl = "";
         let proxyUser = "";
         let proxyPassword = "";
-        if (!(agent_proxy_conf?.proxyUrl === undefined)){ //if proxy defined, then get the rest
+        if (!(agent_proxy_conf?.proxyUrl === undefined)) { //if proxy defined, then get the rest
             proxyUrl = agent_proxy_conf?.proxyUrl;
-            if (!(agent_proxy_conf?.proxyUsername === undefined)){ //user defined
+            if (!(agent_proxy_conf?.proxyUsername === undefined)) { //user defined
                 proxyUser = agent_proxy_conf?.proxyUsername;
             }//end checking user
-            if (!(agent_proxy_conf?.proxyPassword === undefined)){ //password defined
+            if (!(agent_proxy_conf?.proxyPassword === undefined)) { //password defined
                 proxyPassword = agent_proxy_conf?.proxyPassword;
             }//end checking pass
         }//end checking proxy undefined
@@ -197,8 +189,7 @@ async function run() {
             advancedArgs = `.kiuwan.analysis.excludesPattern=${excludePatterns} ` +
                 `.kiuwan.analysis.includesPattern=${includePatterns} ` +
                 `.kiuwan.analysis.encoding=${encoding}`;
-        }
-        else {
+        } else {
             advancedArgs = `exclude.patterns=${excludePatterns} ` +
                 `include.patterns=${includePatterns} ` +
                 `encoding=${encoding}`;
@@ -208,13 +199,11 @@ async function run() {
         let appModel: string | undefined = tl.getInput('appmodel');
         let modelOption = ' ';
         if (overrideModel) {
-            console.log(`[KW] OverrideModel ${overrideModel} value ${appModel}.`);
+            tl.debug(`[KW] OverrideModel ${overrideModel} value ${appModel}.`);
             modelOption = `--model-name "${appModel}" `;
+        } else {
+            tl.debug(`[KW] OverrideModel ${overrideModel}.`);
         }
-        else {    
-            console.log(`[KW] OverrideModel ${overrideModel}.`);
-        }
-
 
         let domainOption = ' ';
         if (kiuwanDomainId !== undefined && kiuwanDomainId !== "" && kiuwanDomainId !== "0") {
@@ -241,36 +230,29 @@ async function run() {
             `upload.analyzed.code=${uploadfiles} ` +
             `${ignoreclause}`;
 
-        console.log(`[KW] Running Kiuwan analysis: ${kla} ${klaArgs}`);
+        tl.debug(`[KW] Running Kiuwan analysis: ${kla} ${klaArgs}`);
 
         let kiuwanRetCode: Number = await kwutils.runKiuwanLocalAnalyzer(kla, klaArgs);
-
         let kiuwanMsg: string = kwutils.getKiuwanRetMsg(kiuwanRetCode);
 
         if (kiuwanRetCode === 0) {
             if (!kwutils.isBuild()) {
-                console.log("[KW] this is a release, we don't need to get the results");
+                tl.debug("[KW] this is a release, we don't need to get the results");
                 tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg + ", Results uploaded to Kiuwan. Go check!");
-            }
-            else {
+            } else {
                 let kiuwanEndpoint = `/saas/rest/v1/apps/${projectName}`;
-                let kiuwanAnalysisResult = await kwutils.getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, kiuwanDomainId, kiuwanEndpoint, klaAgentProperties);
-
+                let kiuwanAnalysisResult = await kwutils.getLastAnalysisResults(kiuwanUrl, kiuwanUser, kiuwanPasswd, 
+                    kiuwanDomainId, kiuwanEndpoint, klaAgentProperties);
                 tl.debug(`[KW] Result of last analysis for ${projectName}: ${kiuwanAnalysisResult}`);
-
                 const kiuwanResultsPath = kwutils.saveKiuwanResults(`${kiuwanAnalysisResult}`, "baseline");
-
                 kwutils.uploadKiuwanResults(kiuwanResultsPath, 'Kiuwan Baseline Results', "baseline");
-
                 tl.setResult(tl.TaskResult.Succeeded, kiuwanMsg + ", Results uploaded.");
             }
-        }
-        else {
+        } else {
             tl.setResult(tl.TaskResult.Failed, kiuwanMsg);
         }
-    }
-    catch (err) {
+    } catch (err) {
         tl.setResult(tl.TaskResult.Failed, err.message);
-        console.error('[KW] Task failed: ' + err.message);
+        tl.error('[KW] Task failed: ' + err.message);
     }
 }
