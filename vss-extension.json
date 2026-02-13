@@ -25,11 +25,11 @@
   },
   "CustomerQnASupport": {
     "enableqna": "true",
-    "url": "https://www.kiuwan.com/docs/display/K5/FAQs+-+Frequently+Asked+Questions"
+    "url": "https://support.kiuwan.com/hc/en-us/sections/36148435056657-Frequently-Asked-Questions"
   },
   "links": {
     "getstarted": {
-      "uri": "https://www.kiuwan.com/docs/display/K5/Microsoft+TFS-Azure+DevOps+Extension"
+      "uri": "https://support.kiuwan.com/hc/en-us/articles/36335481452817-Microsoft-TFS-Azure-DevOps-Extension"
     },
     "repository": {
       "uri": "https://github.com/kiuwan/tfs-vsts-extension"
