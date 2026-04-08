@@ -1,0 +1,131 @@
+name: Validate Branch and Commit Standards
+
+env:
+  BRANCH_PATTERN: '^(feature|bugfix|documentation|hotfix|update|upgrade|rc|test)/(KWN|KWD)-[0-9]{1,5}-[a-z0-9]+(-[a-z0-9]+)*$'
+  COMMIT_PATTERN: '^(KWN|KWD)-[0-9]{1,5}: .+$'
+
+concurrency:
+  group: validation-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  validate:
+    name: Validate Branch and Commit Standards
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine branch name
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH_NAME="${{ github.head_ref }}"
+          else
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          fi
+
+          echo "Branch name: $BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> "$GITHUB_ENV"
+
+      - name: Skip validation for protected branches
+        shell: bash
+        run: |
+          if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "develop" || "$BRANCH_NAME" == "development" ]]; then
+            echo "Branch $BRANCH_NAME is exempt from validation."
+            echo "SKIP_VALIDATION=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Validate branch name
+        if: env.SKIP_VALIDATION != 'true'
+        shell: bash
+        run: |
+          echo "Validating branch: $BRANCH_NAME"
+
+          if [[ ! "$BRANCH_NAME" =~ $BRANCH_PATTERN ]]; then
+            echo "Invalid branch name: $BRANCH_NAME"
+            echo "Expected pattern: feature/KWN-1234-description"
+            exit 1
+          fi
+
+          echo "Branch name is valid"
+
+      - name: Collect commits
+        if: env.SKIP_VALIDATION != 'true'
+        shell: bash
+        run: |
+          COMMITS_FILE="$RUNNER_TEMP/commits.txt"
+          : > "$COMMITS_FILE"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Collecting only PR-introduced commits..."
+
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+            echo "Base SHA: $BASE_SHA"
+            echo "Head SHA: $HEAD_SHA"
+
+            MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+            echo "Merge base: $MERGE_BASE"
+
+            git log "$MERGE_BASE..$HEAD_SHA" --pretty=format:"%s" > "$COMMITS_FILE"
+          else
+            echo "Collecting only commits from this push event..."
+
+            jq -r '.commits[].message | split("\n")[0]' "$GITHUB_EVENT_PATH" > "$COMMITS_FILE"
+          fi
+
+          echo >> "$COMMITS_FILE"
+
+          echo "COMMITS_FILE=$COMMITS_FILE" >> "$GITHUB_ENV"
+          echo "Collected commits:"
+          cat "$COMMITS_FILE"
+
+      - name: Validate commit messages
+        if: env.SKIP_VALIDATION != 'true'
+        shell: bash
+        run: |
+          VALID_COUNT=0
+
+          while IFS= read -r COMMIT || [ -n "$COMMIT" ]; do
+            [ -z "$COMMIT" ] && continue
+
+            echo "Checking commit: $COMMIT"
+
+            if [[ "$COMMIT" =~ ^Merge ]]; then
+              echo "Skipping merge commit"
+              continue
+            fi
+
+            if [[ "$COMMIT" =~ ^Revert ]]; then
+              echo "Skipping revert commit"
+              continue
+            fi
+
+            VALID_COUNT=$((VALID_COUNT + 1))
+
+            if [[ ! "$COMMIT" =~ $COMMIT_PATTERN ]]; then
+              echo "Invalid commit message:"
+              echo "$COMMIT"
+              echo "Expected format: KWN-1234: Commit description"
+              exit 1
+            fi
+          done < "$COMMITS_FILE"
+
+          if [ "$VALID_COUNT" -eq 0 ]; then
+            echo "No valid commits found to validate"
+            exit 1
+          fi
+
+          echo "All commit messages follow the standard"
